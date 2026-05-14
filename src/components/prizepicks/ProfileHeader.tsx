@@ -49,10 +49,10 @@ export function ProfileHeader() {
         </div>
         <div className="flex items-center gap-2">
           <button aria-label="search" className="shrink-0">
-            <img src={searchCircle} alt="search" className="h-[58px] w-[58px] object-contain" draggable={false} />
+            <img src={searchCircle} alt="search" className="h-[68px] w-[68px] object-contain" draggable={false} />
           </button>
-          <button aria-label="share" className="shrink-0 -ml-2">
-            <img src={shareBtn} alt="Share" className="h-[58px] w-auto object-contain object-left" draggable={false} />
+          <button aria-label="share" className="shrink-0 -ml-3">
+            <img src={shareBtn} alt="Share" className="h-[83px] w-auto object-contain object-left" draggable={false} />
           </button>
         </div>
       </div>
