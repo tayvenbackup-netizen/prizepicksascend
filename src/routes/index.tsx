@@ -35,7 +35,7 @@ function Index() {
                 <ProfileHeader />
                 <ProfileTabs />
               </div>
-              <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-28">
+              <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-24 space-y-1">
                 <StatsCards />
                 <SectionTitle>Top Wins</SectionTitle>
                 <TopWins />
