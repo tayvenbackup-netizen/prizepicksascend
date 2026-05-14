@@ -11,6 +11,7 @@ import { MOCK_PLAYERS, SPORT_ORDER, type PlayerOption, type Sport } from "./parl
 import { Sparkles, Link2, Loader2 } from "lucide-react";
 import { fmtMoney } from "@/lib/fmt";
 import { fetchUpcomingTeamSet, teamIsUpcoming } from "@/lib/sportsdb";
+import { Jersey } from "./Jersey";
 
 type Draft = {
   player: PlayerOption;
@@ -453,31 +454,30 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
 }
 
 function PlayerThumb({ player, size = 32 }: { player: PlayerOption; size?: number }) {
-  const initials = player.name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("");
+  const [failed, setFailed] = useState(!player.photo);
+  if (failed) {
+    return (
+      <div
+        className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#1a1530]"
+        style={{ width: size, height: size }}
+      >
+        <Jersey team={player.team} size={Math.round(size * 0.92)} />
+      </div>
+    );
+  }
   return (
     <div
-      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[10px] font-bold"
+      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2a2540]"
       style={{ width: size, height: size }}
     >
-      {player.photo ? (
-        <img
-          src={player.photo}
-          alt={player.name}
-          loading="lazy"
-          draggable={false}
-          className="h-full w-full object-cover object-top"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-          }}
-        />
-      ) : null}
-      <span className="absolute inset-0 -z-10 flex items-center justify-center">
-        {initials}
-      </span>
+      <img
+        src={player.photo}
+        alt={player.name}
+        loading="lazy"
+        draggable={false}
+        className="h-full w-full object-cover object-top"
+        onError={() => setFailed(true)}
+      />
     </div>
   );
 }
