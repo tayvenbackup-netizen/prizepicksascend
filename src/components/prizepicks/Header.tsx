@@ -3,11 +3,13 @@ import playersPill from "@/assets/major/players-pill.png";
 import dollarSign from "@/assets/major/dollar-sign.png";
 import plusCircle from "@/assets/major/plus-circle.png";
 import arrowDown from "@/assets/major/arrow-down.png";
+import { useProfile } from "./ProfileContext";
 
 export function TopHeader() {
+  const { data } = useProfile();
   return (
     <header className="flex items-center justify-between gap-2 px-3 pt-3 pb-2">
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center shrink-0" style={{ gap: 0 }}>
         <button aria-label="menu" style={{ color: "#93939f" }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" className="h-[32px] w-[32px]">
             <path d="M4 8h16" />
@@ -15,7 +17,7 @@ export function TopHeader() {
             <path d="M4 18h10" />
           </svg>
         </button>
-        <PLogo size={44} />
+        <PLogo size={56} />
       </div>
 
       <div className="flex flex-1 justify-center">
@@ -35,7 +37,7 @@ export function TopHeader() {
 
       <div className="flex items-center gap-1 shrink-0">
         <img src={dollarSign} alt="" className="h-[18px] w-auto object-contain" />
-        <span className="text-success text-[13px] font-semibold">0.00</span>
+        <span className="text-success text-[13px] font-semibold">{data.balance}</span>
         <img src={plusCircle} alt="add funds" className="h-[28px] w-[28px] object-contain -ml-0.5" />
       </div>
     </header>

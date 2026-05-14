@@ -8,6 +8,7 @@ import { TopWins } from "@/components/prizepicks/TopWins";
 import { MostPickedPlayers, TopWinningPlayers } from "@/components/prizepicks/PlayerLists";
 import { MostPickedTeams, TopWinningLeagues } from "@/components/prizepicks/LeaguesTeams";
 import { BottomNav } from "@/components/prizepicks/BottomNav";
+import { ProfileProvider } from "@/components/prizepicks/ProfileContext";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
+    <ProfileProvider>
     <div className="mx-auto min-h-screen max-w-[480px] bg-background pb-28">
       <TopHeader />
       <ProfileHeader />
@@ -38,5 +40,6 @@ function Index() {
 
       <BottomNav />
     </div>
+    </ProfileProvider>
   );
 }
