@@ -15,11 +15,11 @@ export function TopHeader() {
             <path d="M4 18h10" />
           </svg>
         </button>
-        <PLogo size={32} />
+        <PLogo size={44} />
       </div>
 
       <div className="flex flex-1 justify-center">
-        <div className="flex items-center justify-center gap-2 rounded-full border-[1.5px] border-white/95 pl-4 pr-3 py-[7px] min-w-[200px]">
+        <div className="flex items-center justify-center gap-1.5 rounded-full border-[1.5px] border-white/95 px-2.5 py-[7px]">
           <img
             src={playersPill}
             alt="Players"
@@ -36,7 +36,7 @@ export function TopHeader() {
       <div className="flex items-center gap-1 shrink-0">
         <img src={dollarSign} alt="" className="h-[18px] w-auto object-contain" />
         <span className="text-success text-[13px] font-semibold">0.00</span>
-        <img src={plusCircle} alt="add funds" className="h-[18px] w-[18px] object-contain -ml-0.5" />
+        <img src={plusCircle} alt="add funds" className="h-[28px] w-[28px] object-contain -ml-0.5" />
       </div>
     </header>
   );
