@@ -150,7 +150,6 @@ export function ListsEditor() {
       {/* Top Winning Players (3) */}
       <Section title="Top winning players" icon={Trophy}>
         {wp.map((e, i) => {
-          const [pendingName, setPendingName] = [e?.name || "", null];
           return (
             <ValidatedRow
               key={`wp-${i}`}
@@ -174,9 +173,7 @@ export function ListsEditor() {
                 />
               }
               onClear={() => updateWinPlayer(i, null)}
-              onResolved={async () => {
-                const inputEl = document.activeElement as HTMLInputElement;
-                const q = inputEl?.value?.trim() || pendingName;
+              onResolved={async (q) => {
                 const hit = await searchPlayer(q);
                 if (!hit) return { ok: false, msg: "Player not found." };
                 updateWinPlayer(i, {
