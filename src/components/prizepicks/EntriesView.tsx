@@ -63,7 +63,7 @@ export function EntriesView() {
       </div>
 
       {/* Scrollable area below the tabs */}
-      <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-28">
+      <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-24">
         {showEmpty ? (
           <div className="flex flex-col items-center justify-start px-6 pt-10 pb-8">
             <img src={emptyEntries} alt="" className="h-[180px] w-auto object-contain select-none" draggable={false} />
