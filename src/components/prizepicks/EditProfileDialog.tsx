@@ -129,6 +129,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
               }}
             >
               Live
+            </span>
           </div>
 
           {/* Tabs */}
