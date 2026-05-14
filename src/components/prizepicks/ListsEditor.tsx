@@ -209,9 +209,7 @@ export function ListsEditor() {
               )
             }
             onClear={() => updatePickPlayer(i, null)}
-            onResolved={async () => {
-              const inputEl = document.activeElement as HTMLInputElement;
-              const q = inputEl?.value?.trim() || "";
+            onResolved={async (q) => {
               const hit = await searchPlayer(q);
               if (!hit) return { ok: false, msg: "Player not found." };
               updatePickPlayer(i, {
