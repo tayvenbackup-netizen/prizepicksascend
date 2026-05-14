@@ -248,7 +248,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
             </div>
           </>
         ) : (
-          <div className="flex h-[65vh] flex-col">
+          <div className="flex-1 min-h-0 flex flex-col">
             <ParlayGen onClose={() => onOpenChange(false)} />
           </div>
         )}
