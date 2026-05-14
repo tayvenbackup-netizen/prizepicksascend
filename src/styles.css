@@ -2,6 +2,42 @@
 @source "../src";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: "TT Norms Pro";
+  src: url("/src/assets/fonts/TT-Norms-Pro-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TT Norms Pro";
+  src: url("/src/assets/fonts/TT-Norms-Pro-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TT Norms Pro";
+  src: url("/src/assets/fonts/TT-Norms-Pro-DemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TT Norms Pro";
+  src: url("/src/assets/fonts/TT-Norms-Pro-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TT Norms Pro Expanded";
+  src: url("/src/assets/fonts/TT-Norms-Pro-Expanded-ExtraBold.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -35,7 +71,7 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "TT Norms Pro", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
