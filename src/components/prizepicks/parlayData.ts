@@ -100,4 +100,34 @@ export const MOCK_PLAYERS: PlayerOption[] = [
   { id: "ten-4", name: "Iga Swiatek", team: "POL", league: "Tennis", stat: "Total Games", line: 17.5, photo: tennis("4697052") },
 ];
 
-export const SPORT_ORDER: Sport[] = ["NBA", "NFL", "MLB", "NHL", "WNBA", "Soccer", "Tennis"];
+  // CSGO (esports — curated active pros)
+  { id: "cs-1", name: "s1mple", team: "FaZe", league: "CSGO", stat: "Kills (Map 1)", line: 22.5 },
+  { id: "cs-2", name: "ZywOo", team: "Vitality", league: "CSGO", stat: "Kills (Map 1)", line: 23.5 },
+  { id: "cs-3", name: "donk", team: "Spirit", league: "CSGO", stat: "Headshots (Map 1)", line: 10.5 },
+  { id: "cs-4", name: "NiKo", team: "G2", league: "CSGO", stat: "Kills (Map 1)", line: 21.5 },
+  { id: "cs-5", name: "m0NESY", team: "G2", league: "CSGO", stat: "AWP Kills (Map 1)", line: 11.5 },
+  { id: "cs-6", name: "broky", team: "FaZe", league: "CSGO", stat: "Kills (Map 1)", line: 19.5 },
+
+  // League of Legends
+  { id: "lol-1", name: "Faker", team: "T1", league: "LoL", stat: "Assists (Map 1)", line: 8.5 },
+  { id: "lol-2", name: "Chovy", team: "GEN", league: "LoL", stat: "Kills (Map 1)", line: 4.5 },
+  { id: "lol-3", name: "Caps", team: "G2", league: "LoL", stat: "Kills (Map 1)", line: 4.5 },
+
+  // Valorant
+  { id: "val-1", name: "TenZ", team: "SEN", league: "Valorant", stat: "Kills (Map 1)", line: 18.5 },
+  { id: "val-2", name: "Demon1", team: "EG", league: "Valorant", stat: "First Bloods", line: 3.5 },
+  { id: "val-3", name: "aspas", team: "LEV", league: "Valorant", stat: "Kills (Map 1)", line: 19.5 },
+];
+
+export const SPORT_ORDER: Sport[] = [
+  "NBA",
+  "NFL",
+  "MLB",
+  "NHL",
+  "WNBA",
+  "Soccer",
+  "Tennis",
+  "CSGO",
+  "LoL",
+  "Valorant",
+];
