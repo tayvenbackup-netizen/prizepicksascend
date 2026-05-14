@@ -2,7 +2,7 @@ import { useState } from "react";
 import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
 import { useEntries, type Entry } from "./EntriesContext";
-import { CheckCircle, XCircle } from "./Icons";
+import { CheckBadge, XBadge } from "./Icons";
 
 export function EntriesView() {
   const [tab, setTab] = useState<"open" | "past">("open");
