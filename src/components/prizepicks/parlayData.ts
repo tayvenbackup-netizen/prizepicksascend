@@ -98,8 +98,6 @@ export const MOCK_PLAYERS: PlayerOption[] = [
   { id: "ten-2", name: "Aryna Sabalenka", team: "BLR", league: "Tennis", stat: "Aces", line: 4.5, photo: tennis("3855632") },
   { id: "ten-3", name: "Jannik Sinner", team: "ITA", league: "Tennis", stat: "Total Games", line: 21.5, photo: tennis("4920808") },
   { id: "ten-4", name: "Iga Swiatek", team: "POL", league: "Tennis", stat: "Total Games", line: 17.5, photo: tennis("4697052") },
-];
-
   // CSGO (esports — curated active pros)
   { id: "cs-1", name: "s1mple", team: "FaZe", league: "CSGO", stat: "Kills (Map 1)", line: 22.5 },
   { id: "cs-2", name: "ZywOo", team: "Vitality", league: "CSGO", stat: "Kills (Map 1)", line: 23.5 },
