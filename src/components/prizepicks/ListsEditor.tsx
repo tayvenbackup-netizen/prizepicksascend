@@ -276,7 +276,11 @@ export function ListsEditor() {
                     }}
                     className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] hover:bg-white/[0.06]"
                   >
-                    <img src={lg.badge} alt="" className="h-5 w-5 object-contain" />
+                    {lg.badge ? (
+                      <img src={lg.badge} alt="" className="h-5 w-5 object-contain" />
+                    ) : (
+                      <div className="h-5 w-5 rounded-full bg-white/10" />
+                    )}
                     <span>{lg.name}</span>
                   </button>
                 ))}
