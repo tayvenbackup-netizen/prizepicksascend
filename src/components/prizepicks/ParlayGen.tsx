@@ -110,9 +110,9 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       {/* Slip header */}
-      <div className="px-5 pt-4">
+      <div className="shrink-0 px-4 pt-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
