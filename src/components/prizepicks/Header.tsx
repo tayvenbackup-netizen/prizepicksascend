@@ -1,30 +1,34 @@
-import { ChevronDown, MenuIcon, PLogo, PlusIcon, UserCheck } from "./Icons";
+import { MenuIcon, PLogo } from "./Icons";
+import playersPill from "@/assets/major/players-top-nav.png";
+import balanceImg from "@/assets/major/balance.png";
 
 export function TopHeader() {
   return (
-    <header className="flex items-center justify-between gap-3 px-4 pt-3 pb-2">
-      <div className="flex items-center gap-3">
+    <header className="flex items-center justify-between gap-2 px-4 pt-3 pb-2">
+      <div className="flex items-center gap-2.5">
         <button aria-label="menu" className="text-foreground/80">
-          <MenuIcon className="h-6 w-6" />
+          <MenuIcon className="h-[22px] w-[22px]" />
         </button>
-        <PLogo size={28} />
+        <PLogo size={24} />
       </div>
 
-      <button className="flex h-10 items-center gap-2 rounded-full border border-foreground/90 px-4 text-sm font-extrabold tracking-wide">
-        <UserCheck className="h-[18px] w-[18px]" />
-        PLAYERS
-        <ChevronDown className="h-4 w-4" />
+      <button aria-label="players" className="shrink-0">
+        <img
+          src={playersPill}
+          alt="Players"
+          className="h-9 w-auto select-none"
+          draggable={false}
+        />
       </button>
 
-      <div className="flex items-center gap-1.5">
-        <span className="text-success font-semibold">$ 0.00</span>
-        <button
-          aria-label="add funds"
-          className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-success text-success"
-        >
-          <PlusIcon className="h-4 w-4" strokeWidth={3} />
-        </button>
-      </div>
+      <button aria-label="balance" className="shrink-0">
+        <img
+          src={balanceImg}
+          alt="$0.00"
+          className="h-7 w-auto select-none"
+          draggable={false}
+        />
+      </button>
     </header>
   );
 }
