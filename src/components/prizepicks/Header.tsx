@@ -1,4 +1,4 @@
-import { MenuIcon, PLogo } from "./Icons";
+import { PLogo } from "./Icons";
 import playersPill from "@/assets/major/players-pill.png";
 import dollarSign from "@/assets/major/dollar-sign.png";
 import plusCircle from "@/assets/major/plus-circle.png";
