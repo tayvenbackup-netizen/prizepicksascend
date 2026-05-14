@@ -129,97 +129,124 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
               }}
             >
               Live
-            </span>
+          </div>
+
+          {/* Tabs */}
+          <div className="mt-3 grid grid-cols-2 rounded-full bg-black/30 p-1">
+            {([
+              { id: "profile" as const, label: "Profile", Icon: User },
+              { id: "parlay" as const, label: "Parlay Gen", Icon: Layers },
+            ]).map(({ id, label, Icon }) => {
+              const active = tab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className={`flex items-center justify-center gap-1.5 rounded-full py-1.5 text-[12px] font-semibold transition-colors ${
+                    active ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Body */}
-        <div className="max-h-[60vh] overflow-y-auto px-5 py-4 space-y-5">
-          {sections.map((section) => (
-            <div key={section.title}>
-              <div className="mb-2 flex items-center gap-2">
-                <div className="h-px flex-1 bg-white/5" />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  {section.title}
-                </span>
-                <div className="h-px flex-1 bg-white/5" />
-              </div>
-              <div className="grid gap-2">
-                {section.fields.map((f) => {
-                  const Icon = f.icon;
-                  return (
-                    <div
-                      key={f.key}
-                      className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.06)",
-                      }}
-                    >
-                      <div
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                        style={{
-                          background: "color-mix(in oklab, var(--primary) 18%, transparent)",
-                          color: "var(--primary)",
-                        }}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <label className="block text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                          {f.label}
-                        </label>
-                        <div className="flex items-center gap-1">
-                          {f.prefix && (
-                            <span className="text-[14px] font-semibold text-foreground/80">
-                              {f.prefix}
-                            </span>
-                          )}
-                          <Input
-                            value={form[f.key]}
-                            placeholder={f.placeholder}
-                            onChange={(e) => updateField(f.key, e.target.value)}
-                            className="h-7 border-0 bg-transparent px-0 text-[14px] font-semibold shadow-none focus-visible:ring-0"
-                          />
+        {tab === "profile" ? (
+          <>
+            <div className="max-h-[55vh] overflow-y-auto px-5 py-4 space-y-5">
+              {sections.map((section) => (
+                <div key={section.title}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <div className="h-px flex-1 bg-white/5" />
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      {section.title}
+                    </span>
+                    <div className="h-px flex-1 bg-white/5" />
+                  </div>
+                  <div className="grid gap-2">
+                    {section.fields.map((f) => {
+                      const Icon = f.icon;
+                      return (
+                        <div
+                          key={f.key}
+                          className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors"
+                          style={{
+                            background: "rgba(255,255,255,0.03)",
+                            border: "1px solid rgba(255,255,255,0.06)",
+                          }}
+                        >
+                          <div
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                            style={{
+                              background: "color-mix(in oklab, var(--primary) 18%, transparent)",
+                              color: "var(--primary)",
+                            }}
+                          >
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <label className="block text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                              {f.label}
+                            </label>
+                            <div className="flex items-center gap-1">
+                              {f.prefix && (
+                                <span className="text-[14px] font-semibold text-foreground/80">
+                                  {f.prefix}
+                                </span>
+                              )}
+                              <Input
+                                value={form[f.key]}
+                                placeholder={f.placeholder}
+                                onChange={(e) => updateField(f.key, e.target.value)}
+                                className="h-7 border-0 bg-transparent px-0 text-[14px] font-semibold shadow-none focus-visible:ring-0"
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Footer */}
-        <div
-          className="flex items-center gap-2 px-5 py-3"
-          style={{
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(0,0,0,0.2)",
-          }}
-        >
-          <Button
-            variant="ghost"
-            onClick={reset}
-            className="gap-1.5 text-muted-foreground hover:text-foreground"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Reset
-          </Button>
-          <div className="flex-1" />
-          <Button
-            onClick={() => onOpenChange(false)}
-            className="gap-1.5 font-semibold"
-            style={{
-              background: "linear-gradient(135deg, var(--primary), oklch(0.72 0.22 320))",
-              boxShadow: "0 6px 20px -6px var(--primary)",
-            }}
-          >
-            <Check className="h-4 w-4" />
-            Done
-          </Button>
-        </div>
+            <div
+              className="flex items-center gap-2 px-5 py-3"
+              style={{
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+                background: "rgba(0,0,0,0.2)",
+              }}
+            >
+              <Button
+                variant="ghost"
+                onClick={reset}
+                className="gap-1.5 text-muted-foreground hover:text-foreground"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Reset
+              </Button>
+              <div className="flex-1" />
+              <Button
+                onClick={() => onOpenChange(false)}
+                className="gap-1.5 font-semibold"
+                style={{
+                  background: "linear-gradient(135deg, var(--primary), oklch(0.72 0.22 320))",
+                  boxShadow: "0 6px 20px -6px var(--primary)",
+                }}
+              >
+                <Check className="h-4 w-4" />
+                Done
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="flex h-[65vh] flex-col">
+            <ParlayGen onClose={() => onOpenChange(false)} />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
