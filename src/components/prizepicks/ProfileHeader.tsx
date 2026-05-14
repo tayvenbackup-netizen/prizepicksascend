@@ -17,8 +17,8 @@ export function ProfileHeader() {
               padding: 2,
             }}
           >
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-[#7c3aed]">
-              <PLogo size={38} />
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#7c3aed]">
+              <PLogo size={56} />
             </div>
           </div>
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground">
@@ -49,10 +49,10 @@ export function ProfileHeader() {
         </div>
         <div className="flex items-center gap-2">
           <button aria-label="search" className="shrink-0">
-            <img src={searchCircle} alt="search" className="h-10 w-10 object-contain" draggable={false} />
+            <img src={searchCircle} alt="search" className="h-9 w-9 object-contain" draggable={false} />
           </button>
           <button aria-label="share" className="shrink-0">
-            <img src={shareBtn} alt="Share" className="h-10 w-auto object-contain" draggable={false} />
+            <img src={shareBtn} alt="Share" className="h-9 w-auto object-contain" draggable={false} />
           </button>
         </div>
       </div>
