@@ -164,22 +164,16 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
             </p>
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {picks.map((d, i) => (
               <li
                 key={d.player.id}
-                className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5"
+                className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-3"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[12px] font-bold">
-                  {d.player.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .slice(0, 2)
-                    .join("")}
-                </div>
+                <PlayerThumb player={d.player} size={40} />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[13px] font-bold">{d.player.name}</div>
-                  <div className="truncate text-[11px] text-muted-foreground">
+                  <div className="truncate text-[14px] font-bold">{d.player.name}</div>
+                  <div className="truncate text-[12px] text-muted-foreground">
                     {d.player.team} · {d.player.league} · {d.player.stat}
                   </div>
                 </div>
@@ -190,14 +184,14 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                   onChange={(e) =>
                     updatePick(i, { line: Number(e.target.value) || 0 })
                   }
-                  className="h-7 w-14 rounded-md bg-black/40 px-1.5 text-center text-[13px] font-semibold outline-none ring-1 ring-white/10 focus:ring-primary"
+                  className="h-8 w-16 rounded-md bg-black/40 px-1.5 text-center text-[14px] font-semibold outline-none ring-1 ring-white/10 focus:ring-primary"
                 />
                 <div className="flex overflow-hidden rounded-md ring-1 ring-white/10">
                   {(["over", "under"] as const).map((p) => (
                     <button
                       key={p}
                       onClick={() => updatePick(i, { pick: p })}
-                      className={`px-2 py-1 text-[10px] font-bold uppercase ${
+                      className={`px-2.5 py-1.5 text-[11px] font-bold uppercase ${
                         d.pick === p
                           ? p === "over"
                             ? "bg-success text-background"
