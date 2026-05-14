@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 export type ProfileData = {
   name: string;
@@ -72,9 +72,9 @@ const defaultPickPlayers: PickPlayerEntry[] = [
 ];
 
 const defaultWinLeagues: WinLeagueEntry[] = [
-  { name: "NBA", badge: "https://upload.wikimedia.org/wikipedia/en/0/03/National_Basketball_Association_logo.svg", lineups: 3 },
-  { name: "NFL", badge: null, lineups: 1 },
-  { name: "COD", badge: null, lineups: 1 },
+  { name: "NBA", badge: "https://r2.thesportsdb.com/images/media/league/badge/frdjqy1536585083.png", lineups: 3 },
+  { name: "NFL", badge: "https://r2.thesportsdb.com/images/media/league/badge/g85fqz1662057187.png", lineups: 1 },
+  { name: "COD", badge: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Call_of_Duty_League_logo.svg", lineups: 1 },
 ];
 
 const defaultPickTeams: PickTeamEntry[] = [
@@ -99,12 +99,64 @@ type Ctx = {
 
 const ProfileContext = createContext<Ctx | null>(null);
 
+const STORAGE_KEY = "pp-profile-state-v1";
+
+type PersistedState = {
+  data: ProfileData;
+  winPlayers: WinPlayerEntry[];
+  pickPlayers: PickPlayerEntry[];
+  winLeagues: WinLeagueEntry[];
+  pickTeams: PickTeamEntry[];
+};
+
+function loadInitialState(): PersistedState {
+  if (typeof window === "undefined") {
+    return {
+      data: defaultData,
+      winPlayers: defaultWinPlayers,
+      pickPlayers: defaultPickPlayers,
+      winLeagues: defaultWinLeagues,
+      pickTeams: defaultPickTeams,
+    };
+  }
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) throw new Error("missing");
+    const parsed = JSON.parse(raw) as Partial<PersistedState>;
+    return {
+      data: parsed.data ?? defaultData,
+      winPlayers: parsed.winPlayers ?? defaultWinPlayers,
+      pickPlayers: parsed.pickPlayers ?? defaultPickPlayers,
+      winLeagues: parsed.winLeagues ?? defaultWinLeagues,
+      pickTeams: parsed.pickTeams ?? defaultPickTeams,
+    };
+  } catch {
+    return {
+      data: defaultData,
+      winPlayers: defaultWinPlayers,
+      pickPlayers: defaultPickPlayers,
+      winLeagues: defaultWinLeagues,
+      pickTeams: defaultPickTeams,
+    };
+  }
+}
+
 export function ProfileProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<ProfileData>(defaultData);
-  const [winPlayers, setWinPlayers] = useState(defaultWinPlayers);
-  const [pickPlayers, setPickPlayers] = useState(defaultPickPlayers);
-  const [winLeagues, setWinLeagues] = useState(defaultWinLeagues);
-  const [pickTeams, setPickTeams] = useState(defaultPickTeams);
+  const initial = loadInitialState();
+  const [data, setData] = useState<ProfileData>(initial.data);
+  const [winPlayers, setWinPlayers] = useState(initial.winPlayers);
+  const [pickPlayers, setPickPlayers] = useState(initial.pickPlayers);
+  const [winLeagues, setWinLeagues] = useState(initial.winLeagues);
+  const [pickTeams, setPickTeams] = useState(initial.pickTeams);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ data, winPlayers, pickPlayers, winLeagues, pickTeams }),
+    );
+  }, [data, winPlayers, pickPlayers, winLeagues, pickTeams]);
   return (
     <ProfileContext.Provider
       value={{
