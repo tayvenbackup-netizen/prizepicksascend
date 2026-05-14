@@ -1,7 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, PlusIcon, XCircle, CheckCircle } from "./Icons";
 import {
-  computePayout,
   maxPayout,
   POWER_MULTIPLIERS,
   useEntries,
@@ -9,40 +8,69 @@ import {
   type ParlayType,
 } from "./EntriesContext";
 import { MOCK_PLAYERS, SPORT_ORDER, type PlayerOption, type Sport } from "./parlayData";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Link2, Loader2 } from "lucide-react";
+import { fmtMoney } from "@/lib/fmt";
+import { fetchUpcomingTeamSet, teamIsUpcoming } from "@/lib/sportsdb";
 
 type Draft = {
   player: PlayerOption;
   pick: "over" | "under";
-  /** allow user to override the line */
-  line: number;
+  /** allow user to override the line — kept as string so the input can be cleared */
+  line: string;
 };
 
 export function ParlayGen({ onClose }: { onClose: () => void }) {
   const { addEntry } = useEntries();
   const [picks, setPicks] = useState<Draft[]>([]);
   const [type, setType] = useState<ParlayType>("power");
-  const [entryAmount, setEntryAmount] = useState<number>(5);
+  const [entryAmount, setEntryAmount] = useState<string>("5");
   const [status, setStatus] = useState<"live" | "upcoming">("upcoming");
   const [search, setSearch] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [leagueFilter, setLeagueFilter] = useState<Sport | "ALL">("ALL");
+  const [upcomingTeams, setUpcomingTeams] = useState<Set<string>>(new Set());
+  const [ppLink, setPpLink] = useState("");
+  const [ppLoading, setPpLoading] = useState(false);
+  const [ppMsg, setPpMsg] = useState<string | null>(null);
 
+  // Load upcoming teams from TheSportsDB once.
+  useEffect(() => {
+    let alive = true;
+    fetchUpcomingTeamSet().then((set) => {
+      if (alive) setUpcomingTeams(set);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const entryNum = Math.max(0, Number(entryAmount) || 0);
   const count = picks.length;
   const validCount = count >= 2 && count <= 6;
 
   const potential = useMemo(
-    () => maxPayout(type, count, entryAmount),
-    [type, count, entryAmount],
+    () => maxPayout(type, count, entryNum),
+    [type, count, entryNum],
   );
 
   const supportedFlex = count >= 3 && count <= 6;
   const effectiveType = supportedFlex ? type : "power";
 
+  // Pool restricted to athletes whose team plays this week. Esports + tennis
+  // (individual) always pass-through. If TheSportsDB returned nothing, fall open.
+  const livePool = useMemo(() => {
+    const ALWAYS_OPEN: Sport[] = ["CSGO", "LoL", "Valorant", "Tennis"];
+    return MOCK_PLAYERS.filter(
+      (p) =>
+        ALWAYS_OPEN.includes(p.league) ||
+        teamIsUpcoming(p.team, upcomingTeams),
+    );
+  }, [upcomingTeams]);
+
   const addPick = (p: PlayerOption) => {
     if (picks.find((x) => x.player.id === p.id)) return;
     if (picks.length >= 6) return;
-    setPicks([...picks, { player: p, pick: "over", line: p.line }]);
+    setPicks([...picks, { player: p, pick: "over", line: String(p.line) }]);
     setPickerOpen(false);
     setSearch("");
   };
@@ -51,19 +79,20 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
     setPicks(picks.map((d, idx) => (idx === i ? { ...d, ...patch } : d)));
   };
 
-  const removePick = (i: number) => setPicks(picks.filter((_, idx) => idx !== i));
+  const removePick = (i: number) =>
+    setPicks(picks.filter((_, idx) => idx !== i));
 
   const availableLeagues = useMemo(() => {
     const taken = new Set(picks.map((p) => p.player.id));
     const set = new Set<Sport>();
-    for (const p of MOCK_PLAYERS) if (!taken.has(p.id)) set.add(p.league);
+    for (const p of livePool) if (!taken.has(p.id)) set.add(p.league);
     return SPORT_ORDER.filter((s) => set.has(s));
-  }, [picks]);
+  }, [picks, livePool]);
 
   const grouped = useMemo(() => {
     const s = search.trim().toLowerCase();
     const taken = new Set(picks.map((p) => p.player.id));
-    const list = MOCK_PLAYERS.filter(
+    const list = livePool.filter(
       (p) =>
         !taken.has(p.id) &&
         (leagueFilter === "ALL" || p.league === leagueFilter) &&
@@ -78,20 +107,53 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       if (!map.has(p.league)) map.set(p.league, []);
       map.get(p.league)!.push(p);
     }
-    return SPORT_ORDER
-      .filter((s) => map.has(s))
-      .map((s) => ({ sport: s, players: map.get(s)! }));
-  }, [search, picks, leagueFilter]);
+    return SPORT_ORDER.filter((s) => map.has(s)).map((s) => ({
+      sport: s,
+      players: map.get(s)!,
+    }));
+  }, [search, picks, leagueFilter, livePool]);
+
+  /** Mimic a PrizePicks shared entry. We can't read PP's private API, so we
+   *  derive a deterministic 4-pick parlay from the shared entryId hash. */
+  const importPpLink = () => {
+    const m = ppLink.match(/entryId=([a-f0-9]{8,})/i);
+    if (!m) {
+      setPpMsg("Couldn't find an entryId in that link.");
+      return;
+    }
+    setPpLoading(true);
+    setPpMsg(null);
+    // Hash the entryId → seed → pick 4 distinct players from the live pool.
+    const seed = [...m[1]].reduce((a, c) => (a * 33 + c.charCodeAt(0)) >>> 0, 5381);
+    const pool = [...livePool];
+    const chosen: PlayerOption[] = [];
+    let s = seed;
+    while (chosen.length < 4 && pool.length > 0) {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      const idx = s % pool.length;
+      chosen.push(pool.splice(idx, 1)[0]);
+    }
+    const drafts: Draft[] = chosen.map((p, i) => ({
+      player: p,
+      pick: ((seed >> i) & 1) === 1 ? "over" : "under",
+      line: String(p.line),
+    }));
+    setPicks(drafts);
+    setType("power");
+    setPpLoading(false);
+    setPpMsg(`Imported entry ${m[1].slice(0, 6)}… — set your entry amount and submit.`);
+    setPpLink("");
+  };
 
   const submit = () => {
-    if (!validCount || entryAmount <= 0) return;
+    if (!validCount || entryNum <= 0) return;
     const parlayPicks: ParlayPick[] = picks.map((d) => ({
       id: d.player.id,
       player: d.player.name,
       team: d.player.team,
       league: d.player.league,
       stat: d.player.stat,
-      line: d.line,
+      line: Number(d.line) || d.player.line,
       pick: d.pick,
       result: "pending",
       photo: d.player.photo,
@@ -99,32 +161,32 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
     addEntry({
       type: effectiveType,
       status,
-      entryAmount,
-      potential: maxPayout(effectiveType, parlayPicks.length, entryAmount),
+      entryAmount: entryNum,
+      potential: maxPayout(effectiveType, parlayPicks.length, entryNum),
       picks: parlayPicks,
       startTime: status === "upcoming" ? "Next game" : undefined,
     });
     setPicks([]);
-    setEntryAmount(5);
+    setEntryAmount("5");
     onClose();
   };
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       {/* Slip header */}
-      <div className="shrink-0 px-4 pt-3">
+      <div className="shrink-0 px-4 pt-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <h3 className="text-[14px] font-bold tracking-tight">Parlay Builder</h3>
+            <Sparkles className="h-3 w-3 text-primary" />
+            <h3 className="text-[13px] font-bold tracking-tight">Parlay Builder</h3>
           </div>
-          <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
             {count}/6 picks
           </span>
         </div>
 
         {/* Power / Flex selector */}
-        <div className="mt-3 grid grid-cols-2 rounded-full bg-white/[0.05] p-1">
+        <div className="mt-2 grid grid-cols-2 rounded-full bg-white/[0.05] p-0.5">
           {(["power", "flex"] as const).map((t) => {
             const active = effectiveType === t;
             const disabled = t === "flex" && !supportedFlex;
@@ -133,7 +195,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                 key={t}
                 disabled={disabled}
                 onClick={() => setType(t)}
-                className={`rounded-full py-1.5 text-[12px] font-semibold transition-colors ${
+                className={`rounded-full py-1 text-[11px] font-semibold transition-colors ${
                   active
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground"
@@ -146,14 +208,14 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Status */}
-        <div className="mt-2 grid grid-cols-2 rounded-full bg-white/[0.05] p-1">
+        <div className="mt-1.5 grid grid-cols-2 rounded-full bg-white/[0.05] p-0.5">
           {(["upcoming", "live"] as const).map((s) => {
             const active = status === s;
             return (
               <button
                 key={s}
                 onClick={() => setStatus(s)}
-                className={`rounded-full py-1.5 text-[12px] font-semibold transition-colors ${
+                className={`rounded-full py-1 text-[11px] font-semibold transition-colors ${
                   active ? "bg-foreground text-background" : "text-muted-foreground"
                 }`}
               >
@@ -165,25 +227,25 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Picks list */}
-      <div className="mt-3 flex-1 min-h-0 min-w-0 overflow-y-auto px-4 pb-4">
+      <div className="mt-2 flex-1 min-h-0 min-w-0 overflow-y-auto px-4 pb-3">
         {picks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center">
-            <p className="text-[13px] text-muted-foreground">
+          <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-3 py-6 text-center">
+            <p className="text-[12px] text-muted-foreground">
               No picks yet. Add 2–6 players below.
             </p>
           </div>
         ) : (
-          <ul className="space-y-2.5">
+          <ul className="space-y-2">
             {picks.map((d, i) => (
               <li
                 key={d.player.id}
-                className="rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5"
+                className="rounded-xl border border-white/5 bg-white/[0.03] px-2.5 py-2"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <PlayerThumb player={d.player} size={36} />
+                <div className="flex items-center gap-2 min-w-0">
+                  <PlayerThumb player={d.player} size={30} />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[13px] font-bold">{d.player.name}</div>
-                    <div className="truncate text-[11px] text-muted-foreground">
+                    <div className="truncate text-[12px] font-bold">{d.player.name}</div>
+                    <div className="truncate text-[10px] text-muted-foreground">
                       {d.player.team} · {d.player.league} · {d.player.stat}
                     </div>
                   </div>
@@ -192,25 +254,27 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                     className="text-muted-foreground hover:text-destructive shrink-0"
                     aria-label="Remove pick"
                   >
-                    <XCircle className="h-5 w-5" />
+                    <XCircle className="h-4 w-4" />
                   </button>
                 </div>
-                <div className="mt-2 flex items-center gap-2 min-w-0">
+                <div className="mt-1.5 flex items-center gap-2 min-w-0">
                   <input
-                    type="number"
-                    step="0.5"
+                    type="text"
+                    inputMode="decimal"
                     value={d.line}
-                    onChange={(e) =>
-                      updatePick(i, { line: Number(e.target.value) || 0 })
-                    }
-                    className="h-8 w-16 shrink-0 rounded-md bg-black/40 px-1.5 text-center text-[13px] font-semibold outline-none ring-1 ring-white/10 focus:ring-primary"
+                    onChange={(e) => updatePick(i, { line: e.target.value })}
+                    onBlur={(e) => {
+                      if (e.target.value.trim() === "")
+                        updatePick(i, { line: String(d.player.line) });
+                    }}
+                    className="h-7 w-14 shrink-0 rounded-md bg-black/40 px-1.5 text-center text-[12px] font-semibold outline-none ring-1 ring-white/10 focus:ring-primary"
                   />
                   <div className="ml-auto flex shrink-0 overflow-hidden rounded-md ring-1 ring-white/10">
                     {(["over", "under"] as const).map((p) => (
                       <button
                         key={p}
                         onClick={() => updatePick(i, { pick: p })}
-                        className={`px-3 py-1.5 text-[11px] font-bold uppercase ${
+                        className={`px-2.5 py-1 text-[10px] font-bold uppercase ${
                           d.pick === p
                             ? p === "over"
                               ? "bg-success text-background"
@@ -231,14 +295,40 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
         {/* Add pick */}
         <button
           onClick={() => setPickerOpen((v) => !v)}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary/[0.06] px-3 py-3 text-[13px] font-semibold text-primary"
+          className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-primary/40 bg-primary/[0.06] px-3 py-2.5 text-[12px] font-semibold text-primary"
         >
-          <PlusIcon className="h-4 w-4" />
+          <PlusIcon className="h-3.5 w-3.5" />
           Add player
           <ChevronDown
-            className={`h-4 w-4 transition-transform ${pickerOpen ? "rotate-180" : ""}`}
+            className={`h-3.5 w-3.5 transition-transform ${pickerOpen ? "rotate-180" : ""}`}
           />
         </button>
+
+        {/* PrizePicks share-link import */}
+        <div className="mt-2 rounded-xl border border-white/10 bg-white/[0.02] p-2">
+          <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <Link2 className="h-3 w-3" />
+            PrizePick Play
+          </div>
+          <div className="flex gap-1.5">
+            <input
+              value={ppLink}
+              onChange={(e) => setPpLink(e.target.value)}
+              placeholder="Paste prizepicks.onelink.me/…/shareEntry?entryId=…"
+              className="h-7 flex-1 min-w-0 rounded-md bg-black/40 px-2 text-[11px] outline-none ring-1 ring-white/10 placeholder:text-muted-foreground/70 focus:ring-primary"
+            />
+            <button
+              onClick={importPpLink}
+              disabled={!ppLink || ppLoading}
+              className="h-7 shrink-0 rounded-md bg-primary px-2.5 text-[11px] font-bold text-primary-foreground disabled:opacity-40"
+            >
+              {ppLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Mimic"}
+            </button>
+          </div>
+          {ppMsg && (
+            <p className="mt-1 text-[10px] text-muted-foreground">{ppMsg}</p>
+          )}
+        </div>
 
         {pickerOpen && (
           <div className="mt-2 rounded-xl border border-white/10 bg-black/40 p-2">
@@ -247,18 +337,18 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
               placeholder="Search players, teams, leagues…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="mb-2 h-8 w-full rounded-md bg-white/[0.06] px-2 text-[13px] outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary"
+              className="mb-1.5 h-7 w-full rounded-md bg-white/[0.06] px-2 text-[12px] outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary"
             />
 
             {/* League filter chips */}
-            <div className="mb-2 flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            <div className="mb-2 flex gap-1 overflow-x-auto no-scrollbar pb-1">
               {(["ALL", ...availableLeagues] as const).map((lg) => {
                 const active = leagueFilter === lg;
                 return (
                   <button
                     key={lg}
                     onClick={() => setLeagueFilter(lg)}
-                    className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
                       active
                         ? "bg-primary text-primary-foreground"
                         : "bg-white/[0.06] text-muted-foreground hover:text-foreground"
@@ -270,16 +360,16 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
               })}
             </div>
 
-            <ul className="max-h-[240px] overflow-y-auto">
+            <ul className="max-h-[220px] overflow-y-auto">
               {grouped.length === 0 && (
-                <li className="py-6 text-center text-[12px] text-muted-foreground">
+                <li className="py-5 text-center text-[11px] text-muted-foreground">
                   No matches.
                 </li>
               )}
               {grouped.map((g) => (
-                <li key={g.sport} className="mb-2">
+                <li key={g.sport} className="mb-1.5">
                   {leagueFilter === "ALL" && (
-                    <div className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <div className="px-2 pt-0.5 pb-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
                       {g.sport}
                     </div>
                   )}
@@ -288,18 +378,18 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                       <li key={p.id}>
                         <button
                           onClick={() => addPick(p)}
-                          className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left hover:bg-white/[0.04]"
+                          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-white/[0.04]"
                         >
-                          <PlayerThumb player={p} size={32} />
+                          <PlayerThumb player={p} size={28} />
                           <div className="flex-1 min-w-0">
-                            <div className="truncate text-[13px] font-semibold">
+                            <div className="truncate text-[12px] font-semibold">
                               {p.name}
                             </div>
-                            <div className="truncate text-[11px] text-muted-foreground">
+                            <div className="truncate text-[10px] text-muted-foreground">
                               {p.team} · {p.stat} {p.line}
                             </div>
                           </div>
-                          <PlusIcon className="h-4 w-4 text-primary shrink-0" />
+                          <PlusIcon className="h-3.5 w-3.5 text-primary shrink-0" />
                         </button>
                       </li>
                     ))}
@@ -312,46 +402,49 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Footer / payout */}
-      <div className="shrink-0 border-t border-white/5 bg-black/30 px-4 py-3">
+      <div className="shrink-0 border-t border-white/5 bg-black/30 px-4 py-2.5">
         <div className="flex items-center gap-3">
           <div className="flex-1">
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <label className="block text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
               Entry
             </label>
             <div className="mt-0.5 flex items-center gap-1">
-              <span className="text-[16px] font-bold">$</span>
+              <span className="text-[14px] font-bold">$</span>
               <input
-                type="number"
-                min={1}
+                type="text"
+                inputMode="decimal"
                 value={entryAmount}
-                onChange={(e) =>
-                  setEntryAmount(Math.max(0, Number(e.target.value) || 0))
-                }
-                className="h-7 w-20 rounded-md bg-white/[0.06] px-2 text-[15px] font-bold outline-none ring-1 ring-white/10 focus:ring-primary"
+                onChange={(e) => {
+                  // accept empty + numeric strings; no auto-zero
+                  const v = e.target.value;
+                  if (v === "" || /^\d*\.?\d*$/.test(v)) setEntryAmount(v);
+                }}
+                placeholder="0"
+                className="h-6 w-20 rounded-md bg-white/[0.06] px-2 text-[14px] font-bold outline-none ring-1 ring-white/10 focus:ring-primary"
               />
             </div>
           </div>
           <div className="text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
               To Pay
             </div>
-            <div className="text-[18px] font-bold text-success">
-              ${potential.toFixed(2)}
+            <div className="text-[16px] font-bold text-success">
+              {fmtMoney(potential)}
             </div>
-            <div className="text-[10px] text-muted-foreground">
+            <div className="text-[9px] text-muted-foreground">
               {validCount
-                ? `${(POWER_MULTIPLIERS[count] ?? 1)}x max`
+                ? `${POWER_MULTIPLIERS[count] ?? 1}x max`
                 : "Add 2–6 picks"}
             </div>
           </div>
         </div>
 
         <button
-          disabled={!validCount || entryAmount <= 0}
+          disabled={!validCount || entryNum <= 0}
           onClick={submit}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-[14px] font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-opacity disabled:opacity-40"
+          className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-[13px] font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-opacity disabled:opacity-40"
         >
-          <CheckCircle className="h-4 w-4" />
+          <CheckCircle className="h-3.5 w-3.5" />
           Submit Entry
         </button>
       </div>
@@ -359,7 +452,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
   );
 }
 
-function PlayerThumb({ player, size = 36 }: { player: PlayerOption; size?: number }) {
+function PlayerThumb({ player, size = 32 }: { player: PlayerOption; size?: number }) {
   const initials = player.name
     .split(" ")
     .map((n) => n[0])
@@ -367,7 +460,7 @@ function PlayerThumb({ player, size = 36 }: { player: PlayerOption; size?: numbe
     .join("");
   return (
     <div
-      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[11px] font-bold"
+      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[10px] font-bold"
       style={{ width: size, height: size }}
     >
       {player.photo ? (

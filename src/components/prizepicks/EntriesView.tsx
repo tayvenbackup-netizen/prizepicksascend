@@ -3,6 +3,7 @@ import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
 import { useEntries, type Entry } from "./EntriesContext";
 import { CheckBadge, XBadge } from "./Icons";
+import { fmtMoney } from "@/lib/fmt";
 
 export function EntriesView() {
   const [tab, setTab] = useState<"open" | "past">("open");
@@ -55,7 +56,7 @@ export function EntriesView() {
           </div>
           <div className="rounded-2xl bg-surface px-4 py-5 text-center">
             <div className="text-[26px] font-bold leading-none">
-              ${totalPotential.toFixed(2).replace(/\.00$/, "")}
+              {fmtMoney(totalPotential)}
             </div>
             <div className="mt-2 text-[13px] text-foreground/90">Potential Winnings</div>
           </div>
@@ -149,7 +150,7 @@ function EntryCard({ entry }: { entry: Entry }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-[15px] font-bold">
-            ${entry.entryAmount} to pay ${formatMoney(entry.potential)}
+            {fmtMoney(entry.entryAmount)} to pay {fmtMoney(entry.potential)}
           </div>
           <div className="mt-0.5 text-[13px] text-muted-foreground">
             {planLabel(entry)}
@@ -260,6 +261,3 @@ function abbrev(name: string) {
   return `${parts[0][0]}. ${parts.slice(1).join(" ")}`;
 }
 
-function formatMoney(n: number) {
-  return n % 1 === 0 ? n.toFixed(0) : n.toFixed(2);
-}
