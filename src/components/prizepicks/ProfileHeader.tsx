@@ -5,7 +5,7 @@ import shareBtn from "@/assets/major/share-btn.png";
 export function ProfileHeader() {
   return (
     <section className="px-4 pt-4">
-      <div className="flex items-start gap-4">
+      <div className="flex items-center gap-4">
         {/* Avatar with thin ring + level pill */}
         <div className="relative shrink-0">
           <div
@@ -26,7 +26,7 @@ export function ProfileHeader() {
           </div>
         </div>
 
-        <div className="flex-1 pt-1">
+        <div className="flex-1">
           <h1 className="text-[19px] font-bold leading-tight tracking-tight">
             ascend2k
           </h1>
@@ -48,11 +48,11 @@ export function ProfileHeader() {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button aria-label="search" className="shrink-0 flex items-center">
+          <button aria-label="search" className="shrink-0 flex items-center justify-center h-[80px]">
             <img src={searchCircle} alt="search" className="h-[72px] w-[72px] object-contain" draggable={false} />
           </button>
-          <button aria-label="share" className="shrink-0 flex items-center -ml-[6px]">
-            <img src={shareBtn} alt="Share" className="h-[87px] w-auto object-contain object-left" draggable={false} />
+          <button aria-label="share" className="shrink-0 flex items-center justify-center h-[80px] -ml-[6px]">
+            <img src={shareBtn} alt="Share" className="h-[95px] w-auto object-contain object-left" draggable={false} />
           </button>
         </div>
       </div>
