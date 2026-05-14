@@ -249,7 +249,28 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
               onChange={(e) => setSearch(e.target.value)}
               className="mb-2 h-8 w-full rounded-md bg-white/[0.06] px-2 text-[13px] outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary"
             />
-            <ul className="max-h-[260px] overflow-y-auto">
+
+            {/* League filter chips */}
+            <div className="mb-2 flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+              {(["ALL", ...availableLeagues] as const).map((lg) => {
+                const active = leagueFilter === lg;
+                return (
+                  <button
+                    key={lg}
+                    onClick={() => setLeagueFilter(lg)}
+                    className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-white/[0.06] text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {lg === "ALL" ? "All" : lg}
+                  </button>
+                );
+              })}
+            </div>
+
+            <ul className="max-h-[240px] overflow-y-auto">
               {grouped.length === 0 && (
                 <li className="py-6 text-center text-[12px] text-muted-foreground">
                   No matches.
@@ -257,9 +278,11 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
               )}
               {grouped.map((g) => (
                 <li key={g.sport} className="mb-2">
-                  <div className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    {g.sport}
-                  </div>
+                  {leagueFilter === "ALL" && (
+                    <div className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {g.sport}
+                    </div>
+                  )}
                   <ul>
                     {g.players.map((p) => (
                       <li key={p.id}>
@@ -276,7 +299,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                               {p.team} · {p.stat} {p.line}
                             </div>
                           </div>
-                          <PlusIcon className="h-4 w-4 text-primary" />
+                          <PlusIcon className="h-4 w-4 text-primary shrink-0" />
                         </button>
                       </li>
                     ))}
