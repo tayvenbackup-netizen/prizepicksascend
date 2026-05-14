@@ -2,7 +2,7 @@ import { useState } from "react";
 import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
 import { useEntries, type Entry } from "./EntriesContext";
-import { CheckCircle, XCircle } from "./Icons";
+import { CheckBadge, XBadge } from "./Icons";
 
 export function EntriesView() {
   const [tab, setTab] = useState<"open" | "past">("open");
@@ -63,7 +63,7 @@ export function EntriesView() {
       </div>
 
       {/* Scrollable area below the tabs */}
-      <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-28">
+      <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-24">
         {showEmpty ? (
           <div className="flex flex-col items-center justify-start px-6 pt-10 pb-8">
             <img src={emptyEntries} alt="" className="h-[180px] w-auto object-contain select-none" draggable={false} />
@@ -225,11 +225,11 @@ function PickAvatar({ pick }: { pick: Entry["picks"][number] }) {
         </div>
       </div>
       {pick.result && pick.result !== "pending" && (
-        <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-background p-[1px]">
+        <div className="absolute -bottom-1 -right-1 rounded-full bg-background p-[1.5px]">
           {pick.result === "win" ? (
-            <CheckCircle className="h-3.5 w-3.5 text-success" />
+            <CheckBadge className="h-4 w-4 text-success" />
           ) : (
-            <XCircle className="h-3.5 w-3.5 text-destructive" />
+            <XBadge className="h-4 w-4 text-destructive" />
           )}
         </div>
       )}

@@ -8,7 +8,7 @@ import {
   type ParlayPick,
   type ParlayType,
 } from "./EntriesContext";
-import { MOCK_PLAYERS, type PlayerOption } from "./parlayData";
+import { MOCK_PLAYERS, SPORT_ORDER, type PlayerOption, type Sport } from "./parlayData";
 import { Sparkles } from "lucide-react";
 
 type Draft = {
@@ -52,17 +52,26 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
 
   const removePick = (i: number) => setPicks(picks.filter((_, idx) => idx !== i));
 
-  const filtered = useMemo(() => {
+  const grouped = useMemo(() => {
     const s = search.trim().toLowerCase();
     const taken = new Set(picks.map((p) => p.player.id));
-    return MOCK_PLAYERS.filter(
+    const list = MOCK_PLAYERS.filter(
       (p) =>
         !taken.has(p.id) &&
         (s === "" ||
           p.name.toLowerCase().includes(s) ||
           p.team.toLowerCase().includes(s) ||
-          p.league.toLowerCase().includes(s)),
+          p.league.toLowerCase().includes(s) ||
+          p.stat.toLowerCase().includes(s)),
     );
+    const map = new Map<Sport, PlayerOption[]>();
+    for (const p of list) {
+      if (!map.has(p.league)) map.set(p.league, []);
+      map.get(p.league)!.push(p);
+    }
+    return SPORT_ORDER
+      .filter((s) => map.has(s))
+      .map((s) => ({ sport: s, players: map.get(s)! }));
   }, [search, picks]);
 
   const submit = () => {
@@ -155,22 +164,16 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
             </p>
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {picks.map((d, i) => (
               <li
                 key={d.player.id}
-                className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5"
+                className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-3"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[12px] font-bold">
-                  {d.player.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .slice(0, 2)
-                    .join("")}
-                </div>
+                <PlayerThumb player={d.player} size={40} />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[13px] font-bold">{d.player.name}</div>
-                  <div className="truncate text-[11px] text-muted-foreground">
+                  <div className="truncate text-[14px] font-bold">{d.player.name}</div>
+                  <div className="truncate text-[12px] text-muted-foreground">
                     {d.player.team} · {d.player.league} · {d.player.stat}
                   </div>
                 </div>
@@ -181,14 +184,14 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                   onChange={(e) =>
                     updatePick(i, { line: Number(e.target.value) || 0 })
                   }
-                  className="h-7 w-14 rounded-md bg-black/40 px-1.5 text-center text-[13px] font-semibold outline-none ring-1 ring-white/10 focus:ring-primary"
+                  className="h-8 w-16 rounded-md bg-black/40 px-1.5 text-center text-[14px] font-semibold outline-none ring-1 ring-white/10 focus:ring-primary"
                 />
                 <div className="flex overflow-hidden rounded-md ring-1 ring-white/10">
                   {(["over", "under"] as const).map((p) => (
                     <button
                       key={p}
                       onClick={() => updatePick(i, { pick: p })}
-                      className={`px-2 py-1 text-[10px] font-bold uppercase ${
+                      className={`px-2.5 py-1.5 text-[11px] font-bold uppercase ${
                         d.pick === p
                           ? p === "over"
                             ? "bg-success text-background"
@@ -233,28 +236,38 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
               onChange={(e) => setSearch(e.target.value)}
               className="mb-2 h-8 w-full rounded-md bg-white/[0.06] px-2 text-[13px] outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary"
             />
-            <ul className="max-h-[180px] overflow-y-auto">
-              {filtered.length === 0 && (
+            <ul className="max-h-[260px] overflow-y-auto">
+              {grouped.length === 0 && (
                 <li className="py-6 text-center text-[12px] text-muted-foreground">
                   No matches.
                 </li>
               )}
-              {filtered.map((p) => (
-                <li key={p.id}>
-                  <button
-                    onClick={() => addPick(p)}
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-white/[0.04]"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate text-[12px] font-semibold">
-                        {p.name}
-                      </div>
-                      <div className="truncate text-[10px] text-muted-foreground">
-                        {p.team} · {p.league} · {p.stat} {p.line}
-                      </div>
-                    </div>
-                    <PlusIcon className="h-4 w-4 text-primary" />
-                  </button>
+              {grouped.map((g) => (
+                <li key={g.sport} className="mb-2">
+                  <div className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {g.sport}
+                  </div>
+                  <ul>
+                    {g.players.map((p) => (
+                      <li key={p.id}>
+                        <button
+                          onClick={() => addPick(p)}
+                          className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left hover:bg-white/[0.04]"
+                        >
+                          <PlayerThumb player={p} size={32} />
+                          <div className="flex-1 min-w-0">
+                            <div className="truncate text-[13px] font-semibold">
+                              {p.name}
+                            </div>
+                            <div className="truncate text-[11px] text-muted-foreground">
+                              {p.team} · {p.stat} {p.line}
+                            </div>
+                          </div>
+                          <PlusIcon className="h-4 w-4 text-primary" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </li>
               ))}
             </ul>
@@ -306,6 +319,36 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
           Submit Entry
         </button>
       </div>
+    </div>
+  );
+}
+
+function PlayerThumb({ player, size = 36 }: { player: PlayerOption; size?: number }) {
+  const initials = player.name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("");
+  return (
+    <div
+      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[11px] font-bold"
+      style={{ width: size, height: size }}
+    >
+      {player.photo ? (
+        <img
+          src={player.photo}
+          alt={player.name}
+          loading="lazy"
+          draggable={false}
+          className="h-full w-full object-cover object-top"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
+        />
+      ) : null}
+      <span className="absolute inset-0 -z-10 flex items-center justify-center">
+        {initials}
+      </span>
     </div>
   );
 }

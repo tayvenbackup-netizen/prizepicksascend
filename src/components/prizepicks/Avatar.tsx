@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle } from "./Icons";
+import { CheckBadge, XBadge } from "./Icons";
 
 type Props = {
   src?: string;
@@ -62,18 +62,18 @@ export function PlayerAvatar({
 
       {badge !== "none" && (
         <div
-          className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center rounded-full bg-background"
-          style={{ padding: 1 }}
+          className="absolute -bottom-1 -right-1 flex items-center justify-center rounded-full bg-background"
+          style={{ padding: 1.5 }}
         >
           {badge === "check" ? (
-            <CheckCircle
+            <CheckBadge
               className="text-success"
-              style={{ width: size * 0.36, height: size * 0.36 }}
+              style={{ width: Math.max(14, size * 0.46), height: Math.max(14, size * 0.46) }}
             />
           ) : (
-            <XCircle
+            <XBadge
               className="text-destructive"
-              style={{ width: size * 0.36, height: size * 0.36 }}
+              style={{ width: Math.max(14, size * 0.46), height: Math.max(14, size * 0.46) }}
             />
           )}
         </div>
