@@ -236,28 +236,38 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
               onChange={(e) => setSearch(e.target.value)}
               className="mb-2 h-8 w-full rounded-md bg-white/[0.06] px-2 text-[13px] outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary"
             />
-            <ul className="max-h-[180px] overflow-y-auto">
-              {filtered.length === 0 && (
+            <ul className="max-h-[260px] overflow-y-auto">
+              {grouped.length === 0 && (
                 <li className="py-6 text-center text-[12px] text-muted-foreground">
                   No matches.
                 </li>
               )}
-              {filtered.map((p) => (
-                <li key={p.id}>
-                  <button
-                    onClick={() => addPick(p)}
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-white/[0.04]"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate text-[12px] font-semibold">
-                        {p.name}
-                      </div>
-                      <div className="truncate text-[10px] text-muted-foreground">
-                        {p.team} · {p.league} · {p.stat} {p.line}
-                      </div>
-                    </div>
-                    <PlusIcon className="h-4 w-4 text-primary" />
-                  </button>
+              {grouped.map((g) => (
+                <li key={g.sport} className="mb-2">
+                  <div className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {g.sport}
+                  </div>
+                  <ul>
+                    {g.players.map((p) => (
+                      <li key={p.id}>
+                        <button
+                          onClick={() => addPick(p)}
+                          className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left hover:bg-white/[0.04]"
+                        >
+                          <PlayerThumb player={p} size={32} />
+                          <div className="flex-1 min-w-0">
+                            <div className="truncate text-[13px] font-semibold">
+                              {p.name}
+                            </div>
+                            <div className="truncate text-[11px] text-muted-foreground">
+                              {p.team} · {p.stat} {p.line}
+                            </div>
+                          </div>
+                          <PlusIcon className="h-4 w-4 text-primary" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </li>
               ))}
             </ul>
