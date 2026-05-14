@@ -67,6 +67,7 @@ function Index() {
             <BottomNav active={nav} onChange={setNav} />
           </div>
         </div>
+      </div>
       </EntriesProvider>
     </ProfileProvider>
   );
