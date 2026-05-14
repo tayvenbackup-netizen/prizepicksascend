@@ -2,22 +2,28 @@ import { MenuIcon, PLogo } from "./Icons";
 import playersPill from "@/assets/major/players-pill.png";
 import dollarSign from "@/assets/major/dollar-sign.png";
 import plusCircle from "@/assets/major/plus-circle.png";
+import arrowDown from "@/assets/major/arrow-down.png";
 
 export function TopHeader() {
   return (
     <header className="flex items-center justify-between gap-2 px-4 pt-3 pb-2">
       <div className="flex items-center gap-2.5">
-        <button aria-label="menu" className="text-foreground/80">
-          <MenuIcon className="h-[20px] w-[20px]" />
+        <button aria-label="menu" className="text-foreground/90">
+          <MenuIcon className="h-[24px] w-[24px]" />
         </button>
-        <PLogo size={22} />
+        <PLogo size={64} />
       </div>
 
-      <div className="flex items-center justify-center rounded-full border border-white/90 px-3 py-[3px]">
+      <div className="flex items-center justify-center gap-1.5 rounded-full border-[3px] border-white/90 px-3 py-[3px]">
         <img
           src={playersPill}
           alt="Players"
-          className="h-[21px] w-auto object-contain"
+          className="h-[10px] w-auto object-contain"
+        />
+        <img
+          src={arrowDown}
+          alt=""
+          className="h-[22px] w-[22px] object-contain"
         />
       </div>
 
