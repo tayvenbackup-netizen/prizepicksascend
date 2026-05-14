@@ -27,10 +27,10 @@ export function ProfileHeader() {
         </div>
 
         <div className="flex-1 pt-1">
-          <h1 className="text-[22px] font-bold leading-tight tracking-tight">
+          <h1 className="text-[19px] font-bold leading-tight tracking-tight">
             ascend2k
           </h1>
-          <p className="mt-0.5 text-[13px] text-muted-foreground">
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
             Joined September 2025
           </p>
         </div>
@@ -39,20 +39,20 @@ export function ProfileHeader() {
       <div className="mt-5 flex items-end justify-between">
         <div className="flex gap-7">
           <div>
-            <div className="text-[18px] font-bold leading-none">0</div>
-            <div className="mt-1 text-[13px] text-muted-foreground">followers</div>
+            <div className="text-[16px] font-bold leading-none">0</div>
+            <div className="mt-1 text-[11px] text-muted-foreground">followers</div>
           </div>
           <div>
-            <div className="text-[18px] font-bold leading-none">8</div>
-            <div className="mt-1 text-[13px] text-muted-foreground">following</div>
+            <div className="text-[16px] font-bold leading-none">8</div>
+            <div className="mt-1 text-[11px] text-muted-foreground">following</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button aria-label="search" className="shrink-0">
             <img src={searchCircle} alt="search" className="h-[68px] w-[68px] object-contain" draggable={false} />
           </button>
-          <button aria-label="share" className="shrink-0">
-            <img src={shareBtn} alt="Share" className="h-[68px] w-auto object-contain" draggable={false} />
+          <button aria-label="share" className="shrink-0 -ml-3">
+            <img src={shareBtn} alt="Share" className="h-[83px] w-auto object-contain object-left" draggable={false} />
           </button>
         </div>
       </div>

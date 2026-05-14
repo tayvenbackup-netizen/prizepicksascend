@@ -14,7 +14,7 @@ export function StatsCards() {
       {items.map(({ icon, value, label }) => (
         <div key={label} className="rounded-2xl bg-surface px-3 pt-3 pb-3">
           <div className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/[0.06]">
-            <img src={icon} alt="" className="h-[23px] w-[23px] object-contain" />
+            <img src={icon} alt="" className="h-[30px] w-[30px] object-contain" />
           </div>
           <div className="mt-3.5 text-[20px] font-bold leading-none tracking-tight">
             {value}
