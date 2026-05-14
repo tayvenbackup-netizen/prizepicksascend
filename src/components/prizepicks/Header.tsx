@@ -1,4 +1,7 @@
-import { ChevronDown, MenuIcon, PLogo, PlusIcon, UserCheck } from "./Icons";
+import { MenuIcon, PLogo } from "./Icons";
+import playersPill from "@/assets/major/players-pill.png";
+import dollarSign from "@/assets/major/dollar-sign.png";
+import plusCircle from "@/assets/major/plus-circle.png";
 
 export function TopHeader() {
   return (
@@ -10,20 +13,16 @@ export function TopHeader() {
         <PLogo size={22} />
       </div>
 
-      <button className="flex h-8 items-center gap-1.5 rounded-full border border-foreground/90 px-3 text-[12px] font-extrabold tracking-wide">
-        <UserCheck className="h-[14px] w-[14px]" />
-        PLAYERS
-        <ChevronDown className="h-3 w-3" />
-      </button>
+      <img
+        src={playersPill}
+        alt="Players"
+        className="h-7 w-auto object-contain"
+      />
 
-      <div className="flex items-center gap-1">
-        <span className="text-success text-[13px] font-semibold">$ 0.00</span>
-        <button
-          aria-label="add funds"
-          className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-success text-success"
-        >
-          <PlusIcon className="h-3 w-3" strokeWidth={3} />
-        </button>
+      <div className="flex items-center gap-1.5">
+        <img src={dollarSign} alt="" className="h-[14px] w-auto object-contain" />
+        <span className="text-success text-[13px] font-semibold">0.00</span>
+        <img src={plusCircle} alt="add funds" className="h-5 w-5 object-contain" />
       </div>
     </header>
   );
