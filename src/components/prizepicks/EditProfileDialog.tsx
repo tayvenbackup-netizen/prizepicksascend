@@ -92,7 +92,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
       >
         {/* Header */}
         <div
-          className="relative px-5 pt-5 pb-4"
+          className="relative shrink-0 px-5 pt-5 pb-4"
           style={{
             background:
               "linear-gradient(135deg, color-mix(in oklab, var(--primary) 35%, transparent) 0%, transparent 70%)",
