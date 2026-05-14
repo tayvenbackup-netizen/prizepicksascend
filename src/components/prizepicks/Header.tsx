@@ -9,13 +9,13 @@ export function TopHeader() {
     <header className="flex items-center justify-between gap-2 px-3 pt-3 pb-2">
       <div className="flex items-center gap-2 shrink-0">
         <button aria-label="menu" style={{ color: "#93939f" }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" className="h-[26px] w-[26px]">
-            <path d="M4 7h16" />
-            <path d="M4 12h16" />
-            <path d="M4 17h10" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" className="h-[32px] w-[32px]">
+            <path d="M4 8h16" />
+            <path d="M4 13h16" />
+            <path d="M4 18h10" />
           </svg>
         </button>
-        <PLogo size={26} />
+        <PLogo size={32} />
       </div>
 
       <div className="flex flex-1 justify-center">
