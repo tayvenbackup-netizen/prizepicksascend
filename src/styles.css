@@ -116,11 +116,12 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html, body, #root { height: 100%; }
+  html, body, #root { height: 100%; overflow: hidden; }
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     touch-action: manipulation;
+    overscroll-behavior: none;
   }
   body {
     background-color: var(--color-background);
@@ -130,7 +131,10 @@
     text-rendering: optimizeLegibility;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
   }
   /* Prevent iOS auto-zoom on focus by ensuring inputs are >=16px */
   input, select, textarea {
