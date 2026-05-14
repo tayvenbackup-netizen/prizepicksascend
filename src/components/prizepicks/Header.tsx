@@ -8,7 +8,10 @@ import { useProfile } from "./ProfileContext";
 export function TopHeader() {
   const { data } = useProfile();
   return (
-    <header className="flex items-center justify-between gap-2 px-3 pt-3 pb-2">
+    <header
+      className="flex items-center justify-between gap-2 px-3 pb-2"
+      style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)" }}
+    >
       <div className="flex items-center shrink-0" style={{ gap: 0 }}>
         <button aria-label="menu" style={{ color: "#93939f" }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" className="h-[32px] w-[32px]">
