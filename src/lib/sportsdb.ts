@@ -85,12 +85,15 @@ export async function searchPlayer(name: string): Promise<PlayerHit | null> {
     const j = await r.json();
     const p = j?.player?.[0];
     if (!p) return null;
+    // Prefer cutout (transparent headshot, PrizePicks-style), fallback to thumb/render.
+    const photo =
+      p.strCutout || p.strThumb || p.strRender || null;
     return {
       name: p.strPlayer,
       team: p.strTeam || "",
       sport: p.strSport || "",
       league: "",
-      photo: p.strThumb || p.strCutout || null,
+      photo,
     };
   } catch {
     return null;
@@ -104,33 +107,58 @@ export type TeamHit = {
   badge: string | null;
 };
 
-export async function searchTeam(query: string): Promise<TeamHit | null> {
+const LEAGUE_ALIASES: Record<string, string[]> = {
+  nba: ["nba", "national basketball"],
+  nfl: ["nfl", "national football"],
+  mlb: ["mlb", "major league baseball"],
+  nhl: ["nhl", "national hockey"],
+  wnba: ["wnba", "women's national basketball"],
+  epl: ["english premier", "premier league"],
+  mls: ["mls", "major league soccer"],
+  laliga: ["la liga", "spanish la liga", "primera"],
+  ucl: ["uefa champions"],
+  ufc: ["ufc", "mixed martial"],
+  atp: ["atp"],
+  csgo: ["counter-strike", "csgo", "cs:go", "cs2"],
+  lol: ["league of legends"],
+  cod: ["call of duty"],
+  valorant: ["valorant"],
+};
+
+export async function searchTeam(query: string, leaguePrefix?: string): Promise<TeamHit | null> {
   const q = query.trim();
   if (!q) return null;
   try {
     const r = await fetch(`${BASE}/searchteams.php?t=${encodeURIComponent(q)}`);
     if (!r.ok) return null;
     const j = await r.json();
-    const t = j?.teams?.[0];
-    if (!t) return null;
+    const teams: any[] = j?.teams || [];
+    if (teams.length === 0) return null;
+    let pick = teams[0];
+    if (leaguePrefix) {
+      const aliases = LEAGUE_ALIASES[leaguePrefix.toLowerCase()] || [leaguePrefix.toLowerCase()];
+      const match = teams.find((t) => {
+        const lg = (t.strLeague || "").toLowerCase();
+        return aliases.some((a) => lg.includes(a));
+      });
+      if (match) pick = match;
+    }
     return {
-      name: t.strTeam,
-      league: t.strLeague || "",
-      badge: t.strBadge || null,
+      name: pick.strTeam,
+      league: pick.strLeague || "",
+      badge: pick.strBadge || null,
     };
   } catch {
     return null;
   }
 }
 
-/** "NBA Celtics" → search "Celtics" and verify league prefix loosely. */
+/** "NBA Celtics" → search "Celtics" filtering to NBA matches. */
 export async function searchTeamByLeague(input: string): Promise<TeamHit | null> {
   const m = input.trim().match(/^(\S+)\s+(.+)$/);
   if (!m) return null;
-  const [, , teamPart] = m;
-  // Try full search first; fallback to team-only.
-  let hit = await searchTeam(teamPart);
-  if (!hit) hit = await searchTeam(input.trim());
+  const [, leaguePart, teamPart] = m;
+  const hit = await searchTeam(teamPart, leaguePart);
   return hit;
 }
 
