@@ -1,16 +1,29 @@
 import { useState } from "react";
 import navImg from "@/assets/bottom-nav.jpeg";
 
-const items = [
+export type NavTab = "board" | "entries" | "feed" | "promos" | "profile";
+
+const items: { id: NavTab; label: string }[] = [
   { id: "board", label: "Board" },
   { id: "entries", label: "My Entries" },
   { id: "feed", label: "Feed" },
   { id: "promos", label: "Promos" },
   { id: "profile", label: "Profile" },
-] as const;
+];
 
-export function BottomNav() {
-  const [active, setActive] = useState<string>("profile");
+export function BottomNav({
+  active: activeProp,
+  onChange,
+}: {
+  active?: NavTab;
+  onChange?: (t: NavTab) => void;
+}) {
+  const [internal, setInternal] = useState<NavTab>("profile");
+  const active = activeProp ?? internal;
+  const setActive = (t: NavTab) => {
+    setInternal(t);
+    onChange?.(t);
+  };
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 bg-background">
