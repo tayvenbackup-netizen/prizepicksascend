@@ -135,6 +135,14 @@
     position: fixed;
     inset: 0;
     width: 100%;
+    max-height: 100dvh;
+  }
+  #root {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
   }
   /* Prevent iOS auto-zoom on focus by ensuring inputs are >=16px */
   input, select, textarea {
@@ -146,6 +154,11 @@
 }
 
 @layer utilities {
+  .stats-scroll {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
   .ring-success-glow {
     box-shadow: 0 0 0 2px var(--success), 0 0 12px -2px color-mix(in oklab, var(--success) 60%, transparent);
   }
