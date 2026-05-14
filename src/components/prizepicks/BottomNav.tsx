@@ -1,26 +1,18 @@
-import { useState, type ReactElement } from "react";
-import { BoardIcon, EntriesIcon, FeedIcon, PromosIcon, PLogo } from "./Icons";
+import { useState } from "react";
+import boardIcon from "@/assets/nav/board.png";
+import entriesIcon from "@/assets/nav/entries.png";
+import feedIcon from "@/assets/nav/feed.png";
+import promosIcon from "@/assets/nav/promos.png";
+import profileIcon from "@/assets/nav/profile.png";
 
 export type NavTab = "board" | "entries" | "feed" | "promos" | "profile";
 
-const items: {
-  id: NavTab;
-  label: string;
-  Icon: (p: { className?: string }) => ReactElement;
-}[] = [
-  { id: "board", label: "Board", Icon: (p) => <BoardIcon {...p} /> },
-  { id: "entries", label: "My Entries", Icon: (p) => <EntriesIcon {...p} /> },
-  { id: "feed", label: "Feed", Icon: (p) => <FeedIcon {...p} /> },
-  { id: "promos", label: "Promos", Icon: (p) => <PromosIcon {...p} /> },
-  {
-    id: "profile",
-    label: "Profile",
-    Icon: ({ className }) => (
-      <div className={className} style={{ width: 26, height: 26 }}>
-        <PLogo size={26} />
-      </div>
-    ),
-  },
+const items: { id: NavTab; label: string; src: string }[] = [
+  { id: "board", label: "Board", src: boardIcon },
+  { id: "entries", label: "My Entries", src: entriesIcon },
+  { id: "feed", label: "Feed", src: feedIcon },
+  { id: "promos", label: "Promos", src: promosIcon },
+  { id: "profile", label: "Profile", src: profileIcon },
 ];
 
 export function BottomNav({
@@ -55,9 +47,12 @@ export function BottomNav({
                 onClick={() => setActive(it.id)}
                 className="relative flex flex-col items-center justify-center gap-1 py-1.5"
               >
-                <it.Icon
-                  className={`h-[26px] w-[26px] ${
-                    isActive ? "text-foreground" : "text-muted-foreground"
+                <img
+                  src={it.src}
+                  alt=""
+                  draggable={false}
+                  className={`h-8 w-8 object-contain transition-opacity ${
+                    isActive ? "opacity-100" : "opacity-70"
                   }`}
                 />
                 <span
