@@ -56,7 +56,7 @@ export function EntriesView() {
           </div>
           <div className="rounded-2xl bg-surface px-4 py-5 text-center">
             <div className="text-[26px] font-bold leading-none">
-              ${totalPotential.toFixed(2).replace(/\.00$/, "")}
+              {fmtMoney(totalPotential)}
             </div>
             <div className="mt-2 text-[13px] text-foreground/90">Potential Winnings</div>
           </div>
