@@ -78,8 +78,12 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-md p-0 gap-0 border-0 overflow-hidden rounded-2xl"
+        className="p-0 gap-0 border-0 overflow-hidden rounded-2xl flex flex-col"
         style={{
+          width: "min(calc(100vw - 16px), 440px)",
+          maxWidth: "min(calc(100vw - 16px), 440px)",
+          height: "min(calc(100dvh - 32px), 760px)",
+          maxHeight: "calc(100dvh - 32px)",
           background:
             "linear-gradient(180deg, oklch(0.20 0.04 295) 0%, oklch(0.14 0.03 270) 100%)",
           boxShadow:
