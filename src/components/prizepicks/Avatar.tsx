@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle } from "./Icons";
+import { CheckBadge, XBadge } from "./Icons";
 
 type Props = {
   src?: string;
