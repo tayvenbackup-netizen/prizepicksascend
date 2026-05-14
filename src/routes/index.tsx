@@ -22,6 +22,7 @@ function Index() {
 
   return (
     <ProfileProvider>
+      <EntriesProvider>
       <div className="fixed inset-0 overflow-hidden bg-background">
         <div className="mx-auto flex h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-background">
           <div className="shrink-0">
@@ -66,7 +67,7 @@ function Index() {
             <BottomNav active={nav} onChange={setNav} />
           </div>
         </div>
-      </div>
+      </EntriesProvider>
     </ProfileProvider>
   );
 }
