@@ -52,17 +52,26 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
 
   const removePick = (i: number) => setPicks(picks.filter((_, idx) => idx !== i));
 
-  const filtered = useMemo(() => {
+  const grouped = useMemo(() => {
     const s = search.trim().toLowerCase();
     const taken = new Set(picks.map((p) => p.player.id));
-    return MOCK_PLAYERS.filter(
+    const list = MOCK_PLAYERS.filter(
       (p) =>
         !taken.has(p.id) &&
         (s === "" ||
           p.name.toLowerCase().includes(s) ||
           p.team.toLowerCase().includes(s) ||
-          p.league.toLowerCase().includes(s)),
+          p.league.toLowerCase().includes(s) ||
+          p.stat.toLowerCase().includes(s)),
     );
+    const map = new Map<Sport, PlayerOption[]>();
+    for (const p of list) {
+      if (!map.has(p.league)) map.set(p.league, []);
+      map.get(p.league)!.push(p);
+    }
+    return SPORT_ORDER
+      .filter((s) => map.has(s))
+      .map((s) => ({ sport: s, players: map.get(s)! }));
   }, [search, picks]);
 
   const submit = () => {
