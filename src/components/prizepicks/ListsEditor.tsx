@@ -300,9 +300,7 @@ export function ListsEditor() {
               )
             }
             onClear={() => updatePickTeam(i, null)}
-            onResolved={async () => {
-              const inputEl = document.activeElement as HTMLInputElement;
-              const q = inputEl?.value?.trim() || "";
+            onResolved={async (q) => {
               if (!/^\S+\s+\S+/.test(q)) {
                 return { ok: false, msg: 'Use "LEAGUE Team" — e.g. "NBA Celtics".' };
               }
