@@ -103,15 +103,4 @@ export const PromosIcon = (p: I) => (
   </svg>
 );
 
-export const PLogo = ({ size = 28 }: { size?: number }) => (
-  <svg width={size} height={size * 1.05} viewBox="0 0 32 34" fill="none">
-    <path d="M4 4h16a8 8 0 0 1 0 16h-6v6l-6 6V4Z" fill="url(#pg)"/>
-    <path d="M11 9h7a4 4 0 0 1 0 8h-7V9Z" fill="#fff"/>
-    <defs>
-      <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#a855f7"/>
-        <stop offset="1" stopColor="#6d28d9"/>
-      </linearGradient>
-    </defs>
-  </svg>
-);
+export { PLogo } from "./PLogo";
