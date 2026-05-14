@@ -1,26 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TopHeader } from "@/components/prizepicks/Header";
+import { ProfileHeader } from "@/components/prizepicks/ProfileHeader";
+import { ProfileTabs } from "@/components/prizepicks/Tabs";
+import { StatsCards } from "@/components/prizepicks/StatsCards";
+import { SectionTitle } from "@/components/prizepicks/SectionTitle";
+import { TopWins } from "@/components/prizepicks/TopWins";
+import { MostPickedPlayers, TopWinningPlayers } from "@/components/prizepicks/PlayerLists";
+import { MostPickedTeams, TopWinningLeagues } from "@/components/prizepicks/LeaguesTeams";
+import { BottomNav } from "@/components/prizepicks/BottomNav";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="mx-auto min-h-screen max-w-[480px] bg-background pb-28">
+      <TopHeader />
+      <ProfileHeader />
+      <ProfileTabs />
+      <StatsCards />
+
+      <SectionTitle>Top Wins</SectionTitle>
+      <TopWins />
+
+      <SectionTitle>Top winning players</SectionTitle>
+      <TopWinningPlayers />
+
+      <SectionTitle>Most picked players</SectionTitle>
+      <MostPickedPlayers />
+
+      <SectionTitle>Top winning leagues</SectionTitle>
+      <TopWinningLeagues />
+
+      <SectionTitle>Most picked teams</SectionTitle>
+      <MostPickedTeams />
+
+      <BottomNav />
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
