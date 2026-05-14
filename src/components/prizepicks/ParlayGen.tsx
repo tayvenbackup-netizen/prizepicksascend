@@ -312,7 +312,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Footer / payout */}
-      <div className="border-t border-white/5 bg-black/30 px-5 py-3">
+      <div className="shrink-0 border-t border-white/5 bg-black/30 px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
