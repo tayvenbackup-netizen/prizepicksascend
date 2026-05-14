@@ -78,8 +78,12 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-md p-0 gap-0 border-0 overflow-hidden rounded-2xl"
+        className="p-0 gap-0 border-0 overflow-hidden rounded-2xl flex flex-col"
         style={{
+          width: "min(calc(100vw - 16px), 440px)",
+          maxWidth: "min(calc(100vw - 16px), 440px)",
+          height: "min(calc(100dvh - 32px), 760px)",
+          maxHeight: "calc(100dvh - 32px)",
           background:
             "linear-gradient(180deg, oklch(0.20 0.04 295) 0%, oklch(0.14 0.03 270) 100%)",
           boxShadow:
@@ -88,7 +92,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
       >
         {/* Header */}
         <div
-          className="relative px-5 pt-5 pb-4"
+          className="relative shrink-0 px-5 pt-5 pb-4"
           style={{
             background:
               "linear-gradient(135deg, color-mix(in oklab, var(--primary) 35%, transparent) 0%, transparent 70%)",
@@ -157,7 +161,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
 
         {tab === "profile" ? (
           <>
-            <div className="max-h-[55vh] overflow-y-auto px-5 py-4 space-y-5">
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-5">
               {sections.map((section) => (
                 <div key={section.title}>
                   <div className="mb-2 flex items-center gap-2">
@@ -244,7 +248,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
             </div>
           </>
         ) : (
-          <div className="flex h-[65vh] flex-col">
+          <div className="flex-1 min-h-0 flex flex-col">
             <ParlayGen onClose={() => onOpenChange(false)} />
           </div>
         )}

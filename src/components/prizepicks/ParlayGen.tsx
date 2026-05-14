@@ -26,6 +26,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
   const [status, setStatus] = useState<"live" | "upcoming">("upcoming");
   const [search, setSearch] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [leagueFilter, setLeagueFilter] = useState<Sport | "ALL">("ALL");
 
   const count = picks.length;
   const validCount = count >= 2 && count <= 6;
@@ -52,12 +53,20 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
 
   const removePick = (i: number) => setPicks(picks.filter((_, idx) => idx !== i));
 
+  const availableLeagues = useMemo(() => {
+    const taken = new Set(picks.map((p) => p.player.id));
+    const set = new Set<Sport>();
+    for (const p of MOCK_PLAYERS) if (!taken.has(p.id)) set.add(p.league);
+    return SPORT_ORDER.filter((s) => set.has(s));
+  }, [picks]);
+
   const grouped = useMemo(() => {
     const s = search.trim().toLowerCase();
     const taken = new Set(picks.map((p) => p.player.id));
     const list = MOCK_PLAYERS.filter(
       (p) =>
         !taken.has(p.id) &&
+        (leagueFilter === "ALL" || p.league === leagueFilter) &&
         (s === "" ||
           p.name.toLowerCase().includes(s) ||
           p.team.toLowerCase().includes(s) ||
@@ -72,7 +81,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
     return SPORT_ORDER
       .filter((s) => map.has(s))
       .map((s) => ({ sport: s, players: map.get(s)! }));
-  }, [search, picks]);
+  }, [search, picks, leagueFilter]);
 
   const submit = () => {
     if (!validCount || entryAmount <= 0) return;
@@ -101,9 +110,9 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       {/* Slip header */}
-      <div className="px-5 pt-4">
+      <div className="shrink-0 px-4 pt-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
@@ -156,7 +165,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Picks list */}
-      <div className="mt-3 flex-1 overflow-y-auto px-5 pb-4">
+      <div className="mt-3 flex-1 min-h-0 min-w-0 overflow-y-auto px-4 pb-4">
         {picks.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center">
             <p className="text-[13px] text-muted-foreground">
@@ -168,48 +177,52 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
             {picks.map((d, i) => (
               <li
                 key={d.player.id}
-                className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-3"
+                className="rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2.5"
               >
-                <PlayerThumb player={d.player} size={40} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[14px] font-bold">{d.player.name}</div>
-                  <div className="truncate text-[12px] text-muted-foreground">
-                    {d.player.team} · {d.player.league} · {d.player.stat}
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <PlayerThumb player={d.player} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[13px] font-bold">{d.player.name}</div>
+                    <div className="truncate text-[11px] text-muted-foreground">
+                      {d.player.team} · {d.player.league} · {d.player.stat}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removePick(i)}
+                    className="text-muted-foreground hover:text-destructive shrink-0"
+                    aria-label="Remove pick"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="mt-2 flex items-center gap-2 min-w-0">
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={d.line}
+                    onChange={(e) =>
+                      updatePick(i, { line: Number(e.target.value) || 0 })
+                    }
+                    className="h-8 w-16 shrink-0 rounded-md bg-black/40 px-1.5 text-center text-[13px] font-semibold outline-none ring-1 ring-white/10 focus:ring-primary"
+                  />
+                  <div className="ml-auto flex shrink-0 overflow-hidden rounded-md ring-1 ring-white/10">
+                    {(["over", "under"] as const).map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => updatePick(i, { pick: p })}
+                        className={`px-3 py-1.5 text-[11px] font-bold uppercase ${
+                          d.pick === p
+                            ? p === "over"
+                              ? "bg-success text-background"
+                              : "bg-destructive text-background"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={d.line}
-                  onChange={(e) =>
-                    updatePick(i, { line: Number(e.target.value) || 0 })
-                  }
-                  className="h-8 w-16 rounded-md bg-black/40 px-1.5 text-center text-[14px] font-semibold outline-none ring-1 ring-white/10 focus:ring-primary"
-                />
-                <div className="flex overflow-hidden rounded-md ring-1 ring-white/10">
-                  {(["over", "under"] as const).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => updatePick(i, { pick: p })}
-                      className={`px-2.5 py-1.5 text-[11px] font-bold uppercase ${
-                        d.pick === p
-                          ? p === "over"
-                            ? "bg-success text-background"
-                            : "bg-destructive text-background"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => removePick(i)}
-                  className="text-muted-foreground hover:text-destructive"
-                  aria-label="Remove pick"
-                >
-                  <XCircle className="h-5 w-5" />
-                </button>
               </li>
             ))}
           </ul>
@@ -236,7 +249,28 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
               onChange={(e) => setSearch(e.target.value)}
               className="mb-2 h-8 w-full rounded-md bg-white/[0.06] px-2 text-[13px] outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary"
             />
-            <ul className="max-h-[260px] overflow-y-auto">
+
+            {/* League filter chips */}
+            <div className="mb-2 flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+              {(["ALL", ...availableLeagues] as const).map((lg) => {
+                const active = leagueFilter === lg;
+                return (
+                  <button
+                    key={lg}
+                    onClick={() => setLeagueFilter(lg)}
+                    className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-white/[0.06] text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {lg === "ALL" ? "All" : lg}
+                  </button>
+                );
+              })}
+            </div>
+
+            <ul className="max-h-[240px] overflow-y-auto">
               {grouped.length === 0 && (
                 <li className="py-6 text-center text-[12px] text-muted-foreground">
                   No matches.
@@ -244,9 +278,11 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
               )}
               {grouped.map((g) => (
                 <li key={g.sport} className="mb-2">
-                  <div className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    {g.sport}
-                  </div>
+                  {leagueFilter === "ALL" && (
+                    <div className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {g.sport}
+                    </div>
+                  )}
                   <ul>
                     {g.players.map((p) => (
                       <li key={p.id}>
@@ -263,7 +299,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                               {p.team} · {p.stat} {p.line}
                             </div>
                           </div>
-                          <PlusIcon className="h-4 w-4 text-primary" />
+                          <PlusIcon className="h-4 w-4 text-primary shrink-0" />
                         </button>
                       </li>
                     ))}
@@ -276,7 +312,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Footer / payout */}
-      <div className="border-t border-white/5 bg-black/30 px-5 py-3">
+      <div className="shrink-0 border-t border-white/5 bg-black/30 px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
