@@ -36,7 +36,7 @@ export function ProfileHeader() {
         </div>
       </div>
 
-      <div className="mt-5 flex items-end justify-between">
+      <div className="mt-2 flex items-center justify-between">
         <div className="flex gap-7">
           <div>
             <div className="text-[16px] font-bold leading-none">0</div>
@@ -47,12 +47,12 @@ export function ProfileHeader() {
             <div className="mt-1 text-[11px] text-muted-foreground">following</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button aria-label="search" className="shrink-0">
-            <img src={searchCircle} alt="search" className="h-[68px] w-[68px] object-contain" draggable={false} />
+        <div className="flex items-center gap-1">
+          <button aria-label="search" className="shrink-0 flex items-center">
+            <img src={searchCircle} alt="search" className="h-[72px] w-[72px] object-contain" draggable={false} />
           </button>
-          <button aria-label="share" className="shrink-0 -ml-3">
-            <img src={shareBtn} alt="Share" className="h-[83px] w-auto object-contain object-left" draggable={false} />
+          <button aria-label="share" className="shrink-0 flex items-center -ml-[6px]">
+            <img src={shareBtn} alt="Share" className="h-[87px] w-auto object-contain object-left" draggable={false} />
           </button>
         </div>
       </div>
