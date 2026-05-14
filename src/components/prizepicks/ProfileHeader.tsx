@@ -5,11 +5,8 @@ export function ProfileHeader() {
     <section className="px-4 pt-4">
       <div className="flex items-start gap-4">
         <div className="relative">
-          <div
-            className="flex h-[72px] w-[72px] items-center justify-center rounded-full"
-            style={{ background: "linear-gradient(135deg,#a855f7,#6d28d9)" }}
-          >
-            <PLogo size={34} />
+          <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-surface">
+            <PLogo size={44} />
           </div>
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-background px-2 py-0.5 text-[11px] font-semibold text-muted-foreground border border-border">
             0
