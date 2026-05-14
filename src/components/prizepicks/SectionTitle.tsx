@@ -1,5 +1,5 @@
 export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="px-4 pt-7 pb-3 text-xl font-bold tracking-tight">{children}</h2>;
+  return <h2 className="px-4 pt-8 pb-3 text-[22px] font-bold tracking-tight">{children}</h2>;
 }
 
 export function ListHeader({ left, right }: { left: string; right: string }) {

@@ -1,12 +1,30 @@
 import { MOST_PICKED_TEAMS, TOP_LEAGUES } from "./data";
 
-function LeagueBadge({ abbr, bg }: { abbr: string; bg: string }) {
+function LeagueIcon({ kind, logo }: { kind: "img" | "nfl" | "cod"; logo: string }) {
+  if (kind === "img") {
+    return (
+      <div className="flex h-9 w-9 items-center justify-center">
+        <img src={logo} alt="" className="h-9 w-9 object-contain" />
+      </div>
+    );
+  }
+  if (kind === "nfl") {
+    return (
+      <div className="flex h-9 w-9 items-center justify-center text-foreground">
+        <svg viewBox="0 0 48 48" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={2.2}>
+          <ellipse cx="24" cy="24" rx="20" ry="11" transform="rotate(-25 24 24)" />
+          <path d="M16 22l16 4M18 19l3 1M21 17l3 1M24 15l3 1M19 27l3 1M22 29l3 1M25 31l3 1" strokeLinecap="round" />
+        </svg>
+      </div>
+    );
+  }
   return (
-    <div
-      className="flex h-10 w-10 items-center justify-center rounded-full text-[10px] font-extrabold text-white shadow-inner"
-      style={{ background: bg }}
-    >
-      {abbr}
+    <div className="flex h-9 w-9 items-center justify-center text-foreground">
+      <svg viewBox="0 0 48 48" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinejoin="round">
+        <path d="M8 28l16-16 16 16" />
+        <path d="M12 34l12-12 12 12" />
+        <path d="M16 40l8-8 8 8" />
+      </svg>
     </div>
   );
 }
@@ -14,16 +32,19 @@ function LeagueBadge({ abbr, bg }: { abbr: string; bg: string }) {
 export function TopWinningLeagues() {
   return (
     <div className="px-4">
-      <div className="flex items-center justify-between pb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+      <div className="flex items-center justify-between pb-2 text-[14px] text-muted-foreground">
         <span>League</span>
         <span>Lineups</span>
       </div>
-      <div className="divide-y divide-border/60">
+      <div className="space-y-2">
         {TOP_LEAGUES.map((l) => (
-          <div key={l.name} className="flex items-center gap-3 py-3">
-            <LeagueBadge abbr={l.abbr} bg={l.bg} />
-            <div className="flex-1 text-[15px] font-semibold">{l.name}</div>
-            <div className="text-base font-bold">{l.lineups}</div>
+          <div
+            key={l.name}
+            className="flex items-center gap-3 rounded-2xl bg-surface px-3 py-3"
+          >
+            <LeagueIcon kind={l.kind} logo={l.logo} />
+            <div className="flex-1 text-[16px] font-semibold">{l.name}</div>
+            <div className="text-[16px] font-bold text-success">{l.lineups}</div>
           </div>
         ))}
       </div>
@@ -37,17 +58,14 @@ export function MostPickedTeams() {
       {MOST_PICKED_TEAMS.map((t) => (
         <div
           key={t.name}
-          className="flex w-[120px] shrink-0 flex-col items-center rounded-2xl bg-surface p-3"
+          className="flex w-[122px] shrink-0 flex-col items-center rounded-2xl bg-surface px-3 py-4"
         >
-          <div
-            className="flex h-14 w-14 items-center justify-center rounded-full text-[11px] font-extrabold text-white"
-            style={{ background: t.color }}
-          >
-            {t.abbr}
+          <div className="flex h-16 w-16 items-center justify-center">
+            <img src={t.logo} alt={t.name} className="h-14 w-14 object-contain" />
           </div>
-          <div className="mt-3 text-center text-[13px] font-semibold">{t.name}</div>
-          <div className="mt-1.5 inline-flex rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-muted-foreground">
-            NBA
+          <div className="mt-3 text-center text-[15px] font-semibold">{t.name}</div>
+          <div className="mt-2 text-center text-[13px] text-muted-foreground">
+            {t.league}
           </div>
         </div>
       ))}

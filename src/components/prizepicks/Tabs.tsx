@@ -1,33 +1,44 @@
 import { useState } from "react";
 
-export function ProfileTabs({ onChange }: { onChange?: (t: "picks" | "stats") => void }) {
+export function ProfileTabs({
+  onChange,
+}: {
+  onChange?: (t: "picks" | "stats") => void;
+}) {
   const [active, setActive] = useState<"picks" | "stats">("stats");
   const set = (t: "picks" | "stats") => {
     setActive(t);
     onChange?.(t);
   };
   return (
-    <div className="mt-6 px-4">
-      <div className="grid grid-cols-2 border-b border-border/70">
+    <div className="mt-7 px-4">
+      <div className="relative grid grid-cols-2">
         {(["picks", "stats"] as const).map((t) => {
           const isActive = active === t;
           return (
             <button
               key={t}
               onClick={() => set(t)}
-              className={`relative py-3 text-center text-base font-semibold transition-colors ${
-                isActive ? "text-foreground" : "text-muted-foreground"
+              className={`relative pb-3 text-center text-[17px] transition-colors ${
+                isActive
+                  ? "text-foreground font-bold"
+                  : "text-muted-foreground font-semibold"
               }`}
             >
               {t === "picks" ? "PicksPass" : "Stats"}
-              <span
-                className={`pointer-events-none absolute inset-x-0 -bottom-[2px] h-[3px] rounded-full transition-all ${
-                  isActive ? "bg-primary opacity-100" : "opacity-0"
-                }`}
-              />
             </button>
           );
         })}
+        {/* baseline */}
+        <span className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-white/15" />
+        {/* active underline */}
+        <span
+          className="pointer-events-none absolute bottom-0 h-[3px] w-1/2 rounded-full bg-primary transition-all duration-200"
+          style={{
+            transform: `translateX(${active === "picks" ? "0%" : "100%"})`,
+            width: "50%",
+          }}
+        />
       </div>
     </div>
   );
