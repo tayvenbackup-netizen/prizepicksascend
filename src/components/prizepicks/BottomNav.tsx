@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { BoardIcon, EntriesIcon, FeedIcon, PromosIcon, PLogo } from "./Icons";
 
 export type NavTab = "board" | "entries" | "feed" | "promos" | "profile";
@@ -6,7 +6,7 @@ export type NavTab = "board" | "entries" | "feed" | "promos" | "profile";
 const items: {
   id: NavTab;
   label: string;
-  Icon: (p: { className?: string }) => JSX.Element;
+  Icon: (p: { className?: string }) => ReactElement;
 }[] = [
   { id: "board", label: "Board", Icon: (p) => <BoardIcon {...p} /> },
   { id: "entries", label: "My Entries", Icon: (p) => <EntriesIcon {...p} /> },
