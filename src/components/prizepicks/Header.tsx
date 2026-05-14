@@ -13,11 +13,13 @@ export function TopHeader() {
         <PLogo size={22} />
       </div>
 
-      <img
-        src={playersPill}
-        alt="Players"
-        className="h-7 w-auto object-contain"
-      />
+      <div className="flex items-center justify-center rounded-full border border-white/90 px-3 py-[3px]">
+        <img
+          src={playersPill}
+          alt="Players"
+          className="h-[21px] w-auto object-contain"
+        />
+      </div>
 
       <div className="flex items-center gap-1.5">
         <img src={dollarSign} alt="" className="h-[14px] w-auto object-contain" />

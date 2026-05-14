@@ -17,8 +17,8 @@ export function ProfileHeader() {
               padding: 2,
             }}
           >
-            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#7c3aed]">
-              <PLogo size={56} />
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+              <PLogo size={68} />
             </div>
           </div>
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground">
