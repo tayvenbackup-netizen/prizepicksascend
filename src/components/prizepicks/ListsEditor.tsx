@@ -23,7 +23,7 @@ function ValidatedRow({
 }: {
   initial: string;
   placeholder: string;
-  onResolved: () => Promise<{ ok: boolean; msg?: string }>;
+  onResolved: (q: string) => Promise<{ ok: boolean; msg?: string }>;
   preview: React.ReactNode;
   onClear: () => void;
   rightSlot?: React.ReactNode;
@@ -33,7 +33,8 @@ function ValidatedRow({
   const [msg, setMsg] = useState<string | null>(null);
 
   const verify = async () => {
-    if (!val.trim()) {
+    const q = val.trim();
+    if (!q) {
       setStatus("idle");
       setMsg(null);
       onClear();
@@ -41,7 +42,7 @@ function ValidatedRow({
     }
     setStatus("checking");
     setMsg(null);
-    const r = await onResolved();
+    const r = await onResolved(q);
     if (r.ok) {
       setStatus("ok");
       setMsg(null);
@@ -149,7 +150,6 @@ export function ListsEditor() {
       {/* Top Winning Players (3) */}
       <Section title="Top winning players" icon={Trophy}>
         {wp.map((e, i) => {
-          const [pendingName, setPendingName] = [e?.name || "", null];
           return (
             <ValidatedRow
               key={`wp-${i}`}
@@ -173,9 +173,7 @@ export function ListsEditor() {
                 />
               }
               onClear={() => updateWinPlayer(i, null)}
-              onResolved={async () => {
-                const inputEl = document.activeElement as HTMLInputElement;
-                const q = inputEl?.value?.trim() || pendingName;
+              onResolved={async (q) => {
                 const hit = await searchPlayer(q);
                 if (!hit) return { ok: false, msg: "Player not found." };
                 updateWinPlayer(i, {
@@ -211,9 +209,7 @@ export function ListsEditor() {
               )
             }
             onClear={() => updatePickPlayer(i, null)}
-            onResolved={async () => {
-              const inputEl = document.activeElement as HTMLInputElement;
-              const q = inputEl?.value?.trim() || "";
+            onResolved={async (q) => {
               const hit = await searchPlayer(q);
               if (!hit) return { ok: false, msg: "Player not found." };
               updatePickPlayer(i, {
@@ -304,9 +300,7 @@ export function ListsEditor() {
               )
             }
             onClear={() => updatePickTeam(i, null)}
-            onResolved={async () => {
-              const inputEl = document.activeElement as HTMLInputElement;
-              const q = inputEl?.value?.trim() || "";
+            onResolved={async (q) => {
               if (!/^\S+\s+\S+/.test(q)) {
                 return { ok: false, msg: 'Use "LEAGUE Team" — e.g. "NBA Celtics".' };
               }
