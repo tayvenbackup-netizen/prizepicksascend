@@ -23,7 +23,7 @@ function ValidatedRow({
 }: {
   initial: string;
   placeholder: string;
-  onResolved: () => Promise<{ ok: boolean; msg?: string }>;
+  onResolved: (q: string) => Promise<{ ok: boolean; msg?: string }>;
   preview: React.ReactNode;
   onClear: () => void;
   rightSlot?: React.ReactNode;
@@ -33,7 +33,8 @@ function ValidatedRow({
   const [msg, setMsg] = useState<string | null>(null);
 
   const verify = async () => {
-    if (!val.trim()) {
+    const q = val.trim();
+    if (!q) {
       setStatus("idle");
       setMsg(null);
       onClear();
@@ -41,7 +42,7 @@ function ValidatedRow({
     }
     setStatus("checking");
     setMsg(null);
-    const r = await onResolved();
+    const r = await onResolved(q);
     if (r.ok) {
       setStatus("ok");
       setMsg(null);
