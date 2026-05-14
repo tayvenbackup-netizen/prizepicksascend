@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useProfile, type ProfileData } from "./ProfileContext";
 import { PLogo } from "./Icons";
-import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles } from "lucide-react";
+import { ParlayGen } from "./ParlayGen";
+import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, Layers } from "lucide-react";
 
 const defaultData: ProfileData = {
   name: "ascend2k",
