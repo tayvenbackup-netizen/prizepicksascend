@@ -322,3 +322,33 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+
+function PlayerThumb({ player, size = 36 }: { player: PlayerOption; size?: number }) {
+  const initials = player.name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("");
+  return (
+    <div
+      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[11px] font-bold"
+      style={{ width: size, height: size }}
+    >
+      {player.photo ? (
+        <img
+          src={player.photo}
+          alt={player.name}
+          loading="lazy"
+          draggable={false}
+          className="h-full w-full object-cover object-top"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
+        />
+      ) : null}
+      <span className="absolute inset-0 -z-10 flex items-center justify-center">
+        {initials}
+      </span>
+    </div>
+  );
+}
