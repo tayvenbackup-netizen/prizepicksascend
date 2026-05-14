@@ -1,4 +1,14 @@
-export type Sport = "NBA" | "NFL" | "MLB" | "NHL" | "Soccer" | "Tennis" | "WNBA";
+export type Sport =
+  | "NBA"
+  | "NFL"
+  | "MLB"
+  | "NHL"
+  | "Soccer"
+  | "Tennis"
+  | "WNBA"
+  | "CSGO"
+  | "LoL"
+  | "Valorant";
 
 export type PlayerOption = {
   id: string;
