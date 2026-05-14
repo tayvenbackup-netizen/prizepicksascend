@@ -39,12 +39,12 @@ export function ProfileHeader() {
       <div className="mt-5 flex items-end justify-between">
         <div className="flex gap-7">
           <div>
-            <div className="text-[18px] font-bold leading-none">0</div>
-            <div className="mt-1 text-[13px] text-muted-foreground">followers</div>
+            <div className="text-[16px] font-bold leading-none">0</div>
+            <div className="mt-1 text-[11px] text-muted-foreground">followers</div>
           </div>
           <div>
-            <div className="text-[18px] font-bold leading-none">8</div>
-            <div className="mt-1 text-[13px] text-muted-foreground">following</div>
+            <div className="text-[16px] font-bold leading-none">8</div>
+            <div className="mt-1 text-[11px] text-muted-foreground">following</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
