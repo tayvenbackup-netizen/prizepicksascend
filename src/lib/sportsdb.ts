@@ -123,43 +123,29 @@ export async function searchTeam(query: string): Promise<TeamHit | null> {
   }
 }
 
-/** "NBA Celtics" → search "Celtics" and verify league prefix matches. */
+/** "NBA Celtics" → search "Celtics" and verify league prefix loosely. */
 export async function searchTeamByLeague(input: string): Promise<TeamHit | null> {
   const m = input.trim().match(/^(\S+)\s+(.+)$/);
   if (!m) return null;
-  const [, leaguePart, teamPart] = m;
-  const hit = await searchTeam(teamPart);
-  if (!hit) return null;
-  const lp = leaguePart.toLowerCase();
-  const lg = hit.league.toLowerCase();
-  // Loose match: NBA in "National Basketball Association"; NFL likewise.
-  const aliases: Record<string, string[]> = {
-    nba: ["nba", "national basketball"],
-    nfl: ["nfl", "national football"],
-    mlb: ["mlb", "major league baseball"],
-    nhl: ["nhl", "national hockey"],
-    wnba: ["wnba", "women"],
-    epl: ["english premier", "premier league"],
-    mls: ["mls", "major league soccer"],
-    laliga: ["la liga", "spanish la liga", "primera"],
-  };
-  const candidates = aliases[lp] || [lp];
-  if (candidates.some((c) => lg.includes(c))) return hit;
-  return hit; // still return — caller can show league mismatch warning
+  const [, , teamPart] = m;
+  // Try full search first; fallback to team-only.
+  let hit = await searchTeam(teamPart);
+  if (!hit) hit = await searchTeam(input.trim());
+  return hit;
 }
 
 /** Curated list of common leagues with badge URLs (for selector). */
 export const COMMON_LEAGUES = [
-  { name: "NBA", badge: "https://www.thesportsdb.com/images/media/league/badge/0pp2u41549820396.png" },
-  { name: "NFL", badge: "https://www.thesportsdb.com/images/media/league/badge/jrxalt1421360627.png" },
-  { name: "MLB", badge: "https://www.thesportsdb.com/images/media/league/badge/n91uu41608811060.png" },
-  { name: "NHL", badge: "https://www.thesportsdb.com/images/media/league/badge/o5xxlk1545839616.png" },
-  { name: "WNBA", badge: "https://www.thesportsdb.com/images/media/league/badge/qstwwp1610741701.png" },
-  { name: "EPL", badge: "https://www.thesportsdb.com/images/media/league/badge/i6o0kh1549879062.png" },
-  { name: "MLS", badge: "https://www.thesportsdb.com/images/media/league/badge/0u92pl1547820836.png" },
-  { name: "La Liga", badge: "https://www.thesportsdb.com/images/media/league/badge/7onmyv1534768460.png" },
-  { name: "UFC", badge: "https://www.thesportsdb.com/images/media/league/badge/lqstuw1421524428.png" },
-  { name: "ATP", badge: "https://www.thesportsdb.com/images/media/league/badge/4dlt2z1683462737.png" },
-  { name: "CSGO", badge: "https://www.thesportsdb.com/images/media/league/badge/d5gmf91637687786.png" },
-  { name: "LoL", badge: "https://www.thesportsdb.com/images/media/league/badge/1xq37j1655824036.png" },
+  { name: "NBA", badge: "https://upload.wikimedia.org/wikipedia/en/0/03/National_Basketball_Association_logo.svg" },
+  { name: "NFL", badge: "https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg" },
+  { name: "MLB", badge: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Major_League_Baseball_logo.svg" },
+  { name: "NHL", badge: "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg" },
+  { name: "WNBA", badge: "https://upload.wikimedia.org/wikipedia/en/8/8a/WNBA_logo.svg" },
+  { name: "EPL", badge: "https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg" },
+  { name: "MLS", badge: "https://upload.wikimedia.org/wikipedia/commons/3/3c/MLS_crest_logo_RGB_gradient.svg" },
+  { name: "La Liga", badge: "https://upload.wikimedia.org/wikipedia/commons/1/13/LaLiga.svg" },
+  { name: "UFC", badge: "https://upload.wikimedia.org/wikipedia/commons/9/92/UFC_Logo.svg" },
+  { name: "ATP", badge: "https://upload.wikimedia.org/wikipedia/commons/3/30/ATP_Tour_logo.svg" },
+  { name: "CSGO", badge: "https://upload.wikimedia.org/wikipedia/commons/6/6e/CS2_logo.svg" },
+  { name: "LoL", badge: "https://upload.wikimedia.org/wikipedia/commons/0/07/League_of_Legends_2019_vector.svg" },
 ];
