@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Check, X, Trophy, Users, Star, Layers as LayersIcon } from "lucide-react";
 import {
   useProfile,
@@ -31,6 +31,12 @@ function ValidatedRow({
   const [val, setVal] = useState(initial);
   const [status, setStatus] = useState<Status>(initial ? "ok" : "idle");
   const [msg, setMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    setVal(initial);
+    setStatus(initial ? "ok" : "idle");
+    setMsg(null);
+  }, [initial]);
 
   const verify = async () => {
     const q = val.trim();
@@ -308,7 +314,7 @@ export function ListsEditor() {
               if (!hit) return { ok: false, msg: "Team not found." };
               updatePickTeam(i, {
                 name: hit.name,
-                league: q.split(/\s+/)[0].toUpperCase(),
+                league: hit.league,
                 badge: hit.badge,
               });
               return { ok: true };
