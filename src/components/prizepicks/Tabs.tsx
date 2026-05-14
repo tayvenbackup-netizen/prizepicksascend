@@ -11,7 +11,7 @@ export function ProfileTabs({
     onChange?.(t);
   };
   return (
-    <div className="mt-7 px-4">
+    <div className="mt-6 px-4">
       <div className="relative grid grid-cols-2">
         {(["picks", "stats"] as const).map((t) => {
           const isActive = active === t;
@@ -19,7 +19,7 @@ export function ProfileTabs({
             <button
               key={t}
               onClick={() => set(t)}
-              className={`relative pb-3 text-center text-[17px] transition-colors ${
+              className={`relative pb-2.5 text-center text-[15px] transition-colors ${
                 isActive
                   ? "text-foreground font-bold"
                   : "text-muted-foreground font-semibold"
