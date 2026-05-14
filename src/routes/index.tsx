@@ -24,7 +24,7 @@ function Index() {
     <ProfileProvider>
       <EntriesProvider>
       <div className="fixed inset-0 overflow-hidden bg-background">
-        <div className="mx-auto flex h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-background">
+        <div className="mx-auto flex h-[100dvh] w-full flex-col overflow-hidden bg-background">
           <div className="shrink-0">
             <TopHeader />
           </div>
@@ -52,7 +52,7 @@ function Index() {
           )}
 
           {nav === "entries" && (
-            <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-28">
+            <div className="flex-1 min-h-0 overflow-hidden">
               <EntriesView />
             </div>
           )}

@@ -51,7 +51,7 @@ export function BottomNav({
                   src={it.src}
                   alt=""
                   draggable={false}
-                  className={`h-8 w-8 object-contain transition-opacity ${
+                  className={`h-9 w-9 object-contain transition-opacity ${
                     isActive ? "opacity-100" : "opacity-70"
                   }`}
                 />
