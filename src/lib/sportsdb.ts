@@ -1,6 +1,7 @@
 /**
- * TheSportsDB free integration.
- * Test API key "123" — CORS-allowed for browser fetches.
+ * Sports lookup helpers.
+ * Uses a mix of league-specific public feeds because TheSportsDB's generic
+ * team search is currently returning incorrect Arsenal-only results.
  */
 
 const KEY = "123";
@@ -45,7 +46,9 @@ export async function fetchUpcomingTeamSet(): Promise<Set<string>> {
           if (e.strHomeTeam) teams.add(normalize(e.strHomeTeam));
           if (e.strAwayTeam) teams.add(normalize(e.strAwayTeam));
         }
-      } catch { /* ignore */ }
+      } catch {
+        return;
+      }
     }),
   );
   cache = { ts: Date.now(), teams };
@@ -54,6 +57,10 @@ export async function fetchUpcomingTeamSet(): Promise<Set<string>> {
 
 export function normalize(s: string): string {
   return s.toUpperCase().replace(/\s+/g, " ").trim();
+}
+
+function normalizeLoose(s: string): string {
+  return normalize(s).replace(/[^A-Z0-9 ]/g, "");
 }
 
 export function teamIsUpcoming(teamShort: string, set: Set<string>): boolean {
@@ -67,7 +74,6 @@ export function teamIsUpcoming(teamShort: string, set: Set<string>): boolean {
   return false;
 }
 
-/** Player search — returns first match w/ photo + team + sport. */
 export type PlayerHit = {
   name: string;
   team: string;
@@ -85,14 +91,12 @@ export async function searchPlayer(name: string): Promise<PlayerHit | null> {
     const j = await r.json();
     const p = j?.player?.[0];
     if (!p) return null;
-    // Prefer cutout (transparent headshot, PrizePicks-style), fallback to thumb/render.
-    const photo =
-      p.strCutout || p.strThumb || p.strRender || null;
+    const photo = p.strCutout || p.strThumb || p.strRender || null;
     return {
       name: p.strPlayer,
       team: p.strTeam || "",
       sport: p.strSport || "",
-      league: "",
+      league: p.strLeague || "",
       photo,
     };
   } catch {
@@ -100,80 +104,175 @@ export async function searchPlayer(name: string): Promise<PlayerHit | null> {
   }
 }
 
-/** Team search — returns first match with badge + league. */
 export type TeamHit = {
   name: string;
   league: string;
   badge: string | null;
 };
 
-const LEAGUE_ALIASES: Record<string, string[]> = {
-  nba: ["nba", "national basketball"],
-  nfl: ["nfl", "national football"],
-  mlb: ["mlb", "major league baseball"],
-  nhl: ["nhl", "national hockey"],
-  wnba: ["wnba", "women's national basketball"],
-  epl: ["english premier", "premier league"],
-  mls: ["mls", "major league soccer"],
-  laliga: ["la liga", "spanish la liga", "primera"],
-  ucl: ["uefa champions"],
-  ufc: ["ufc", "mixed martial"],
-  atp: ["atp"],
-  csgo: ["counter-strike", "csgo", "cs:go", "cs2"],
-  lol: ["league of legends"],
-  cod: ["call of duty"],
-  valorant: ["valorant"],
+type TeamSource = {
+  aliases: string[];
+  label: string;
+  badge: string | null;
+  fetchTeams: () => Promise<TeamHit[]>;
 };
 
-export async function searchTeam(query: string, leaguePrefix?: string): Promise<TeamHit | null> {
-  const q = query.trim();
-  if (!q) return null;
-  try {
-    const r = await fetch(`${BASE}/searchteams.php?t=${encodeURIComponent(q)}`);
-    if (!r.ok) return null;
-    const j = await r.json();
-    const teams: any[] = j?.teams || [];
-    if (teams.length === 0) return null;
-    let pick = teams[0];
-    if (leaguePrefix) {
-      const aliases = LEAGUE_ALIASES[leaguePrefix.toLowerCase()] || [leaguePrefix.toLowerCase()];
-      const match = teams.find((t) => {
-        const lg = (t.strLeague || "").toLowerCase();
-        return aliases.some((a) => lg.includes(a));
-      });
-      if (match) pick = match;
-    }
-    return {
-      name: pick.strTeam,
-      league: pick.strLeague || "",
-      badge: pick.strBadge || null,
-    };
-  } catch {
-    return null;
-  }
+const COMMON_LEAGUE_META: TeamSource[] = [
+  {
+    label: "NBA",
+    aliases: ["NBA", "BASKETBALL"],
+    badge: "https://r2.thesportsdb.com/images/media/league/badge/frdjqy1536585083.png",
+    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams", "NBA"),
+  },
+  {
+    label: "NFL",
+    aliases: ["NFL", "FOOTBALL"],
+    badge: "https://r2.thesportsdb.com/images/media/league/badge/g85fqz1662057187.png",
+    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams", "NFL"),
+  },
+  {
+    label: "MLB",
+    aliases: ["MLB", "BASEBALL"],
+    badge: "https://r2.thesportsdb.com/images/media/league/badge/c5r83j1521893739.png",
+    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams", "MLB"),
+  },
+  {
+    label: "NHL",
+    aliases: ["NHL", "HOCKEY"],
+    badge: "https://r2.thesportsdb.com/images/media/league/badge/4cem2k1619616539.png",
+    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams", "NHL"),
+  },
+  {
+    label: "WNBA",
+    aliases: ["WNBA"],
+    badge: "https://r2.thesportsdb.com/images/media/league/badge/47llb31573154455.png",
+    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/teams", "WNBA"),
+  },
+  {
+    label: "EPL",
+    aliases: ["EPL", "PREMIERLEAGUE", "PREMIER", "SOCCER"],
+    badge: "https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png",
+    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams", "EPL"),
+  },
+  {
+    label: "MLS",
+    aliases: ["MLS"],
+    badge: "https://r2.thesportsdb.com/images/media/league/badge/dqo6r91549878326.png",
+    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/teams", "MLS"),
+  },
+  {
+    label: "ATP",
+    aliases: ["ATP", "TENNIS"],
+    badge: "https://r2.thesportsdb.com/images/media/league/badge/q7aej51769857150.png",
+    fetchTeams: async () => [],
+  },
+  {
+    label: "COD",
+    aliases: ["COD", "CDL", "CALLOFDUTY"],
+    badge: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Call_of_Duty_League_logo.svg",
+    fetchTeams: () => fetchSportsDbLeagueTeams("Call of Duty League", "COD"),
+  },
+  {
+    label: "CSGO",
+    aliases: ["CSGO", "CS2", "COUNTERSTRIKE"],
+    badge: "https://upload.wikimedia.org/wikipedia/commons/6/6e/CS2_logo.svg",
+    fetchTeams: async () => ["FaZe", "Vitality", "Spirit", "G2"].map((name) => ({ name, league: "CSGO", badge: null })),
+  },
+  {
+    label: "LoL",
+    aliases: ["LOL", "LEAGUEOFLEGENDS"],
+    badge: "https://upload.wikimedia.org/wikipedia/commons/0/07/League_of_Legends_2019_vector.svg",
+    fetchTeams: async () => {
+      const sportsDbTeams = await fetchSportsDbLeagueTeams("League of Legends Championship Series", "LoL");
+      return sportsDbTeams.length > 0
+        ? sportsDbTeams
+        : ["T1", "Gen.G", "G2", "NRG", "Immortals"].map((name) => ({ name, league: "LoL", badge: null }));
+    },
+  },
+  {
+    label: "Valorant",
+    aliases: ["VALORANT", "VAL"],
+    badge: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Valorant_logo_-_pink_color_version.svg",
+    fetchTeams: async () => ["Sentinels", "Evil Geniuses", "Leviatán"].map((name) => ({ name, league: "Valorant", badge: null })),
+  },
+];
+
+export const COMMON_LEAGUES = COMMON_LEAGUE_META.map(({ label, badge }) => ({
+  name: label,
+  badge,
+}));
+
+const teamCache = new Map<string, Promise<TeamHit[]>>();
+
+async function fetchEspnTeams(url: string, league: string): Promise<TeamHit[]> {
+  const r = await fetch(url);
+  if (!r.ok) return [];
+  const j = await r.json();
+  const teams = j?.sports?.[0]?.leagues?.[0]?.teams || [];
+  return teams
+    .map((entry: any) => entry?.team)
+    .filter(Boolean)
+    .map((team: any) => ({
+      name: team.displayName || team.shortDisplayName || team.name,
+      league,
+      badge: team.logos?.[0]?.href || null,
+      abbr: team.abbreviation || "",
+      shortName: team.shortDisplayName || "",
+    }));
 }
 
-/** "NBA Celtics" → search "Celtics" filtering to NBA matches. */
+async function fetchSportsDbLeagueTeams(leagueName: string, league: string): Promise<TeamHit[]> {
+  const r = await fetch(`${BASE}/search_all_teams.php?l=${encodeURIComponent(leagueName)}`);
+  if (!r.ok) return [];
+  const j = await r.json();
+  const teams = j?.teams || [];
+  return teams.map((team: any) => ({
+    name: team.strTeam,
+    league,
+    badge: team.strBadge || null,
+    abbr: team.strTeamShort || "",
+    shortName: team.strAlternate || "",
+  }));
+}
+
+function resolveLeagueToken(token: string): TeamSource | null {
+  const normalized = normalizeLoose(token);
+  return COMMON_LEAGUE_META.find((league) => league.aliases.some((alias) => normalizeLoose(alias) === normalized)) || null;
+}
+
+function scoreTeamMatch(teamQuery: string, team: TeamHit & { abbr?: string; shortName?: string }): number {
+  const query = normalizeLoose(teamQuery);
+  const name = normalizeLoose(team.name);
+  const shortName = normalizeLoose(team.shortName || "");
+  const abbr = normalizeLoose(team.abbr || "");
+  if (!query) return 0;
+  if (name === query || shortName === query || abbr === query) return 100;
+  if (name.endsWith(query) || shortName.endsWith(query)) return 90;
+  if (name.includes(query) || shortName.includes(query)) return 75;
+  if (query.includes(name) || query.includes(shortName)) return 60;
+  if (abbr && query.startsWith(abbr)) return 40;
+  return 0;
+}
+
+export async function searchTeam(query: string, leaguePrefix?: string): Promise<TeamHit | null> {
+  if (!leaguePrefix) return null;
+  const league = resolveLeagueToken(leaguePrefix);
+  if (!league) return null;
+  const cacheKey = league.label;
+  const promise = teamCache.get(cacheKey) || league.fetchTeams();
+  teamCache.set(cacheKey, promise);
+  const teams = (await promise) as Array<TeamHit & { abbr?: string; shortName?: string }>;
+  if (!teams.length) return null;
+  const ranked = teams
+    .map((team) => ({ team, score: scoreTeamMatch(query, team) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score);
+  return ranked[0]?.team || null;
+}
+
 export async function searchTeamByLeague(input: string): Promise<TeamHit | null> {
   const m = input.trim().match(/^(\S+)\s+(.+)$/);
   if (!m) return null;
   const [, leaguePart, teamPart] = m;
-  const hit = await searchTeam(teamPart, leaguePart);
-  return hit;
+  return searchTeam(teamPart, leaguePart);
 }
-
-/** Curated list of common leagues with badge URLs (for selector). */
-export const COMMON_LEAGUES = [
-  { name: "NBA", badge: "https://upload.wikimedia.org/wikipedia/en/0/03/National_Basketball_Association_logo.svg" },
-  { name: "NFL", badge: "https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg" },
-  { name: "MLB", badge: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Major_League_Baseball_logo.svg" },
-  { name: "NHL", badge: "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg" },
-  { name: "WNBA", badge: "https://upload.wikimedia.org/wikipedia/en/8/8a/WNBA_logo.svg" },
-  { name: "EPL", badge: "https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg" },
-  { name: "MLS", badge: "https://upload.wikimedia.org/wikipedia/commons/3/3c/MLS_crest_logo_RGB_gradient.svg" },
-  { name: "La Liga", badge: "https://upload.wikimedia.org/wikipedia/commons/1/13/LaLiga.svg" },
-  { name: "UFC", badge: "https://upload.wikimedia.org/wikipedia/commons/9/92/UFC_Logo.svg" },
-  { name: "ATP", badge: "https://upload.wikimedia.org/wikipedia/commons/3/30/ATP_Tour_logo.svg" },
-  { name: "CSGO", badge: "https://upload.wikimedia.org/wikipedia/commons/6/6e/CS2_logo.svg" },
-  { name: "LoL", badge: "https://upload.wikimedia.org/wikipedia/commons/0/07/League_of_Legends_2019_vector.svg" },
-];
