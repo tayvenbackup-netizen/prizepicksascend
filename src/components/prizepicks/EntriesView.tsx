@@ -225,11 +225,11 @@ function PickAvatar({ pick }: { pick: Entry["picks"][number] }) {
         </div>
       </div>
       {pick.result && pick.result !== "pending" && (
-        <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-background p-[1px]">
+        <div className="absolute -bottom-1 -right-1 rounded-full bg-background p-[1.5px]">
           {pick.result === "win" ? (
-            <CheckCircle className="h-3.5 w-3.5 text-success" />
+            <CheckBadge className="h-4 w-4 text-success" />
           ) : (
-            <XCircle className="h-3.5 w-3.5 text-destructive" />
+            <XBadge className="h-4 w-4 text-destructive" />
           )}
         </div>
       )}
