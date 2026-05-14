@@ -1,14 +1,15 @@
 import iconFlame from "@/assets/major/icon-flame.png";
 import iconDollar from "@/assets/major/icon-dollar.png";
 import iconClipboard from "@/assets/major/icon-clipboard.png";
-
-const items = [
-  { icon: iconFlame, value: "5", label: "Wins" },
-  { icon: iconDollar, value: "$325", label: "Total won" },
-  { icon: iconClipboard, value: "$200", label: "Top win" },
-];
+import { useProfile } from "./ProfileContext";
 
 export function StatsCards() {
+  const { data } = useProfile();
+  const items = [
+    { icon: iconFlame, value: data.wins, label: "Wins" },
+    { icon: iconDollar, value: data.totalWon, label: "Total won" },
+    { icon: iconClipboard, value: data.topWin, label: "Top win" },
+  ];
   return (
     <div className="mt-5 grid grid-cols-3 gap-2.5 px-4">
       {items.map(({ icon, value, label }) => (
