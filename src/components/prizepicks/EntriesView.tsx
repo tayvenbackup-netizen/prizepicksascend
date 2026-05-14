@@ -261,6 +261,3 @@ function abbrev(name: string) {
   return `${parts[0][0]}. ${parts.slice(1).join(" ")}`;
 }
 
-function formatMoney(n: number) {
-  return n % 1 === 0 ? n.toFixed(0) : n.toFixed(2);
-}
