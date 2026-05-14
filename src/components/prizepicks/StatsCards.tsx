@@ -12,14 +12,14 @@ export function StatsCards() {
   return (
     <div className="mt-5 grid grid-cols-3 gap-2.5 px-4">
       {items.map(({ icon, value, label }) => (
-        <div key={label} className="rounded-2xl bg-surface p-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.06]">
-            <img src={icon} alt="" className="h-[18px] w-[18px] object-contain" />
+        <div key={label} className="rounded-2xl bg-surface px-3 pt-3 pb-3">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.06]">
+            <img src={icon} alt="" className="h-4 w-4 object-contain" />
           </div>
-          <div className="mt-5 text-[22px] font-bold leading-none tracking-tight">
+          <div className="mt-3.5 text-[20px] font-bold leading-none tracking-tight">
             {value}
           </div>
-          <div className="mt-1.5 text-[13px] text-muted-foreground">{label}</div>
+          <div className="mt-1 text-[12px] text-muted-foreground">{label}</div>
         </div>
       ))}
     </div>
