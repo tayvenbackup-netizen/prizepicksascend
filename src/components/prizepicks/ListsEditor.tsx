@@ -7,7 +7,7 @@ import {
   type WinLeagueEntry,
   type PickTeamEntry,
 } from "./ProfileContext";
-import { searchPlayer, searchTeamByLeague, COMMON_LEAGUES } from "@/lib/sportsdb";
+import { searchPlayer, searchTeamByLeague, COMMON_LEAGUES, fetchTeamsForLeague, type TeamHit } from "@/lib/sportsdb";
 import { Jersey } from "./Jersey";
 
 type Status = "idle" | "checking" | "ok" | "error";
@@ -117,7 +117,7 @@ export function ListsEditor() {
   const wp: (WinPlayerEntry | null)[] = Array.from({ length: 3 }, (_, i) => winPlayers[i] || null);
   const pp: (PickPlayerEntry | null)[] = Array.from({ length: 5 }, (_, i) => pickPlayers[i] || null);
   const wl: (WinLeagueEntry | null)[] = Array.from({ length: 3 }, (_, i) => winLeagues[i] || null);
-  const pt: (PickTeamEntry | null)[] = Array.from({ length: 4 }, (_, i) => pickTeams[i] || null);
+  const pt: (PickTeamEntry | null)[] = Array.from({ length: 3 }, (_, i) => pickTeams[i] || null);
 
   const updateWinPlayer = (i: number, e: WinPlayerEntry | null) => {
     const next = [...wp];
@@ -293,38 +293,13 @@ export function ListsEditor() {
         </p>
       </Section>
 
-      {/* Most picked teams (4) */}
+      {/* Most picked teams (3) — pick from league grid */}
       <Section title="Most picked teams" icon={LayersIcon}>
-        {pt.map((e, i) => (
-          <ValidatedRow
-            key={`pt-${i}`}
-            initial={e ? `${e.league} ${e.name}` : ""}
-            placeholder='Format: "NBA Celtics"'
-            preview={
-              e?.badge ? (
-                <img src={e.badge} alt="" className="h-7 w-7 object-contain" />
-              ) : e ? (
-                <Jersey team={e.name} size={26} />
-              ) : (
-                <div className="h-7 w-7 rounded-full border border-dashed border-white/15" />
-              )
-            }
-            onClear={() => updatePickTeam(i, null)}
-            onResolved={async (q) => {
-              if (!/^\S+\s+\S+/.test(q)) {
-                return { ok: false, msg: 'Use "LEAGUE Team" — e.g. "NBA Celtics".' };
-              }
-              const hit = await searchTeamByLeague(q);
-              if (!hit) return { ok: false, msg: "Team not found." };
-              updatePickTeam(i, {
-                name: hit.name,
-                league: hit.league,
-                badge: hit.badge,
-              });
-              return { ok: true };
-            }}
-          />
-        ))}
+        <TeamPicker
+          selected={pickTeams}
+          max={3}
+          onChange={(next) => setPickTeams(next)}
+        />
       </Section>
     </div>
   );
