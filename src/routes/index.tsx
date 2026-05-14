@@ -11,6 +11,7 @@ import { MostPickedTeams, TopWinningLeagues } from "@/components/prizepicks/Leag
 import { BottomNav, type NavTab } from "@/components/prizepicks/BottomNav";
 import { EntriesView } from "@/components/prizepicks/EntriesView";
 import { ProfileProvider } from "@/components/prizepicks/ProfileContext";
+import { EntriesProvider } from "@/components/prizepicks/EntriesContext";
 
 export const Route = createFileRoute("/")({
   component: Index,
