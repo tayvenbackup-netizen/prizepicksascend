@@ -8,7 +8,7 @@ import {
   type ParlayPick,
   type ParlayType,
 } from "./EntriesContext";
-import { MOCK_PLAYERS, type PlayerOption } from "./parlayData";
+import { MOCK_PLAYERS, SPORT_ORDER, type PlayerOption, type Sport } from "./parlayData";
 import { Sparkles } from "lucide-react";
 
 type Draft = {
