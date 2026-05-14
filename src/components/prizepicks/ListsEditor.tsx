@@ -7,7 +7,7 @@ import {
   type WinLeagueEntry,
   type PickTeamEntry,
 } from "./ProfileContext";
-import { searchPlayer, searchTeamByLeague, COMMON_LEAGUES, fetchTeamsForLeague, type TeamHit } from "@/lib/sportsdb";
+import { searchPlayer, COMMON_LEAGUES, fetchTeamsForLeague, type TeamHit } from "@/lib/sportsdb";
 import { Jersey } from "./Jersey";
 
 type Status = "idle" | "checking" | "ok" | "error";
@@ -117,7 +117,7 @@ export function ListsEditor() {
   const wp: (WinPlayerEntry | null)[] = Array.from({ length: 3 }, (_, i) => winPlayers[i] || null);
   const pp: (PickPlayerEntry | null)[] = Array.from({ length: 5 }, (_, i) => pickPlayers[i] || null);
   const wl: (WinLeagueEntry | null)[] = Array.from({ length: 3 }, (_, i) => winLeagues[i] || null);
-  const pt: (PickTeamEntry | null)[] = Array.from({ length: 3 }, (_, i) => pickTeams[i] || null);
+  void Array.from({ length: 3 }, (_, i) => pickTeams[i] || null);
 
   const updateWinPlayer = (i: number, e: WinPlayerEntry | null) => {
     const next = [...wp];
@@ -134,11 +134,7 @@ export function ListsEditor() {
     next[i] = e;
     setWinLeagues(next.filter(Boolean) as WinLeagueEntry[]);
   };
-  const updatePickTeam = (i: number, e: PickTeamEntry | null) => {
-    const next = [...pt];
-    next[i] = e;
-    setPickTeams(next.filter(Boolean) as PickTeamEntry[]);
-  };
+  // pickTeams updated via TeamPicker
 
   const sportToLeague = (sport: string): string => {
     const s = sport.toLowerCase();
@@ -298,7 +294,7 @@ export function ListsEditor() {
         <TeamPicker
           selected={pickTeams}
           max={3}
-          onChange={(next) => setPickTeams(next)}
+          onChange={(next: PickTeamEntry[]) => setPickTeams(next)}
         />
       </Section>
     </div>
