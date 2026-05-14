@@ -69,18 +69,18 @@ export const XCircle = (p: I) => (
   </svg>
 );
 
-/** Solid filled variants used for win/loss badges */
+/** Outlined badge variants — transparent center, ring + glyph in currentColor. */
 export const CheckBadge = (p: I) => (
-  <svg viewBox="0 0 24 24" className={base} {...p}>
-    <circle cx="12" cy="12" r="11" fill="currentColor" />
-    <path d="m7 12 3.2 3.2L17 8.8" stroke="#0b1020" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  <svg viewBox="0 0 24 24" fill="none" className={base} {...p}>
+    <circle cx="12" cy="12" r="10.5" stroke="currentColor" strokeWidth={2} />
+    <path d="m7.5 12.2 3 3 6-6.4" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 export const XBadge = (p: I) => (
-  <svg viewBox="0 0 24 24" className={base} {...p}>
-    <circle cx="12" cy="12" r="11" fill="currentColor" />
-    <path d="m8 8 8 8M16 8l-8 8" stroke="#0b1020" strokeWidth={2.6} strokeLinecap="round" fill="none" />
+  <svg viewBox="0 0 24 24" fill="none" className={base} {...p}>
+    <circle cx="12" cy="12" r="10.5" stroke="currentColor" strokeWidth={2} />
+    <path d="m8.5 8.5 7 7M15.5 8.5l-7 7" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" />
   </svg>
 );
 
