@@ -26,6 +26,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
   const [status, setStatus] = useState<"live" | "upcoming">("upcoming");
   const [search, setSearch] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [leagueFilter, setLeagueFilter] = useState<Sport | "ALL">("ALL");
 
   const count = picks.length;
   const validCount = count >= 2 && count <= 6;
