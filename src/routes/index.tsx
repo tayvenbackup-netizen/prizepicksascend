@@ -17,33 +17,37 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <ProfileProvider>
-      <div className="mx-auto flex h-[100dvh] max-w-[480px] flex-col bg-background overflow-hidden">
-        <div className="shrink-0">
-          <TopHeader />
-          <ProfileHeader />
-          <ProfileTabs />
+      <div className="fixed inset-0 overflow-hidden bg-background">
+        <div className="mx-auto flex h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-background">
+          <div className="shrink-0">
+            <TopHeader />
+            <ProfileHeader />
+            <ProfileTabs />
+          </div>
+
+          <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-28">
+            <StatsCards />
+
+            <SectionTitle>Top Wins</SectionTitle>
+            <TopWins />
+
+            <SectionTitle>Top winning players</SectionTitle>
+            <TopWinningPlayers />
+
+            <SectionTitle>Most picked players</SectionTitle>
+            <MostPickedPlayers />
+
+            <SectionTitle>Top winning leagues</SectionTitle>
+            <TopWinningLeagues />
+
+            <SectionTitle>Most picked teams</SectionTitle>
+            <MostPickedTeams />
+          </div>
+
+          <div className="shrink-0">
+            <BottomNav />
+          </div>
         </div>
-
-        <div className="flex-1 overflow-y-auto pb-28">
-          <StatsCards />
-
-          <SectionTitle>Top Wins</SectionTitle>
-          <TopWins />
-
-          <SectionTitle>Top winning players</SectionTitle>
-          <TopWinningPlayers />
-
-          <SectionTitle>Most picked players</SectionTitle>
-          <MostPickedPlayers />
-
-          <SectionTitle>Top winning leagues</SectionTitle>
-          <TopWinningLeagues />
-
-          <SectionTitle>Most picked teams</SectionTitle>
-          <MostPickedTeams />
-        </div>
-
-        <BottomNav />
       </div>
     </ProfileProvider>
   );
