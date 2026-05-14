@@ -17,29 +17,34 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <ProfileProvider>
-    <div className="mx-auto min-h-screen max-w-[480px] bg-background pb-28">
-      <TopHeader />
-      <ProfileHeader />
-      <ProfileTabs />
-      <StatsCards />
+      <div className="mx-auto flex h-[100dvh] max-w-[480px] flex-col bg-background overflow-hidden">
+        <div className="shrink-0">
+          <TopHeader />
+          <ProfileHeader />
+          <ProfileTabs />
+        </div>
 
-      <SectionTitle>Top Wins</SectionTitle>
-      <TopWins />
+        <div className="flex-1 overflow-y-auto pb-28">
+          <StatsCards />
 
-      <SectionTitle>Top winning players</SectionTitle>
-      <TopWinningPlayers />
+          <SectionTitle>Top Wins</SectionTitle>
+          <TopWins />
 
-      <SectionTitle>Most picked players</SectionTitle>
-      <MostPickedPlayers />
+          <SectionTitle>Top winning players</SectionTitle>
+          <TopWinningPlayers />
 
-      <SectionTitle>Top winning leagues</SectionTitle>
-      <TopWinningLeagues />
+          <SectionTitle>Most picked players</SectionTitle>
+          <MostPickedPlayers />
 
-      <SectionTitle>Most picked teams</SectionTitle>
-      <MostPickedTeams />
+          <SectionTitle>Top winning leagues</SectionTitle>
+          <TopWinningLeagues />
 
-      <BottomNav />
-    </div>
+          <SectionTitle>Most picked teams</SectionTitle>
+          <MostPickedTeams />
+        </div>
+
+        <BottomNav />
+      </div>
     </ProfileProvider>
   );
 }
