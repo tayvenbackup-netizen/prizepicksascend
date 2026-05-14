@@ -150,7 +150,7 @@ function EntryCard({ entry }: { entry: Entry }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-[15px] font-bold">
-            ${entry.entryAmount} to pay ${formatMoney(entry.potential)}
+            {fmtMoney(entry.entryAmount)} to pay {fmtMoney(entry.potential)}
           </div>
           <div className="mt-0.5 text-[13px] text-muted-foreground">
             {planLabel(entry)}
