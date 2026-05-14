@@ -254,6 +254,16 @@ function scoreTeamMatch(teamQuery: string, team: TeamHit & { abbr?: string; shor
   return 0;
 }
 
+export async function fetchTeamsForLeague(label: string): Promise<TeamHit[]> {
+  const league = COMMON_LEAGUE_META.find((l) => l.label === label);
+  if (!league) return [];
+  const cacheKey = league.label;
+  const promise = teamCache.get(cacheKey) || league.fetchTeams();
+  teamCache.set(cacheKey, promise);
+  const teams = await promise;
+  return teams;
+}
+
 export async function searchTeam(query: string, leaguePrefix?: string): Promise<TeamHit | null> {
   if (!leaguePrefix) return null;
   const league = resolveLeagueToken(leaguePrefix);
