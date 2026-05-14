@@ -27,10 +27,10 @@ export function ProfileHeader() {
         </div>
 
         <div className="flex-1 pt-1">
-          <h1 className="text-[22px] font-bold leading-tight tracking-tight">
+          <h1 className="text-[19px] font-bold leading-tight tracking-tight">
             ascend2k
           </h1>
-          <p className="mt-0.5 text-[13px] text-muted-foreground">
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
             Joined September 2025
           </p>
         </div>
