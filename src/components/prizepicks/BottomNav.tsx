@@ -34,7 +34,7 @@ export function BottomNav({
       className="fixed inset-x-0 bottom-0 z-30 bg-background"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <div className="mx-auto max-w-[480px]">
+      <div className="mx-auto w-full">
         <div className="grid grid-cols-5 pt-2 pb-2">
           {items.map((it) => {
             const isActive = active === it.id;
@@ -51,7 +51,7 @@ export function BottomNav({
                   src={it.src}
                   alt=""
                   draggable={false}
-                  className={`h-8 w-8 object-contain transition-opacity ${
+                  className={`h-9 w-9 object-contain transition-opacity ${
                     isActive ? "opacity-100" : "opacity-70"
                   }`}
                 />
