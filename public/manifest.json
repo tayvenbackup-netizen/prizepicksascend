@@ -1,0 +1,12 @@
+{
+  "name": "PrizePicks",
+  "short_name": "PrizePicks",
+  "description": "PrizePicks",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0a14",
+  "theme_color": "#7a00ff",
+  "icons": [
+    { "src": "/icon.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
