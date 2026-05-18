@@ -272,9 +272,13 @@ export async function fetchTeamsForLeague(label: string): Promise<TeamHit[]> {
   const league = COMMON_LEAGUE_META.find((l) => l.label === label);
   if (!league) return [];
   const cacheKey = league.label;
-  const promise = teamCache.get(cacheKey) || league.fetchTeams();
-  teamCache.set(cacheKey, promise);
+  let promise = teamCache.get(cacheKey);
+  if (!promise) {
+    promise = league.fetchTeams().catch(() => [] as TeamHit[]);
+    teamCache.set(cacheKey, promise);
+  }
   const teams = await promise;
+  if (teams.length === 0) teamCache.delete(cacheKey);
   return teams;
 }
 
