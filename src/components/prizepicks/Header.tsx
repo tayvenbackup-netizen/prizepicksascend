@@ -24,7 +24,7 @@ export function TopHeader() {
         <PLogo size={56} />
       </div>
 
-      <div className="flex flex-1 justify-center">
+      <div className="flex shrink-0 justify-center">
         <div className="flex items-center justify-center gap-1.5 rounded-full border-[1.5px] border-white/95 px-2.5 py-[7px]">
           <img
             src={playersPill}
@@ -39,10 +39,10 @@ export function TopHeader() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
-        <img src={dollarSign} alt="" className="h-[18px] w-auto object-contain" />
-        <span className="text-success text-[13px] font-semibold">{data.balance}</span>
-        <img src={plusCircle} alt="add funds" className="h-[28px] w-[28px] object-contain -ml-0.5" />
+      <div className="flex flex-1 items-center justify-end gap-1 min-w-0">
+        <img src={dollarSign} alt="" className="h-[18px] w-auto shrink-0 object-contain" />
+        <span className="text-success text-[13px] font-semibold truncate">{autoComma(data.balance)}</span>
+        <img src={plusCircle} alt="add funds" className="h-[28px] w-[28px] shrink-0 object-contain -ml-0.5" />
       </div>
     </header>
   );
