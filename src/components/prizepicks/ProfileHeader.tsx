@@ -59,8 +59,8 @@ export function ProfileHeader() {
           <button aria-label="search" className="shrink-0 flex items-center justify-center h-[80px]">
             <img src={searchCircle} alt="search" className="h-[72px] w-[72px] object-contain" draggable={false} />
           </button>
-          <button aria-label="share" className="shrink-0 flex items-center justify-center h-[80px] -ml-[18px] mt-[3px]">
-            <img src={shareBtn} alt="Share" className="h-[95px] w-auto object-contain object-left" draggable={false} />
+          <button aria-label="share" className="shrink-0 flex items-center justify-center h-[86px] -ml-[18px] mt-[3px]">
+            <img src={shareBtn} alt="Share" className="h-[101px] w-auto object-contain object-left" draggable={false} />
           </button>
         </div>
       </div>
