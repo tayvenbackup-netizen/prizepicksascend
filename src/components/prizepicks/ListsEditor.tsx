@@ -104,6 +104,148 @@ function NumberStepper({
   );
 }
 
+function TeamPicker({
+  selected,
+  max,
+  onChange,
+}: {
+  selected: PickTeamEntry[];
+  max: number;
+  onChange: (next: PickTeamEntry[]) => void;
+}) {
+  const [activeLeague, setActiveLeague] = useState<string>(
+    selected[0]?.league || COMMON_LEAGUES[0]?.name || "NBA",
+  );
+  const [teams, setTeams] = useState<TeamHit[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchTeamsForLeague(activeLeague)
+      .then((t) => {
+        if (cancelled) return;
+        setTeams([...t].sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [activeLeague]);
+
+  const isSelected = (t: TeamHit) =>
+    selected.some((s) => s.league === t.league && s.name === t.name);
+
+  const toggle = (t: TeamHit) => {
+    if (isSelected(t)) {
+      onChange(selected.filter((s) => !(s.league === t.league && s.name === t.name)));
+      return;
+    }
+    if (selected.length >= max) {
+      onChange([...selected.slice(1), { name: t.name, league: t.league, badge: t.badge }]);
+      return;
+    }
+    onChange([...selected, { name: t.name, league: t.league, badge: t.badge }]);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="no-scrollbar flex gap-1 overflow-x-auto pb-1">
+        {COMMON_LEAGUES.map((lg) => {
+          const active = lg.name === activeLeague;
+          return (
+            <button
+              key={lg.name}
+              onClick={() => setActiveLeague(lg.name)}
+              className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold transition-colors ${
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-white/[0.04] text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {lg.badge ? (
+                <img src={lg.badge} alt="" className="h-3.5 w-3.5 object-contain" />
+              ) : (
+                <div className="h-3.5 w-3.5 rounded-full bg-white/10" />
+              )}
+              {lg.name}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[9.5px] text-muted-foreground">
+          Pick up to {max} teams
+        </span>
+        <span className="text-[10px] font-bold text-[color:var(--primary)]">
+          {selected.length}/{max}
+        </span>
+      </div>
+
+      <div className="max-h-56 overflow-y-auto rounded-lg border border-white/5 bg-black/20 p-1.5">
+        {loading ? (
+          <div className="flex items-center justify-center py-6">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : teams.length === 0 ? (
+          <p className="py-4 text-center text-[10px] text-muted-foreground">
+            No teams available for {activeLeague}.
+          </p>
+        ) : (
+          <div className="grid grid-cols-4 gap-1.5">
+            {teams.map((t) => {
+              const sel = isSelected(t);
+              return (
+                <button
+                  key={`${t.league}-${t.name}`}
+                  onClick={() => toggle(t)}
+                  className={`flex flex-col items-center gap-1 rounded-md px-1 py-1.5 transition-all ${
+                    sel
+                      ? "bg-primary/20 ring-1 ring-[color:var(--primary)]"
+                      : "bg-white/[0.03] hover:bg-white/[0.06]"
+                  }`}
+                  title={t.name}
+                >
+                  {t.badge ? (
+                    <img src={t.badge} alt={t.name} className="h-7 w-7 object-contain" />
+                  ) : (
+                    <Jersey team={t.name} size={26} />
+                  )}
+                  <span className="line-clamp-1 w-full text-center text-[9px] font-semibold">
+                    {t.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {selected.length > 0 && (
+        <div className="flex items-center gap-1.5 rounded-md bg-white/[0.03] px-2 py-1.5">
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
+            Picked:
+          </span>
+          {selected.map((s) => (
+            <div
+              key={`${s.league}-${s.name}`}
+              className="flex items-center gap-1 rounded-full bg-black/40 px-1.5 py-0.5"
+            >
+              {s.badge ? (
+                <img src={s.badge} alt="" className="h-3.5 w-3.5 object-contain" />
+              ) : (
+                <Jersey team={s.name} size={14} />
+              )}
+              <span className="text-[9.5px] font-semibold">{s.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ListsEditor() {
   const {
     winPlayers, setWinPlayers,
