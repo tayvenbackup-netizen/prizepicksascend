@@ -24,7 +24,7 @@ export function TopHeader() {
         <PLogo size={56} />
       </div>
 
-      <div className="flex shrink-0 justify-center">
+      <div className="flex flex-1 justify-center min-w-0">
         <div className="flex items-center justify-center gap-1.5 rounded-full border-[1.5px] border-white/95 px-2.5 py-[7px]">
           <img
             src={playersPill}
