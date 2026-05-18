@@ -122,43 +122,43 @@ const COMMON_LEAGUE_META: TeamSource[] = [
     label: "NBA",
     aliases: ["NBA", "BASKETBALL"],
     badge: "https://r2.thesportsdb.com/images/media/league/badge/frdjqy1536585083.png",
-    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams", "NBA"),
+    fetchTeams: () => fetchEspnTeams("NBA"),
   },
   {
     label: "NFL",
     aliases: ["NFL", "FOOTBALL"],
     badge: "https://r2.thesportsdb.com/images/media/league/badge/g85fqz1662057187.png",
-    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams", "NFL"),
+    fetchTeams: () => fetchEspnTeams("NFL"),
   },
   {
     label: "MLB",
     aliases: ["MLB", "BASEBALL"],
     badge: "https://r2.thesportsdb.com/images/media/league/badge/c5r83j1521893739.png",
-    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams", "MLB"),
+    fetchTeams: () => fetchEspnTeams("MLB"),
   },
   {
     label: "NHL",
     aliases: ["NHL", "HOCKEY"],
     badge: "https://r2.thesportsdb.com/images/media/league/badge/4cem2k1619616539.png",
-    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/teams", "NHL"),
+    fetchTeams: () => fetchEspnTeams("NHL"),
   },
   {
     label: "WNBA",
     aliases: ["WNBA"],
     badge: "https://r2.thesportsdb.com/images/media/league/badge/47llb31573154455.png",
-    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/teams", "WNBA"),
+    fetchTeams: () => fetchEspnTeams("WNBA"),
   },
   {
     label: "EPL",
     aliases: ["EPL", "PREMIERLEAGUE", "PREMIER", "SOCCER"],
     badge: "https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png",
-    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams", "EPL"),
+    fetchTeams: () => fetchEspnTeams("EPL"),
   },
   {
     label: "MLS",
     aliases: ["MLS"],
     badge: "https://r2.thesportsdb.com/images/media/league/badge/dqo6r91549878326.png",
-    fetchTeams: () => fetchEspnTeams("https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/teams", "MLS"),
+    fetchTeams: () => fetchEspnTeams("MLS"),
   },
   {
     label: "ATP",
@@ -176,7 +176,12 @@ const COMMON_LEAGUE_META: TeamSource[] = [
     label: "CSGO",
     aliases: ["CSGO", "CS2", "COUNTERSTRIKE"],
     badge: "https://upload.wikimedia.org/wikipedia/commons/6/6e/CS2_logo.svg",
-    fetchTeams: async () => ["FaZe", "Vitality", "Spirit", "G2"].map((name) => ({ name, league: "CSGO", badge: null })),
+    fetchTeams: async () =>
+      ["FaZe", "Vitality", "Spirit", "G2", "NAVI", "MOUZ", "Heroic", "Team Liquid"].map((name) => ({
+        name,
+        league: "CSGO",
+        badge: null,
+      })),
   },
   {
     label: "LoL",
@@ -186,14 +191,23 @@ const COMMON_LEAGUE_META: TeamSource[] = [
       const sportsDbTeams = await fetchSportsDbLeagueTeams("League of Legends Championship Series", "LoL");
       return sportsDbTeams.length > 0
         ? sportsDbTeams
-        : ["T1", "Gen.G", "G2", "NRG", "Immortals"].map((name) => ({ name, league: "LoL", badge: null }));
+        : ["T1", "Gen.G", "G2", "NRG", "Immortals", "Cloud9", "100 Thieves"].map((name) => ({
+            name,
+            league: "LoL",
+            badge: null,
+          }));
     },
   },
   {
     label: "Valorant",
     aliases: ["VALORANT", "VAL"],
     badge: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Valorant_logo_-_pink_color_version.svg",
-    fetchTeams: async () => ["Sentinels", "Evil Geniuses", "Leviatán"].map((name) => ({ name, league: "Valorant", badge: null })),
+    fetchTeams: async () =>
+      ["Sentinels", "Evil Geniuses", "Leviatán", "LOUD", "Fnatic", "Paper Rex"].map((name) => ({
+        name,
+        league: "Valorant",
+        badge: null,
+      })),
   },
 ];
 
@@ -204,8 +218,8 @@ export const COMMON_LEAGUES = COMMON_LEAGUE_META.map(({ label, badge }) => ({
 
 const teamCache = new Map<string, Promise<TeamHit[]>>();
 
-async function fetchEspnTeams(url: string, league: string): Promise<TeamHit[]> {
-  const r = await fetch(url);
+async function fetchEspnTeams(league: string): Promise<TeamHit[]> {
+  const r = await fetch(`/api/public/espn-teams?league=${encodeURIComponent(league)}`);
   if (!r.ok) return [];
   const j = await r.json();
   const teams = j?.sports?.[0]?.leagues?.[0]?.teams || [];
@@ -258,9 +272,13 @@ export async function fetchTeamsForLeague(label: string): Promise<TeamHit[]> {
   const league = COMMON_LEAGUE_META.find((l) => l.label === label);
   if (!league) return [];
   const cacheKey = league.label;
-  const promise = teamCache.get(cacheKey) || league.fetchTeams();
-  teamCache.set(cacheKey, promise);
+  let promise = teamCache.get(cacheKey);
+  if (!promise) {
+    promise = league.fetchTeams().catch(() => [] as TeamHit[]);
+    teamCache.set(cacheKey, promise);
+  }
   const teams = await promise;
+  if (teams.length === 0) teamCache.delete(cacheKey);
   return teams;
 }
 
