@@ -4,6 +4,7 @@ import dollarSign from "@/assets/major/dollar-sign.png";
 import plusCircle from "@/assets/major/plus-circle.png";
 import arrowDown from "@/assets/major/arrow-down.png";
 import { useProfile } from "./ProfileContext";
+import { autoComma } from "@/lib/fmt";
 
 export function TopHeader() {
   const { data } = useProfile();
