@@ -38,6 +38,20 @@ export type PickTeamEntry = {
   badge: string | null;
 };
 
+export type TopWinPlayer = {
+  name: string;
+  photo: string | null;
+  hit: boolean;
+};
+
+export type TopWinEntry = {
+  pickCount: 2 | 3 | 4 | 5 | 6;
+  payout: string;
+  cost: string;
+  play: string;
+  players: TopWinPlayer[];
+};
+
 const defaultData: ProfileData = {
   name: "ascend2k",
   joinDate: "Joined September 2025",
