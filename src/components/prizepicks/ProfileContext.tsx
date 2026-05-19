@@ -142,6 +142,8 @@ type Ctx = {
   setWinLeagues: (l: WinLeagueEntry[]) => void;
   pickTeams: PickTeamEntry[];
   setPickTeams: (l: PickTeamEntry[]) => void;
+  topWins: TopWinEntry[];
+  setTopWins: (l: TopWinEntry[]) => void;
 };
 
 const ProfileContext = createContext<Ctx | null>(null);
@@ -154,38 +156,33 @@ type PersistedState = {
   pickPlayers: PickPlayerEntry[];
   winLeagues: WinLeagueEntry[];
   pickTeams: PickTeamEntry[];
+  topWins: TopWinEntry[];
 };
 
 function loadInitialState(): PersistedState {
-  if (typeof window === "undefined") {
-    return {
-      data: defaultData,
-      winPlayers: defaultWinPlayers,
-      pickPlayers: defaultPickPlayers,
-      winLeagues: defaultWinLeagues,
-      pickTeams: defaultPickTeams,
-    };
-  }
-
+  const base: PersistedState = {
+    data: defaultData,
+    winPlayers: defaultWinPlayers,
+    pickPlayers: defaultPickPlayers,
+    winLeagues: defaultWinLeagues,
+    pickTeams: defaultPickTeams,
+    topWins: defaultTopWins,
+  };
+  if (typeof window === "undefined") return base;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) throw new Error("missing");
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
     return {
-      data: parsed.data ?? defaultData,
-      winPlayers: parsed.winPlayers ?? defaultWinPlayers,
-      pickPlayers: parsed.pickPlayers ?? defaultPickPlayers,
-      winLeagues: parsed.winLeagues ?? defaultWinLeagues,
-      pickTeams: parsed.pickTeams ?? defaultPickTeams,
+      data: parsed.data ?? base.data,
+      winPlayers: parsed.winPlayers ?? base.winPlayers,
+      pickPlayers: parsed.pickPlayers ?? base.pickPlayers,
+      winLeagues: parsed.winLeagues ?? base.winLeagues,
+      pickTeams: parsed.pickTeams ?? base.pickTeams,
+      topWins: parsed.topWins ?? base.topWins,
     };
   } catch {
-    return {
-      data: defaultData,
-      winPlayers: defaultWinPlayers,
-      pickPlayers: defaultPickPlayers,
-      winLeagues: defaultWinLeagues,
-      pickTeams: defaultPickTeams,
-    };
+    return base;
   }
 }
 
@@ -196,14 +193,15 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [pickPlayers, setPickPlayers] = useState(initial.pickPlayers);
   const [winLeagues, setWinLeagues] = useState(initial.winLeagues);
   const [pickTeams, setPickTeams] = useState(initial.pickTeams);
+  const [topWins, setTopWins] = useState(initial.topWins);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ data, winPlayers, pickPlayers, winLeagues, pickTeams }),
+      JSON.stringify({ data, winPlayers, pickPlayers, winLeagues, pickTeams, topWins }),
     );
-  }, [data, winPlayers, pickPlayers, winLeagues, pickTeams]);
+  }, [data, winPlayers, pickPlayers, winLeagues, pickTeams, topWins]);
   return (
     <ProfileContext.Provider
       value={{
@@ -212,6 +210,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         pickPlayers, setPickPlayers,
         winLeagues, setWinLeagues,
         pickTeams, setPickTeams,
+        topWins, setTopWins,
       }}
     >
       {children}
