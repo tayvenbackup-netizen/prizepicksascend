@@ -249,8 +249,35 @@ function TeamPicker({
 }
 
 export function ListsEditor() {
-  const {
-    winPlayers, setWinPlayers,
+  const [subtab, setSubtab] = useState<"lists" | "topwins">("lists");
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 rounded-full bg-black/30 p-0.5">
+        {([
+          { id: "lists" as const, label: "Lists", Icon: ListChecks },
+          { id: "topwins" as const, label: "Top Wins", Icon: Award },
+        ]).map(({ id, label, Icon }) => {
+          const active = subtab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setSubtab(id)}
+              className={`flex items-center justify-center gap-1 rounded-full py-1 text-[11px] font-semibold transition-colors ${
+                active ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+              }`}
+            >
+              <Icon className="h-3 w-3" />
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      {subtab === "lists" ? <ListsBody /> : <TopWinsEditor />}
+    </div>
+  );
+}
+
+function ListsBody() {
     pickPlayers, setPickPlayers,
     winLeagues, setWinLeagues,
     pickTeams, setPickTeams,
