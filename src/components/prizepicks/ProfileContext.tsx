@@ -38,6 +38,20 @@ export type PickTeamEntry = {
   badge: string | null;
 };
 
+export type TopWinPlayer = {
+  name: string;
+  photo: string | null;
+  hit: boolean;
+};
+
+export type TopWinEntry = {
+  pickCount: 2 | 3 | 4 | 5 | 6;
+  payout: string;
+  cost: string;
+  play: string;
+  players: TopWinPlayer[];
+};
+
 const defaultData: ProfileData = {
   name: "ascend2k",
   joinDate: "Joined September 2025",
@@ -84,6 +98,39 @@ const defaultPickTeams: PickTeamEntry[] = [
   { name: "Knicks", league: "NBA", badge: "https://cdn.nba.com/logos/nba/1610612752/primary/L/logo.svg" },
 ];
 
+const nbaHead = (id: string) => `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`;
+
+const defaultTopWins: TopWinEntry[] = [
+  {
+    pickCount: 6, payout: "$200", cost: "$5", play: "Power Play",
+    players: [
+      { name: "Jalen Johnson", photo: nbaHead("1630552"), hit: true },
+      { name: "Scottie Barnes", photo: nbaHead("1630567"), hit: true },
+      { name: "Tyrese Maxey", photo: nbaHead("1630178"), hit: true },
+      { name: "Joel Embiid", photo: nbaHead("203954"), hit: true },
+      { name: "Josh Giddey", photo: nbaHead("1630581"), hit: true },
+      { name: "Paolo Banchero", photo: nbaHead("1631094"), hit: true },
+    ],
+  },
+  {
+    pickCount: 5, payout: "$20", cost: "$0", play: "Flex Play",
+    players: [
+      { name: "Jayson Tatum", photo: nbaHead("1628369"), hit: true },
+      { name: "Scottie Barnes", photo: nbaHead("1630567"), hit: true },
+      { name: "Pascal Siakam", photo: nbaHead("1627783"), hit: true },
+      { name: "Jamal Murray", photo: nbaHead("1627750"), hit: true },
+      { name: "Jonas Valanciunas", photo: nbaHead("202685"), hit: false },
+    ],
+  },
+  {
+    pickCount: 2, payout: "$10", cost: "$5", play: "Power Play",
+    players: [
+      { name: "Luka Doncic", photo: nbaHead("1629029"), hit: true },
+      { name: "Stephen Curry", photo: nbaHead("201939"), hit: true },
+    ],
+  },
+];
+
 type Ctx = {
   data: ProfileData;
   setData: (d: ProfileData) => void;
@@ -95,6 +142,8 @@ type Ctx = {
   setWinLeagues: (l: WinLeagueEntry[]) => void;
   pickTeams: PickTeamEntry[];
   setPickTeams: (l: PickTeamEntry[]) => void;
+  topWins: TopWinEntry[];
+  setTopWins: (l: TopWinEntry[]) => void;
 };
 
 const ProfileContext = createContext<Ctx | null>(null);
@@ -107,38 +156,33 @@ type PersistedState = {
   pickPlayers: PickPlayerEntry[];
   winLeagues: WinLeagueEntry[];
   pickTeams: PickTeamEntry[];
+  topWins: TopWinEntry[];
 };
 
 function loadInitialState(): PersistedState {
-  if (typeof window === "undefined") {
-    return {
-      data: defaultData,
-      winPlayers: defaultWinPlayers,
-      pickPlayers: defaultPickPlayers,
-      winLeagues: defaultWinLeagues,
-      pickTeams: defaultPickTeams,
-    };
-  }
-
+  const base: PersistedState = {
+    data: defaultData,
+    winPlayers: defaultWinPlayers,
+    pickPlayers: defaultPickPlayers,
+    winLeagues: defaultWinLeagues,
+    pickTeams: defaultPickTeams,
+    topWins: defaultTopWins,
+  };
+  if (typeof window === "undefined") return base;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) throw new Error("missing");
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
     return {
-      data: parsed.data ?? defaultData,
-      winPlayers: parsed.winPlayers ?? defaultWinPlayers,
-      pickPlayers: parsed.pickPlayers ?? defaultPickPlayers,
-      winLeagues: parsed.winLeagues ?? defaultWinLeagues,
-      pickTeams: parsed.pickTeams ?? defaultPickTeams,
+      data: parsed.data ?? base.data,
+      winPlayers: parsed.winPlayers ?? base.winPlayers,
+      pickPlayers: parsed.pickPlayers ?? base.pickPlayers,
+      winLeagues: parsed.winLeagues ?? base.winLeagues,
+      pickTeams: parsed.pickTeams ?? base.pickTeams,
+      topWins: parsed.topWins ?? base.topWins,
     };
   } catch {
-    return {
-      data: defaultData,
-      winPlayers: defaultWinPlayers,
-      pickPlayers: defaultPickPlayers,
-      winLeagues: defaultWinLeagues,
-      pickTeams: defaultPickTeams,
-    };
+    return base;
   }
 }
 
@@ -149,14 +193,15 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [pickPlayers, setPickPlayers] = useState(initial.pickPlayers);
   const [winLeagues, setWinLeagues] = useState(initial.winLeagues);
   const [pickTeams, setPickTeams] = useState(initial.pickTeams);
+  const [topWins, setTopWins] = useState(initial.topWins);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ data, winPlayers, pickPlayers, winLeagues, pickTeams }),
+      JSON.stringify({ data, winPlayers, pickPlayers, winLeagues, pickTeams, topWins }),
     );
-  }, [data, winPlayers, pickPlayers, winLeagues, pickTeams]);
+  }, [data, winPlayers, pickPlayers, winLeagues, pickTeams, topWins]);
   return (
     <ProfileContext.Provider
       value={{
@@ -165,6 +210,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         pickPlayers, setPickPlayers,
         winLeagues, setWinLeagues,
         pickTeams, setPickTeams,
+        topWins, setTopWins,
       }}
     >
       {children}

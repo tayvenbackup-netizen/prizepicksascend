@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Loader2, Check, X, Trophy, Users, Star, Layers as LayersIcon } from "lucide-react";
+import { Loader2, Check, X, Trophy, Users, Star, Layers as LayersIcon, Plus, Trash2, ListChecks, Award } from "lucide-react";
 import {
   useProfile,
   type WinPlayerEntry,
   type PickPlayerEntry,
   type WinLeagueEntry,
   type PickTeamEntry,
+  type TopWinEntry,
+  type TopWinPlayer,
 } from "./ProfileContext";
 import { searchPlayer, COMMON_LEAGUES, fetchTeamsForLeague, type TeamHit } from "@/lib/sportsdb";
 import { Jersey } from "./Jersey";
@@ -247,6 +249,35 @@ function TeamPicker({
 }
 
 export function ListsEditor() {
+  const [subtab, setSubtab] = useState<"lists" | "topwins">("lists");
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 rounded-full bg-black/30 p-0.5">
+        {([
+          { id: "lists" as const, label: "Lists", Icon: ListChecks },
+          { id: "topwins" as const, label: "Top Wins", Icon: Award },
+        ]).map(({ id, label, Icon }) => {
+          const active = subtab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setSubtab(id)}
+              className={`flex items-center justify-center gap-1 rounded-full py-1 text-[11px] font-semibold transition-colors ${
+                active ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+              }`}
+            >
+              <Icon className="h-3 w-3" />
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      {subtab === "lists" ? <ListsBody /> : <TopWinsEditor />}
+    </div>
+  );
+}
+
+function ListsBody() {
   const {
     winPlayers, setWinPlayers,
     pickPlayers, setPickPlayers,
@@ -462,6 +493,143 @@ function Section({
         <div className="h-px flex-1 bg-white/5" />
       </div>
       <div className="space-y-1.5">{children}</div>
+    </div>
+  );
+}
+
+function TopWinsEditor() {
+  const { topWins, setTopWins } = useProfile();
+
+  const updateEntry = (i: number, patch: Partial<TopWinEntry>) => {
+    const next = topWins.map((e, idx) => (idx === i ? { ...e, ...patch } : e));
+    setTopWins(next);
+  };
+
+  const updatePlayer = (i: number, pi: number, patch: Partial<TopWinPlayer>) => {
+    const entry = topWins[i];
+    if (!entry) return;
+    const players = entry.players.map((p, idx) => (idx === pi ? { ...p, ...patch } : p));
+    updateEntry(i, { players });
+  };
+
+  const setPickCount = (i: number, n: 2 | 3 | 4 | 5 | 6) => {
+    const entry = topWins[i];
+    if (!entry) return;
+    const players = [...entry.players];
+    while (players.length < n) players.push({ name: "", photo: null, hit: true });
+    players.length = n;
+    updateEntry(i, { pickCount: n, players });
+  };
+
+  const removeEntry = (i: number) => setTopWins(topWins.filter((_, idx) => idx !== i));
+
+  const addEntry = () => {
+    setTopWins([
+      ...topWins,
+      {
+        pickCount: 3,
+        payout: "$50",
+        cost: "$5",
+        play: "Power Play",
+        players: Array.from({ length: 3 }, () => ({ name: "", photo: null, hit: true })),
+      },
+    ]);
+  };
+
+  return (
+    <div className="space-y-3">
+      {topWins.map((entry, i) => (
+        <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5 space-y-2">
+          <div className="flex items-center gap-1.5">
+            <select
+              value={entry.pickCount}
+              onChange={(e) => setPickCount(i, Number(e.target.value) as 2 | 3 | 4 | 5 | 6)}
+              className="h-7 rounded-md bg-black/40 px-1.5 text-[11px] font-bold outline-none ring-1 ring-white/10"
+            >
+              {[2, 3, 4, 5, 6].map((n) => (
+                <option key={n} value={n}>{n}-Pick</option>
+              ))}
+            </select>
+            <span className="text-[10px] text-muted-foreground">win</span>
+            <input
+              value={entry.payout}
+              onChange={(e) => updateEntry(i, { payout: e.target.value })}
+              placeholder="$200"
+              className="h-7 w-[68px] rounded-md bg-black/40 px-1.5 text-[11px] font-bold text-success outline-none ring-1 ring-white/10"
+            />
+            <div className="flex-1" />
+            <button
+              onClick={() => removeEntry(i)}
+              className="text-muted-foreground hover:text-destructive"
+              aria-label="Remove"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <input
+              value={entry.cost}
+              onChange={(e) => updateEntry(i, { cost: e.target.value })}
+              placeholder="$5"
+              className="h-7 w-[58px] rounded-md bg-black/40 px-1.5 text-[11px] font-bold outline-none ring-1 ring-white/10"
+            />
+            <select
+              value={entry.play}
+              onChange={(e) => updateEntry(i, { play: e.target.value })}
+              className="h-7 flex-1 rounded-md bg-black/40 px-1.5 text-[11px] font-semibold outline-none ring-1 ring-white/10"
+            >
+              {["Power Play", "Flex Play"].map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            {entry.players.map((p, pi) => (
+              <ValidatedRow
+                key={`tw-${i}-${pi}`}
+                initial={p.name}
+                placeholder={`Player ${pi + 1}`}
+                preview={
+                  p.photo ? (
+                    <img src={p.photo} alt="" className="h-7 w-7 rounded-full object-cover" />
+                  ) : (
+                    <div className="h-7 w-7 rounded-full border border-dashed border-white/15" />
+                  )
+                }
+                rightSlot={
+                  <button
+                    onClick={() => updatePlayer(i, pi, { hit: !p.hit })}
+                    className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                      p.hit ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"
+                    }`}
+                    aria-label={p.hit ? "Hit" : "Miss"}
+                    title={p.hit ? "Hit" : "Miss"}
+                  >
+                    {p.hit ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                  </button>
+                }
+                onClear={() => updatePlayer(i, pi, { name: "", photo: null })}
+                onResolved={async (q) => {
+                  const hit = await searchPlayer(q);
+                  if (!hit) return { ok: false, msg: "Player not found." };
+                  updatePlayer(i, pi, { name: hit.name, photo: hit.photo });
+                  return { ok: true };
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <button
+        onClick={addEntry}
+        className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/15 py-2 text-[11px] font-semibold text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        Add a Top Win
+      </button>
     </div>
   );
 }
