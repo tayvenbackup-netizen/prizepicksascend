@@ -98,6 +98,39 @@ const defaultPickTeams: PickTeamEntry[] = [
   { name: "Knicks", league: "NBA", badge: "https://cdn.nba.com/logos/nba/1610612752/primary/L/logo.svg" },
 ];
 
+const nbaHead = (id: string) => `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`;
+
+const defaultTopWins: TopWinEntry[] = [
+  {
+    pickCount: 6, payout: "$200", cost: "$5", play: "Power Play",
+    players: [
+      { name: "Jalen Johnson", photo: nbaHead("1630552"), hit: true },
+      { name: "Scottie Barnes", photo: nbaHead("1630567"), hit: true },
+      { name: "Tyrese Maxey", photo: nbaHead("1630178"), hit: true },
+      { name: "Joel Embiid", photo: nbaHead("203954"), hit: true },
+      { name: "Josh Giddey", photo: nbaHead("1630581"), hit: true },
+      { name: "Paolo Banchero", photo: nbaHead("1631094"), hit: true },
+    ],
+  },
+  {
+    pickCount: 5, payout: "$20", cost: "$0", play: "Flex Play",
+    players: [
+      { name: "Jayson Tatum", photo: nbaHead("1628369"), hit: true },
+      { name: "Scottie Barnes", photo: nbaHead("1630567"), hit: true },
+      { name: "Pascal Siakam", photo: nbaHead("1627783"), hit: true },
+      { name: "Jamal Murray", photo: nbaHead("1627750"), hit: true },
+      { name: "Jonas Valanciunas", photo: nbaHead("202685"), hit: false },
+    ],
+  },
+  {
+    pickCount: 2, payout: "$10", cost: "$5", play: "Power Play",
+    players: [
+      { name: "Luka Doncic", photo: nbaHead("1629029"), hit: true },
+      { name: "Stephen Curry", photo: nbaHead("201939"), hit: true },
+    ],
+  },
+];
+
 type Ctx = {
   data: ProfileData;
   setData: (d: ProfileData) => void;
