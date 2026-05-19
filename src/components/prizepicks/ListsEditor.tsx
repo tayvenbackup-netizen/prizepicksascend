@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Loader2, Check, X, Trophy, Users, Star, Layers as LayersIcon } from "lucide-react";
+import { Loader2, Check, X, Trophy, Users, Star, Layers as LayersIcon, Plus, Trash2, ListChecks, Award } from "lucide-react";
 import {
   useProfile,
   type WinPlayerEntry,
   type PickPlayerEntry,
   type WinLeagueEntry,
   type PickTeamEntry,
+  type TopWinEntry,
+  type TopWinPlayer,
 } from "./ProfileContext";
 import { searchPlayer, COMMON_LEAGUES, fetchTeamsForLeague, type TeamHit } from "@/lib/sportsdb";
 import { Jersey } from "./Jersey";
