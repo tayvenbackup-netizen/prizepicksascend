@@ -9,7 +9,7 @@ export function TopWins() {
           key={i}
           className="relative overflow-hidden rounded-2xl bg-surface py-4 pl-5 pr-4"
         >
-          <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-success" />
+          <span className="absolute left-2 top-3 bottom-3 w-[3px] rounded-full bg-success" />
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="text-[15px] font-bold">
