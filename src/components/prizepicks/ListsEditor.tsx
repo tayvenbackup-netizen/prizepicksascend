@@ -278,6 +278,8 @@ export function ListsEditor() {
 }
 
 function ListsBody() {
+  const {
+    winPlayers, setWinPlayers,
     pickPlayers, setPickPlayers,
     winLeagues, setWinLeagues,
     pickTeams, setPickTeams,
