@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import KeyEntryScreen from './KeyEntryScreen';
+import IntroOverlay from './IntroOverlay';
 import AdminPanel from '../admin/AdminPanel';
 import { useAccessControl } from '@/hooks/useAccessControl';
 import { AccessContext } from '@/lib/accessContext';
@@ -9,6 +10,10 @@ interface Props { children: ReactNode }
 export const GateRoot = ({ children }: Props) => {
   const { isAuthed, isAdmin, isLoading, validateKey, error, session } = useAccessControl();
   const [adminOpen, setAdminOpen] = useState(false);
+  const [introDone, setIntroDone] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return sessionStorage.getItem('ascend:intro-played') === '1';
+  });
 
   useEffect(() => {
     const open = () => setAdminOpen(true);
@@ -29,7 +34,19 @@ export const GateRoot = ({ children }: Props) => {
   }
 
   if (!isAuthed) {
-    return <KeyEntryScreen onValidate={validateKey} error={error} />;
+    return (
+      <>
+        <KeyEntryScreen onValidate={validateKey} error={error} />
+        {!introDone && (
+          <IntroOverlay
+            onDone={() => {
+              sessionStorage.setItem('ascend:intro-played', '1');
+              setIntroDone(true);
+            }}
+          />
+        )}
+      </>
+    );
   }
 
   return (
