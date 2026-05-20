@@ -33,7 +33,7 @@ function Row({ label, badge }: { label: string; badge?: string }) {
       className="flex w-full items-center justify-between py-[14px] text-left"
     >
       <div className="flex items-center gap-2">
-        <span className="text-[20px] font-normal text-white">{label}</span>
+        <span className="text-[13px] font-normal text-white">{label}</span>
         {badge && <img src={badge} alt="" className="h-[18px] w-auto object-contain" />}
       </div>
       <ChevronRight className="h-[15px] w-[15px] text-white/40" strokeWidth={1.75} />
