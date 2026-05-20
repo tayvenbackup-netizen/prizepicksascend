@@ -5,7 +5,8 @@ import teamsBeta from "@/assets/menu/teams-beta.png";
 import cultureBeta from "@/assets/menu/culture-beta.png";
 import rgBadge from "@/assets/menu/responsible-gaming.png";
 import wordmark from "@/assets/menu/prizepicks-wordmark.png";
-import { PLogo } from "./PLogo";
+import coinPlayers from "@/assets/menu/coin-players.gif";
+import coinTeams from "@/assets/menu/coin-teams.gif";
 import { useProfile } from "./ProfileContext";
 import { autoComma } from "@/lib/fmt";
 
