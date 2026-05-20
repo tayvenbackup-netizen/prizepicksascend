@@ -74,56 +74,56 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
             </button>
           </div>
 
-          <div className="px-4 pt-1">
+          <div className="px-5 pt-3">
             {/* Balance card */}
-            <section className="rounded-2xl border border-white/10 bg-[#0b0d14] p-3.5">
+            <section className="rounded-2xl border border-white/10 bg-[#0b0d14] p-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[12px] text-white/80">PrizePicks Balance</p>
-                  <p className="mt-0.5 text-[22px] font-extrabold leading-none text-white">{balance}</p>
+                  <p className="text-[13px] text-white/80">PrizePicks Balance</p>
+                  <p className="mt-2 text-[26px] font-extrabold leading-none text-white">{balance}</p>
                 </div>
                 <button aria-label="info" className="text-white/75">
-                  <Info className="h-[16px] w-[16px]" strokeWidth={1.8} />
+                  <Info className="h-[18px] w-[18px]" strokeWidth={1.8} />
                 </button>
               </div>
 
-              <div className="mt-3 rounded-xl bg-[#1a1d29]/80 p-2.5">
+              <div className="mt-5 rounded-xl bg-[#1a1d29]/80 p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <img src={coinPlayers} alt="" className="h-[24px] w-[24px] rounded-full object-contain" />
+                  <div className="flex items-center gap-3">
+                    <img src={coinPlayers} alt="" className="h-[28px] w-[28px] rounded-full object-contain" />
                     <div>
-                      <p className="text-[12px] font-bold text-white leading-tight">Players</p>
-                      <p className="text-[10px] text-white/60 leading-tight">For player stats and performance</p>
+                      <p className="text-[13px] font-bold text-white leading-tight">Players</p>
+                      <p className="mt-1 text-[11px] text-white/60 leading-tight">For player stats and performance</p>
                     </div>
                   </div>
-                  <p className="text-[12px] text-white">{balance}</p>
+                  <p className="text-[13px] text-white">{balance}</p>
                 </div>
-                <div className="mt-2 flex items-center justify-between pl-2.5">
-                  <div className="flex items-center gap-2">
-                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-white/55" fill="none" stroke="currentColor" strokeWidth={2}>
+                <div className="mt-4 flex items-center justify-between pl-3">
+                  <div className="flex items-center gap-2.5">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/55" fill="none" stroke="currentColor" strokeWidth={2}>
                       <path d="M4 4v8a4 4 0 0 0 4 4h11" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="m15 12 4 4-4 4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <img src={coinTeams} alt="" className="h-[24px] w-[24px] rounded-full object-contain" />
+                    <img src={coinTeams} alt="" className="h-[28px] w-[28px] rounded-full object-contain" />
                     <div>
-                      <p className="text-[12px] font-bold text-white leading-tight">Teams & Culture</p>
-                      <p className="text-[10px] text-white/60 leading-tight">For games and trending topics</p>
+                      <p className="text-[13px] font-bold text-white leading-tight">Teams & Culture</p>
+                      <p className="mt-1 text-[11px] text-white/60 leading-tight">For games and trending topics</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-[12px] text-white leading-tight">{balance}</p>
-                    <p className="text-[9.5px] text-white/55 leading-tight">of {balance}</p>
+                    <p className="text-[13px] text-white leading-tight">{balance}</p>
+                    <p className="mt-1 text-[10.5px] text-white/55 leading-tight">of {balance}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2.5">
-                <button className="h-[36px] rounded-full bg-[#1a1d29] text-[13px] font-bold text-white">Withdraw</button>
-                <button className="h-[36px] rounded-full bg-[#7c3aed] text-[13px] font-bold text-white">Deposit</button>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <button className="h-[44px] rounded-full bg-[#1a1d29] text-[14px] font-bold text-white">Withdraw</button>
+                <button className="h-[44px] rounded-full bg-[#7c3aed] text-[14px] font-bold text-white">Deposit</button>
               </div>
 
-              <div className="mt-3 border-t border-white/10 pt-2.5">
-                <p className="text-[10.5px] leading-snug text-white/55">
+              <div className="mt-5 border-t border-white/10 pt-4">
+                <p className="text-[11.5px] leading-relaxed text-white/55">
                   Your PrizePicks balance includes all deposits and winnings and is ready to use in Players. Some of it may be available in Teams & Culture depending on your payment method and location.{" "}
                   <span className="text-[#3aa6ff]">Learn more about account balances</span>
                 </p>
