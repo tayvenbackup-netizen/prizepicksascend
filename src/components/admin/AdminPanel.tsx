@@ -261,7 +261,7 @@ const AdminPanel = ({ isOpen, onClose, subAdminId }: AdminPanelProps) => {
     >
       <motion.div
         initial={{ scale: 0.96, y: 8 }} animate={{ scale: 1, y: 0 }}
-        onClick={e => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
         className="w-full max-w-md rounded-2xl mb-8 overflow-hidden"
         style={{ background: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 24px 60px rgba(0,0,0,0.55)' }}
       >
