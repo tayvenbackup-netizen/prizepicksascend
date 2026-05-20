@@ -9,6 +9,8 @@ export type ProfileData = {
   wins: string;
   totalWon: string;
   topWin: string;
+  level: string;
+  progress: number;
 };
 
 export type WinPlayerEntry = {
