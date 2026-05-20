@@ -118,12 +118,12 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
               </div>
 
               <div className="mt-3.5 grid grid-cols-2 gap-2.5">
-                <button className="h-[38px] rounded-full bg-[#171a26] text-[13px] font-bold text-white">Withdraw</button>
-                <button className="h-[38px] rounded-full bg-[#7c3aed] text-[13px] font-bold text-white">Deposit</button>
+                <button className="h-[46px] rounded-full bg-[#1f202d] text-[20px] font-bold text-white">Withdraw</button>
+                <button className="h-[46px] rounded-full bg-[#7c3aed] text-[20px] font-bold text-white">Deposit</button>
               </div>
 
               <div className="mt-3.5 border-t border-white/[0.08] pt-3">
-                <p className="text-[10px] leading-[1.5] text-white/55">
+                <p className="text-[17px] leading-[1.5] text-white/55">
                   Your PrizePicks balance includes all deposits and winnings and is ready to use in Players. Some of it may be available in Teams &amp; Culture depending on your payment method and location.{" "}
                   <span className="text-[#3aa6ff]">Learn more about account balances</span>
                 </p>
