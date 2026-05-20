@@ -131,29 +131,29 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
             </section>
 
             {/* Pick Types */}
-            <h3 className="mt-7 text-[13px] font-medium text-white/55">PrizePicks Pick Types</h3>
+            <h3 className="mt-7 text-[20px] font-medium text-white/55">PrizePicks Pick Types</h3>
 
-            <button className="mt-3 flex h-[48px] w-full items-center gap-2.5 rounded-xl border-[1.5px] border-white bg-transparent px-2.5">
-              <span className="grid h-7 w-7 place-items-center rounded-md bg-[#2a1758]">
-                <svg viewBox="0 0 24 24" className="h-[15px] w-[15px] text-white" fill="none" stroke="currentColor" strokeWidth={2}>
+            <button className="mt-3 flex h-[56px] w-full items-center gap-2.5 rounded-xl border-[1.5px] border-white bg-transparent px-2.5">
+              <span className="grid h-8 w-8 place-items-center rounded-md bg-[#2a1758]">
+                <svg viewBox="0 0 24 24" className="h-[17px] w-[17px] text-white" fill="none" stroke="currentColor" strokeWidth={2}>
                   <circle cx="10" cy="8" r="3.5"/>
                   <path d="M4 20c1-3.5 3.5-5 6-5s5 1.5 6 5" strokeLinecap="round"/>
                   <path d="m16 11 1.5 1.5L21 9" stroke="#79e54a" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </span>
-              <span className="text-[14px] font-extrabold tracking-wide text-white">PLAYERS</span>
+              <span className="text-[21px] font-extrabold tracking-wide text-white">PLAYERS</span>
             </button>
 
-            <button className="mt-4 flex h-[48px] w-full items-center rounded-xl border border-white/[0.08] bg-[#0a0d18] px-2.5">
-              <img src={teamsBeta} alt="Teams Beta" className="h-[26px] w-auto object-contain" />
+            <button className="mt-4 flex h-[56px] w-full items-center rounded-xl border border-white/[0.08] bg-[#1f202d] px-2.5">
+              <img src={teamsBeta} alt="Teams Beta" className="h-[28px] w-auto object-contain" />
             </button>
 
-            <button className="mt-4 flex h-[48px] w-full items-center rounded-xl border border-white/[0.08] bg-[#0a0d18] px-2.5">
-              <img src={cultureBeta} alt="Culture Beta" className="h-[26px] w-auto object-contain" />
+            <button className="mt-4 flex h-[56px] w-full items-center rounded-xl border border-white/[0.08] bg-[#1f202d] px-2.5">
+              <img src={cultureBeta} alt="Culture Beta" className="h-[28px] w-auto object-contain" />
             </button>
 
             {/* Useful links */}
-            <h3 className="mt-8 text-[13px] font-medium text-white/55">Useful Links</h3>
+            <h3 className="mt-8 text-[20px] font-medium text-white/55">Useful Links</h3>
             <div className="mt-1">
               {usefulLinks.map((l, i) =>
                 typeof l === "string" ? (
@@ -166,13 +166,13 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
 
             {/* Footer */}
             <div className="mt-6 flex items-center justify-between">
-              <button className="h-[38px] rounded-full bg-[#171a26] px-6 text-[13px] font-bold text-white">
+              <button className="h-[46px] rounded-full bg-[#1f202d] px-6 text-[20px] font-bold text-white">
                 Log Out
               </button>
-              <img src={wordmark} alt="PrizePicks" className="h-[75px] w-auto object-contain" />
+              <img src={wordmark} alt="PrizePicks" className="h-[27px] w-auto object-contain" />
             </div>
 
-            <p className="mt-5 text-center text-[10.5px] text-white/45">
+            <p className="mt-5 text-center text-[17.5px] text-white/45">
               Copyright 2026. All Rights Reserved. PrizePicks Atlanta, GA
             </p>
           </div>
