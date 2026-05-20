@@ -5,7 +5,8 @@ import teamsBeta from "@/assets/menu/teams-beta.png";
 import cultureBeta from "@/assets/menu/culture-beta.png";
 import rgBadge from "@/assets/menu/responsible-gaming.png";
 import wordmark from "@/assets/menu/prizepicks-wordmark.png";
-import { PLogo } from "./PLogo";
+import coinPlayers from "@/assets/menu/coin-players.gif";
+import coinTeams from "@/assets/menu/coin-teams.gif";
 import { useProfile } from "./ProfileContext";
 import { autoComma } from "@/lib/fmt";
 
@@ -89,9 +90,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
               <div className="mt-3 rounded-xl bg-[#1a1d29]/80 p-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-[#6c2bd9]">
-                      <PLogo size={14} />
-                    </span>
+                    <img src={coinPlayers} alt="" className="h-[24px] w-[24px] rounded-full object-contain" />
                     <div>
                       <p className="text-[12px] font-bold text-white leading-tight">Players</p>
                       <p className="text-[10px] text-white/60 leading-tight">For player stats and performance</p>
@@ -105,9 +104,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
                       <path d="M4 4v8a4 4 0 0 0 4 4h11" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="m15 12 4 4-4 4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-[#1ea7a1]">
-                      <PLogo size={14} />
-                    </span>
+                    <img src={coinTeams} alt="" className="h-[24px] w-[24px] rounded-full object-contain" />
                     <div>
                       <p className="text-[12px] font-bold text-white leading-tight">Teams & Culture</p>
                       <p className="text-[10px] text-white/60 leading-tight">For games and trending topics</p>
