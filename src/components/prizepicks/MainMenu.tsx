@@ -104,9 +104,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
                       <path d="M4 4v8a4 4 0 0 0 4 4h11" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="m15 12 4 4-4 4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-[#1ea7a1]">
-                      <PLogo size={14} />
-                    </span>
+                    <img src={coinTeams} alt="" className="h-[24px] w-[24px] rounded-full object-contain" />
                     <div>
                       <p className="text-[12px] font-bold text-white leading-tight">Teams & Culture</p>
                       <p className="text-[10px] text-white/60 leading-tight">For games and trending topics</p>
