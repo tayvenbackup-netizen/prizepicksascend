@@ -79,8 +79,8 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
             <section className="rounded-2xl border border-white/[0.09] bg-[#0a0d18] p-3.5">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[11px] text-white/85">PrizePicks Balance</p>
-                  <p className="mt-1 text-[22px] font-extrabold leading-none tracking-tight text-white">{balance}</p>
+                  <p className="text-[18px] text-white/85">PrizePicks Balance</p>
+                  <p className="mt-1 text-[29px] font-extrabold leading-none tracking-tight text-white">{balance}</p>
                 </div>
                 <button aria-label="info" className="text-white/85">
                   <Info className="h-[16px] w-[16px]" strokeWidth={1.75} />
