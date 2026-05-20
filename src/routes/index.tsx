@@ -72,5 +72,6 @@ function Index() {
       </div>
       </EntriesProvider>
     </ProfileProvider>
+    </GateRoot>
   );
 }
