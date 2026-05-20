@@ -90,9 +90,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
               <div className="mt-3 rounded-xl bg-[#1a1d29]/80 p-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-[#6c2bd9]">
-                      <PLogo size={14} />
-                    </span>
+                    <img src={coinPlayers} alt="" className="h-[24px] w-[24px] rounded-full object-contain" />
                     <div>
                       <p className="text-[12px] font-bold text-white leading-tight">Players</p>
                       <p className="text-[10px] text-white/60 leading-tight">For player stats and performance</p>
