@@ -169,7 +169,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
               <button className="h-[38px] rounded-full bg-[#171a26] px-6 text-[13px] font-bold text-white">
                 Log Out
               </button>
-              <img src={wordmark} alt="PrizePicks" className="h-[60px] w-auto object-contain" />
+              <img src={wordmark} alt="PrizePicks" className="h-[75px] w-auto object-contain" />
             </div>
 
             <p className="mt-5 text-center text-[10.5px] text-white/45">
