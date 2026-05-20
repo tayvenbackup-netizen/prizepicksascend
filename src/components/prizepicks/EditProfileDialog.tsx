@@ -6,7 +6,7 @@ import { useProfile, type ProfileData } from "./ProfileContext";
 import { PLogo } from "./Icons";
 import { ParlayGen } from "./ParlayGen";
 import { ListsEditor } from "./ListsEditor";
-import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, Layers, ListChecks } from "lucide-react";
+import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, Layers, ListChecks, Award, Activity } from "lucide-react";
 
 const defaultData: ProfileData = {
   name: "ascend2k",
@@ -17,6 +17,8 @@ const defaultData: ProfileData = {
   wins: "5",
   totalWon: "$325",
   topWin: "$200",
+  level: "0",
+  progress: 75,
 };
 
 type FieldDef = {
@@ -33,6 +35,12 @@ const sections: { title: string; fields: FieldDef[] }[] = [
     fields: [
       { key: "name", label: "Display name", icon: User, placeholder: "ascend2k" },
       { key: "joinDate", label: "Joined date", icon: Calendar, placeholder: "Joined September 2025" },
+    ],
+  },
+  {
+    title: "Avatar",
+    fields: [
+      { key: "level", label: "Level badge", icon: Award, placeholder: "0" },
     ],
   },
   {
