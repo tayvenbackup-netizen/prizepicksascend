@@ -224,9 +224,43 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
                       );
                     })}
                   </div>
+                  {section.title === "Avatar" && (
+                    <div
+                      className="mt-1.5 flex items-center gap-2 rounded-lg px-2 py-1.5"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                      }}
+                    >
+                      <div
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+                        style={{
+                          background: "color-mix(in oklab, var(--primary) 18%, transparent)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        <Activity className="h-3 w-3" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                            Progress ring
+                          </label>
+                          <span className="text-[11px] font-semibold tabular-nums">{form.progress}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={form.progress}
+                          onChange={(e) => updateField("progress", Number(e.target.value))}
+                          className="mt-1 w-full accent-[color:var(--primary)]"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
-            </div>
 
             <div
               className="flex items-center gap-2 px-3.5 py-2"
