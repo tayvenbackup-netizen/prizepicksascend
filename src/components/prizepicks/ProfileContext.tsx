@@ -63,6 +63,8 @@ const defaultData: ProfileData = {
   wins: "5",
   totalWon: "$325",
   topWin: "$200",
+  level: "0",
+  progress: 75,
 };
 
 const defaultWinPlayers: WinPlayerEntry[] = [
