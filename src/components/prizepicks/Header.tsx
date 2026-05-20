@@ -51,3 +51,8 @@ export function TopHeader() {
     </header>
   );
 }
+
+export function TopHeaderWithMenu() {
+  return <TopHeader />;
+}
+
