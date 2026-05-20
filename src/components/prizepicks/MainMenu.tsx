@@ -61,7 +61,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
           animate={{ x: 0 }}
           exit={{ x: "-100%" }}
           transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.32 }}
-          className="fixed inset-0 z-[60] overflow-y-auto bg-[#000208]"
+          className="fixed inset-0 z-[60] overflow-y-auto bg-[#050614]"
           style={{
             paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
             paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
