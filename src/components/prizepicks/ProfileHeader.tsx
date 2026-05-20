@@ -1,24 +1,30 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import searchCircle from "@/assets/major/search-circle.png";
 import shareBtn from "@/assets/major/share-btn.png";
 import avatarImg from "@/assets/profile-avatar.jpg";
 import { useProfile } from "./ProfileContext";
 import { EditProfileDialog } from "./EditProfileDialog";
 
-function ProgressRing({ size, stroke, progress }: { size: number; stroke: number; progress: number }) {
+function ProgressRing({
+  size,
+  stroke,
+  progress,
+  gapWidth,
+}: {
+  size: number;
+  stroke: number;
+  progress: number;
+  gapWidth: number;
+}) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, progress));
-  // Gap at bottom-center for the level box; arc starts at the box's right edge
-  // and sweeps clockwise around the top back to the box's left edge.
-  const arcFraction = 0.82;
-  const arcLen = c * arcFraction;
-  const gapLen = c - arcLen;
+  const safeGapWidth = Math.min(Math.max(gapWidth, stroke * 4), (r * 2) - stroke * 2);
+  const gapAngle = 2 * Math.asin(Math.min(1, safeGapWidth / (2 * r)));
+  const gapLen = (gapAngle / (2 * Math.PI)) * c;
+  const arcLen = c - gapLen;
   const dash = (clamped / 100) * arcLen;
-  // SVG circle dash starts at 3 o'clock. Rotate so the drawn arc begins
-  // immediately to the right of the bottom-center level box.
-  const gapAngle = 360 * (1 - arcFraction);
-  const rotation = 90 + gapAngle / 2; // points just past 6 o'clock clockwise
+  const rotation = 90 + (gapAngle * 180) / Math.PI / 2;
   return (
     <svg
       width={size}
@@ -53,13 +59,29 @@ function ProgressRing({ size, stroke, progress }: { size: number; stroke: number
 export function ProfileHeader() {
   const { data } = useProfile();
   const [open, setOpen] = useState(false);
+  const [ringGapWidth, setRingGapWidth] = useState(28);
+  const levelBadgeRef = useRef<HTMLDivElement | null>(null);
   const size = 76;
+
+  useEffect(() => {
+    const node = levelBadgeRef.current;
+    if (!node) return;
+
+    const updateGap = () => setRingGapWidth(node.offsetWidth + 8);
+    updateGap();
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(updateGap);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [data.level]);
 
   return (
     <section className="px-4 pt-4">
       <div className="flex items-center gap-4">
         <div className="relative shrink-0" style={{ width: size, height: size }}>
-          <ProgressRing size={size} stroke={3} progress={data.progress} />
+          <ProgressRing size={size} stroke={3} progress={data.progress} gapWidth={ringGapWidth} />
           <button
             type="button"
             onClick={() => setOpen(true)}
@@ -73,7 +95,7 @@ export function ProfileHeader() {
               draggable={false}
             />
           </button>
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground pointer-events-none min-w-[18px] text-center">
+          <div ref={levelBadgeRef} className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground pointer-events-none min-w-[18px] text-center">
             {data.level?.trim() ? data.level : "0"}
           </div>
         </div>
