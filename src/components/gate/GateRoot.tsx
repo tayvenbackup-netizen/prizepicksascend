@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import KeyEntryScreen from './KeyEntryScreen';
 import AdminPanel from '../admin/AdminPanel';
 import { useAccessControl } from '@/hooks/useAccessControl';
+import { AccessContext } from '@/lib/accessContext';
 
 interface Props { children: ReactNode }
 
@@ -32,13 +33,13 @@ export const GateRoot = ({ children }: Props) => {
   }
 
   return (
-    <>
+    <AccessContext.Provider value={{ isAdmin }}>
       {children}
       <AdminPanel
         isOpen={adminOpen}
         onClose={() => setAdminOpen(false)}
         subAdminId={session?.is_sub_admin ? session.sub_admin_id : undefined}
       />
-    </>
+    </AccessContext.Provider>
   );
 };
