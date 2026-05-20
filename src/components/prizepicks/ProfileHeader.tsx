@@ -73,8 +73,8 @@ export function ProfileHeader() {
               draggable={false}
             />
           </button>
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground pointer-events-none">
-            {data.level}
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground pointer-events-none min-w-[18px] text-center">
+            {data.level?.trim() ? data.level : "0"}
           </div>
         </div>
 
