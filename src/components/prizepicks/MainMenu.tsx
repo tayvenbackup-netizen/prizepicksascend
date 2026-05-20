@@ -30,7 +30,7 @@ function Row({ label, badge }: { label: string; badge?: string }) {
   return (
     <button
       type="button"
-      className="flex w-full items-center justify-between py-[11px] text-left"
+      className="flex w-full items-center justify-between py-[17px] text-left"
     >
       <div className="flex items-center gap-2">
         <span className="text-[13px] font-medium text-white">{label}</span>
