@@ -23,7 +23,6 @@ function ProgressRing({
   const gapAngle = 2 * Math.asin(Math.min(1, safeGapWidth / (2 * r)));
   const gapLen = (gapAngle / (2 * Math.PI)) * c;
   const arcLen = c - gapLen;
-  const gapLen = c - arcLen;
   const dash = (clamped / 100) * arcLen;
   const rotation = 90 + (gapAngle * 180) / Math.PI / 2;
   return (
