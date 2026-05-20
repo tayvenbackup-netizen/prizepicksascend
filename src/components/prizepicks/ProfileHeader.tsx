@@ -4,6 +4,7 @@ import shareBtn from "@/assets/major/share-btn.png";
 import avatarImg from "@/assets/profile-avatar.jpg";
 import { useProfile } from "./ProfileContext";
 import { EditProfileDialog } from "./EditProfileDialog";
+import { useAccess } from "@/lib/accessContext";
 
 function ProgressRing({
   size,
@@ -58,6 +59,7 @@ function ProgressRing({
 
 export function ProfileHeader() {
   const { data } = useProfile();
+  const { isAdmin } = useAccess();
   const [open, setOpen] = useState(false);
   const [ringGapWidth, setRingGapWidth] = useState(28);
   const levelBadgeRef = useRef<HTMLDivElement | null>(null);
@@ -122,9 +124,15 @@ export function ProfileHeader() {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button aria-label="search" className="shrink-0 flex items-center justify-center h-[57px]">
-            <img src={searchCircle} alt="search" className="h-[49px] w-[49px] object-contain" draggable={false} />
-          </button>
+          {isAdmin && (
+            <button
+              aria-label="admin panel"
+              onClick={() => window.dispatchEvent(new CustomEvent('ascend:open-admin'))}
+              className="shrink-0 flex items-center justify-center h-[57px]"
+            >
+              <img src={searchCircle} alt="search" className="h-[49px] w-[49px] object-contain" draggable={false} />
+            </button>
+          )}
           <button aria-label="share" className="shrink-0 flex items-center justify-center h-[63px] -ml-[12px] mt-[3px]">
             <img src={shareBtn} alt="Share" className="h-[78px] w-auto object-contain object-left" draggable={false} />
           </button>

@@ -12,6 +12,7 @@ import { BottomNav, type NavTab } from "@/components/prizepicks/BottomNav";
 import { EntriesView } from "@/components/prizepicks/EntriesView";
 import { ProfileProvider } from "@/components/prizepicks/ProfileContext";
 import { EntriesProvider } from "@/components/prizepicks/EntriesContext";
+import { GateRoot } from "@/components/gate/GateRoot";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -21,6 +22,7 @@ function Index() {
   const [nav, setNav] = useState<NavTab>("profile");
 
   return (
+    <GateRoot>
     <ProfileProvider>
       <EntriesProvider>
       <div className="fixed inset-0 overflow-hidden bg-background">
@@ -70,5 +72,6 @@ function Index() {
       </div>
       </EntriesProvider>
     </ProfileProvider>
+    </GateRoot>
   );
 }
