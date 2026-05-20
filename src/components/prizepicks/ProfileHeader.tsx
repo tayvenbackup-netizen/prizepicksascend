@@ -9,18 +9,22 @@ function ProgressRing({ size, stroke, progress }: { size: number; stroke: number
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, progress));
-  // Leave a small gap at bottom (like reference), arc spans ~85% of circle
-  const arcFraction = 0.85;
+  // Gap at bottom-center for the level box; arc starts at the box's right edge
+  // and sweeps clockwise around the top back to the box's left edge.
+  const arcFraction = 0.82;
   const arcLen = c * arcFraction;
+  const gapLen = c - arcLen;
   const dash = (clamped / 100) * arcLen;
-  const gap = c - dash;
-  // Rotate so the arc starts from bottom-left and sweeps clockwise around the top
+  // SVG circle dash starts at 3 o'clock. Rotate so the drawn arc begins
+  // immediately to the right of the bottom-center level box.
+  const gapAngle = 360 * (1 - arcFraction);
+  const rotation = 90 + gapAngle / 2; // points just past 6 o'clock clockwise
   return (
     <svg
       width={size}
       height={size}
       className="absolute inset-0 pointer-events-none"
-      style={{ transform: "rotate(135deg)" }}
+      style={{ transform: `rotate(${rotation}deg)` }}
     >
       <circle
         cx={size / 2}
@@ -39,7 +43,7 @@ function ProgressRing({ size, stroke, progress }: { size: number; stroke: number
         fill="none"
         stroke="#ffffff"
         strokeWidth={stroke}
-        strokeDasharray={`${dash} ${gap}`}
+        strokeDasharray={`${dash} ${c - dash + gapLen}`}
         strokeLinecap="round"
       />
     </svg>
@@ -69,8 +73,8 @@ export function ProfileHeader() {
               draggable={false}
             />
           </button>
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground pointer-events-none">
-            {data.level}
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground pointer-events-none min-w-[18px] text-center">
+            {data.level?.trim() ? data.level : "0"}
           </div>
         </div>
 
