@@ -3,6 +3,7 @@ const ALLOWED_ORIGIN_PATTERNS = [
   'lovable.app',
   'lovableproject.com',
   'lovable.dev',
+  'ascendpickz.store',
   'localhost',
 ];
 
