@@ -261,6 +261,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
                   )}
                 </div>
               ))}
+            </div>
 
             <div
               className="flex items-center gap-2 px-3.5 py-2"
