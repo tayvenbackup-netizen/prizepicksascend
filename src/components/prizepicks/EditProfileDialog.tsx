@@ -73,8 +73,8 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
     if (open) setForm(data);
   }, [open, data]);
 
-  const updateField = (k: keyof ProfileData, v: string) => {
-    const next = { ...form, [k]: v };
+  const updateField = (k: keyof ProfileData, v: string | number) => {
+    const next = { ...form, [k]: v } as ProfileData;
     setForm(next);
     setData(next);
   };
