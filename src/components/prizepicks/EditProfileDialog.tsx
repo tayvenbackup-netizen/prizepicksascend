@@ -6,7 +6,7 @@ import { useProfile, type ProfileData } from "./ProfileContext";
 import { PLogo } from "./Icons";
 import { ParlayGen } from "./ParlayGen";
 import { ListsEditor } from "./ListsEditor";
-import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, Layers, ListChecks } from "lucide-react";
+import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, Layers, ListChecks, Award, Activity } from "lucide-react";
 
 const defaultData: ProfileData = {
   name: "ascend2k",
@@ -17,6 +17,8 @@ const defaultData: ProfileData = {
   wins: "5",
   totalWon: "$325",
   topWin: "$200",
+  level: "0",
+  progress: 75,
 };
 
 type FieldDef = {
@@ -33,6 +35,12 @@ const sections: { title: string; fields: FieldDef[] }[] = [
     fields: [
       { key: "name", label: "Display name", icon: User, placeholder: "ascend2k" },
       { key: "joinDate", label: "Joined date", icon: Calendar, placeholder: "Joined September 2025" },
+    ],
+  },
+  {
+    title: "Avatar",
+    fields: [
+      { key: "level", label: "Level badge", icon: Award, placeholder: "0" },
     ],
   },
   {
@@ -65,8 +73,8 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
     if (open) setForm(data);
   }, [open, data]);
 
-  const updateField = (k: keyof ProfileData, v: string) => {
-    const next = { ...form, [k]: v };
+  const updateField = (k: keyof ProfileData, v: string | number) => {
+    const next = { ...form, [k]: v } as ProfileData;
     setForm(next);
     setData(next);
   };
@@ -216,6 +224,41 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
                       );
                     })}
                   </div>
+                  {section.title === "Avatar" && (
+                    <div
+                      className="mt-1.5 flex items-center gap-2 rounded-lg px-2 py-1.5"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                      }}
+                    >
+                      <div
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+                        style={{
+                          background: "color-mix(in oklab, var(--primary) 18%, transparent)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        <Activity className="h-3 w-3" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                            Progress ring
+                          </label>
+                          <span className="text-[11px] font-semibold tabular-nums">{form.progress}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={form.progress}
+                          onChange={(e) => updateField("progress", Number(e.target.value))}
+                          className="mt-1 w-full accent-[color:var(--primary)]"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

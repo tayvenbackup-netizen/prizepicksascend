@@ -1,36 +1,76 @@
 import { useState } from "react";
-import { PLogo } from "./Icons";
 import searchCircle from "@/assets/major/search-circle.png";
 import shareBtn from "@/assets/major/share-btn.png";
+import avatarImg from "@/assets/profile-avatar.jpg";
 import { useProfile } from "./ProfileContext";
 import { EditProfileDialog } from "./EditProfileDialog";
+
+function ProgressRing({ size, stroke, progress }: { size: number; stroke: number; progress: number }) {
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(100, progress));
+  // Leave a small gap at bottom (like reference), arc spans ~85% of circle
+  const arcFraction = 0.85;
+  const arcLen = c * arcFraction;
+  const dash = (clamped / 100) * arcLen;
+  const gap = c - dash;
+  // Rotate so the arc starts from bottom-left and sweeps clockwise around the top
+  return (
+    <svg
+      width={size}
+      height={size}
+      className="absolute inset-0 pointer-events-none"
+      style={{ transform: "rotate(135deg)" }}
+    >
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke="rgba(255,255,255,0.10)"
+        strokeWidth={stroke}
+        strokeDasharray={`${arcLen} ${c}`}
+        strokeLinecap="round"
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth={stroke}
+        strokeDasharray={`${dash} ${gap}`}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 export function ProfileHeader() {
   const { data } = useProfile();
   const [open, setOpen] = useState(false);
+  const size = 76;
 
   return (
     <section className="px-4 pt-4">
       <div className="flex items-center gap-4">
-        <div className="relative shrink-0">
+        <div className="relative shrink-0" style={{ width: size, height: size }}>
+          <ProgressRing size={size} stroke={3} progress={data.progress} />
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex items-center justify-center rounded-full"
-            style={{
-              width: 72,
-              height: 72,
-              background: "rgba(255,255,255,0.10)",
-              padding: 2,
-            }}
+            className="absolute inset-[6px] flex items-center justify-center overflow-hidden rounded-full"
             aria-label="Edit profile"
           >
-            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
-              <PLogo size={68} />
-            </div>
+            <img
+              src={avatarImg}
+              alt="avatar"
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           </button>
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-md bg-[#1a1830] px-1.5 py-[1px] text-[11px] font-bold text-foreground pointer-events-none">
-            0
+            {data.level}
           </div>
         </div>
 
@@ -56,11 +96,11 @@ export function ProfileHeader() {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button aria-label="search" className="shrink-0 flex items-center justify-center h-[80px]">
-            <img src={searchCircle} alt="search" className="h-[72px] w-[72px] object-contain" draggable={false} />
+          <button aria-label="search" className="shrink-0 flex items-center justify-center h-[57px]">
+            <img src={searchCircle} alt="search" className="h-[49px] w-[49px] object-contain" draggable={false} />
           </button>
-          <button aria-label="share" className="shrink-0 flex items-center justify-center h-[86px] -ml-[18px] mt-[3px]">
-            <img src={shareBtn} alt="Share" className="h-[101px] w-auto object-contain object-left" draggable={false} />
+          <button aria-label="share" className="shrink-0 flex items-center justify-center h-[63px] -ml-[12px] mt-[3px]">
+            <img src={shareBtn} alt="Share" className="h-[78px] w-auto object-contain object-left" draggable={false} />
           </button>
         </div>
       </div>
