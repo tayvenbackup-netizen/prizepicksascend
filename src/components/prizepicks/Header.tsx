@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { PLogo } from "./Icons";
 import playersPill from "@/assets/major/players-pill.png";
 import dollarSign from "@/assets/major/dollar-sign.png";
@@ -5,16 +6,18 @@ import plusCircle from "@/assets/major/plus-circle.png";
 import arrowDown from "@/assets/major/arrow-down.png";
 import { useProfile } from "./ProfileContext";
 import { autoComma } from "@/lib/fmt";
+import { MainMenu } from "./MainMenu";
 
 export function TopHeader() {
   const { data } = useProfile();
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <header
       className="flex items-center justify-between gap-2 px-3 pb-2"
       style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)" }}
     >
       <div className="flex items-center shrink-0" style={{ gap: 0 }}>
-        <button aria-label="menu" style={{ color: "#93939f" }}>
+        <button aria-label="menu" onClick={() => setMenuOpen(true)} style={{ color: "#93939f" }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" className="h-[32px] w-[32px]">
             <path d="M4 8h16" />
             <path d="M4 13h16" />
