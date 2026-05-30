@@ -22,7 +22,8 @@ export function EntriesView() {
   const showEmpty = (tab === "open" && open.length === 0) || (tab === "past" && past.length === 0);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col">
+
       {/* Sticky header: Open/Past tabs + stat cards */}
       <div className="shrink-0 bg-background">
         <div className="px-4 pt-3">
@@ -89,10 +90,7 @@ export function EntriesView() {
             >
               Start an entry
             </button>
-
-            <FilterPill />
           </div>
-
         ) : (
           <div className="flex flex-col px-4 pt-5 pb-6">
             {tab === "open" ? (
@@ -113,14 +111,18 @@ export function EntriesView() {
                 {past.map((e) => <EntryCard key={e.id} entry={e} />)}
               </Section>
             )}
-
-            <div className="mt-6 flex justify-center">
-              <FilterPill />
-            </div>
           </div>
         )}
       </div>
+
+      {/* Pinned Filter button above bottom nav */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-2 z-20 flex justify-center">
+        <div className="pointer-events-auto">
+          <FilterPill />
+        </div>
+      </div>
     </div>
+
   );
 }
 
