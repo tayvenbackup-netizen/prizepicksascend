@@ -33,7 +33,7 @@ export function BottomNav({
     <nav className="fixed inset-x-0 bottom-0 z-30 bg-background">
       <div className="mx-auto w-full">
 
-        <div className="grid grid-cols-5 pt-2 pb-2">
+        <div className="grid grid-cols-5 pt-2 pb-0">
           {items.map((it) => {
             const isActive = active === it.id;
             return (
