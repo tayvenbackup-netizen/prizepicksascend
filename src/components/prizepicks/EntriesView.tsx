@@ -22,7 +22,8 @@ export function EntriesView() {
   const showEmpty = (tab === "open" && open.length === 0) || (tab === "past" && past.length === 0);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col">
+
       {/* Sticky header: Open/Past tabs + stat cards */}
       <div className="shrink-0 bg-background">
         <div className="px-4 pt-3">
