@@ -90,10 +90,7 @@ export function EntriesView() {
             >
               Start an entry
             </button>
-
-            <FilterPill />
           </div>
-
         ) : (
           <div className="flex flex-col px-4 pt-5 pb-6">
             {tab === "open" ? (
@@ -114,14 +111,18 @@ export function EntriesView() {
                 {past.map((e) => <EntryCard key={e.id} entry={e} />)}
               </Section>
             )}
-
-            <div className="mt-6 flex justify-center">
-              <FilterPill />
-            </div>
           </div>
         )}
       </div>
+
+      {/* Pinned Filter button above bottom nav */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-2 z-20 flex justify-center">
+        <div className="pointer-events-auto">
+          <FilterPill />
+        </div>
+      </div>
     </div>
+
   );
 }
 
