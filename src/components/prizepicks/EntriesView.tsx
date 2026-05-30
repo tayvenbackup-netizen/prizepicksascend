@@ -25,7 +25,7 @@ export function EntriesView() {
     <div className="flex h-full flex-col">
       {/* Sticky header: Open/Past tabs + stat cards */}
       <div className="shrink-0 bg-background">
-        <div className="px-4 pt-4">
+        <div className="px-4 pt-3">
           <div className="relative grid grid-cols-2">
             {(["open", "past"] as const).map((t) => {
               const isActive = tab === t;
@@ -33,7 +33,7 @@ export function EntriesView() {
                 <button
                   key={t}
                   onClick={() => setTab(t)}
-                  className={`relative pb-2.5 text-center text-[15px] transition-colors ${
+                  className={`relative pb-2 text-center text-[12px] transition-colors ${
                     isActive ? "text-foreground font-bold" : "text-muted-foreground font-semibold"
                   }`}
                 >
@@ -43,22 +43,22 @@ export function EntriesView() {
             })}
             <span className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-white/15" />
             <span
-              className="pointer-events-none absolute bottom-0 h-[3px] w-1/2 rounded-full bg-primary transition-all duration-200"
+              className="pointer-events-none absolute bottom-0 h-[2px] w-1/2 rounded-full bg-primary transition-all duration-200"
               style={{ transform: `translateX(${tab === "open" ? "0%" : "100%"})` }}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 px-4 pt-4 pb-2">
-          <div className="rounded-2xl bg-surface px-4 py-5 text-center">
-            <div className="text-[26px] font-bold leading-none">{totalOpen}</div>
-            <div className="mt-2 text-[13px] text-foreground/90">Entries Open</div>
+        <div className="grid grid-cols-2 gap-2.5 px-4 pt-3 pb-1.5">
+          <div className="rounded-2xl bg-surface px-3 py-3.5 text-center">
+            <div className="text-[20px] font-bold leading-none">{totalOpen}</div>
+            <div className="mt-1.5 text-[11px] text-foreground/90">Entries Open</div>
           </div>
-          <div className="rounded-2xl bg-surface px-4 py-5 text-center">
-            <div className="text-[26px] font-bold leading-none">
+          <div className="rounded-2xl bg-surface px-3 py-3.5 text-center">
+            <div className="text-[20px] font-bold leading-none">
               {fmtMoney(totalPotential)}
             </div>
-            <div className="mt-2 text-[13px] text-foreground/90">Potential Winnings</div>
+            <div className="mt-1.5 text-[11px] text-foreground/90">Potential Winnings</div>
           </div>
         </div>
       </div>
@@ -66,12 +66,12 @@ export function EntriesView() {
       {/* Scrollable area below the tabs */}
       <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-24">
         {showEmpty ? (
-          <div className="flex flex-col items-center justify-start px-6 pt-10 pb-8">
-            <img src={emptyEntries} alt="" className="h-[180px] w-auto object-contain select-none" draggable={false} />
-            <h2 className="mt-6 text-[28px] font-bold tracking-tight">
+          <div className="flex flex-col items-center justify-start px-6 pt-6 pb-6">
+            <img src={emptyEntries} alt="" className="h-[130px] w-auto object-contain select-none" draggable={false} />
+            <h2 className="mt-4 text-[20px] font-bold tracking-tight">
               {tab === "open" ? "No open entries" : "No past entries"}
             </h2>
-            <p className="mt-3 text-center text-[15px] leading-snug text-foreground/90">
+            <p className="mt-2 text-center text-[12px] leading-snug text-foreground/90">
               {tab === "open" ? (
                 <>
                   Your open entries will appear here.
@@ -85,13 +85,14 @@ export function EntriesView() {
 
             <button
               type="button"
-              className="mt-7 rounded-full bg-primary px-10 py-3.5 text-[15px] font-bold text-primary-foreground shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform"
+              className="mt-5 rounded-full bg-primary px-7 py-2.5 text-[12px] font-bold text-primary-foreground shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform"
             >
               Start an entry
             </button>
 
             <FilterPill />
           </div>
+
         ) : (
           <div className="flex flex-col px-4 pt-5 pb-6">
             {tab === "open" ? (
