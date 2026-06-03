@@ -90,7 +90,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
               <div className="mt-3.5 rounded-xl bg-[#1f202d] px-3 py-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <img src={coinPlayers} alt="" className="h-[10px] w-[10px] rounded-full object-contain" />
+                    <img src={coinPlayers} alt="" className="h-[20px] w-[20px] rounded-full object-contain" />
                     <div>
                       <p className="text-[12px] font-bold text-white leading-tight">Players</p>
                       <p className="mt-0.5 text-[10px] text-white/55 leading-tight">For player stats and performance</p>
@@ -104,7 +104,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
                       <path d="M4 4v8a4 4 0 0 0 4 4h11" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="m15 12 4 4-4 4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <img src={coinTeams} alt="" className="h-[10px] w-[10px] rounded-full object-contain" />
+                    <img src={coinTeams} alt="" className="h-[20px] w-[20px] rounded-full object-contain" />
                     <div>
                       <p className="text-[12px] font-bold text-white leading-tight">Teams &amp; Culture</p>
                       <p className="mt-0.5 text-[10px] text-white/55 leading-tight">For games and trending topics</p>

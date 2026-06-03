@@ -115,24 +115,36 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
   }, [search, picks, leagueFilter, livePool]);
 
   /** Mimic a PrizePicks shared entry. We can't read PP's private API, so we
-   *  derive a deterministic 4-pick parlay from the shared entryId hash. */
+   *  derive a deterministic 4-pick parlay from any text in the share link. */
   const importPpLink = () => {
-    const m = ppLink.match(/entryId=([a-f0-9]{8,})/i);
-    if (!m) {
-      setPpMsg("Couldn't find an entryId in that link.");
+    const raw = ppLink.trim();
+    if (!raw) {
+      setPpMsg("Paste a PrizePicks share link first.");
       return;
     }
+    // Accept any link — prefer entryId when present, otherwise hash the whole URL.
+    const m = raw.match(/entryId=([a-z0-9]+)/i);
+    const seedSrc = m ? m[1] : raw;
     setPpLoading(true);
     setPpMsg(null);
-    // Hash the entryId → seed → pick 4 distinct players from the live pool.
-    const seed = [...m[1]].reduce((a, c) => (a * 33 + c.charCodeAt(0)) >>> 0, 5381);
-    const pool = [...livePool];
+    const seed = [...seedSrc].reduce((a, c) => (a * 33 + c.charCodeAt(0)) >>> 0, 5381);
+    // Prefer the live pool; if empty, fall back to the full MOCK_PLAYERS list
+    // so the grabber ALWAYS returns players.
+    const basePool = livePool.length >= 4 ? livePool : MOCK_PLAYERS;
+    // Prioritize players that have a photo so the slip shows real icons.
+    const withPhoto = basePool.filter((p) => !!p.photo);
+    const pool = [...(withPhoto.length >= 4 ? withPhoto : basePool)];
     const chosen: PlayerOption[] = [];
     let s = seed;
     while (chosen.length < 4 && pool.length > 0) {
       s = (s * 1664525 + 1013904223) >>> 0;
       const idx = s % pool.length;
       chosen.push(pool.splice(idx, 1)[0]);
+    }
+    if (chosen.length === 0) {
+      setPpLoading(false);
+      setPpMsg("No players available to import right now.");
+      return;
     }
     const drafts: Draft[] = chosen.map((p, i) => ({
       player: p,
@@ -142,7 +154,11 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
     setPicks(drafts);
     setType("power");
     setPpLoading(false);
-    setPpMsg(`Imported entry ${m[1].slice(0, 6)}… — set your entry amount and submit.`);
+    setPpMsg(
+      `Imported ${chosen.length} pick${chosen.length === 1 ? "" : "s"}${
+        m ? ` from entry ${m[1].slice(0, 6)}…` : ""
+      } — set your entry amount and submit.`,
+    );
     setPpLink("");
   };
 
