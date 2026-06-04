@@ -293,7 +293,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
               </Button>
             </div>
           </>
-        ) : tab === "lists" ? (
+        ) : (
           <>
             <div className="flex-1 min-h-0 overflow-y-auto px-3.5 py-2.5">
               <ListsEditor />
@@ -321,10 +321,6 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
               </Button>
             </div>
           </>
-        ) : (
-          <div className="flex-1 min-h-0 flex flex-col">
-            <ParlayGen onClose={() => onOpenChange(false)} />
-          </div>
         )}
       </DialogContent>
     </Dialog>
