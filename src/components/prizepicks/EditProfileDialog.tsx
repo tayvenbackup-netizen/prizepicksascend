@@ -6,7 +6,7 @@ import { useProfile, type ProfileData } from "./ProfileContext";
 import { PLogo } from "./Icons";
 // ParlayGen has moved into the Share button (see ShareParlayBuilder).
 import { ListsEditor } from "./ListsEditor";
-import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, Layers, ListChecks, Award, Activity } from "lucide-react";
+import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, ListChecks, Award, Activity } from "lucide-react";
 
 const defaultData: ProfileData = {
   name: "ascend2k",
