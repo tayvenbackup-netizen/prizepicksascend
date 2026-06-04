@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useProfile, type ProfileData } from "./ProfileContext";
 import { PLogo } from "./Icons";
-import { ParlayGen } from "./ParlayGen";
+// ParlayGen has moved into the Share button (see ShareParlayBuilder).
 import { ListsEditor } from "./ListsEditor";
 import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, Layers, ListChecks, Award, Activity } from "lucide-react";
 
