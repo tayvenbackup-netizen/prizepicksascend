@@ -62,6 +62,7 @@ export function ProfileHeader() {
   const { data } = useProfile();
   const { isAdmin } = useAccess();
   const [open, setOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [ringGapWidth, setRingGapWidth] = useState(28);
   const levelBadgeRef = useRef<HTMLDivElement | null>(null);
   const size = 76;
