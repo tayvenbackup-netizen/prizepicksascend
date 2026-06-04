@@ -4,6 +4,7 @@ import shareBtn from "@/assets/major/share-btn.png";
 import avatarImg from "@/assets/profile-avatar.jpg";
 import { useProfile } from "./ProfileContext";
 import { EditProfileDialog } from "./EditProfileDialog";
+import { ShareParlayBuilder } from "./ShareParlayBuilder";
 import { useAccess } from "@/lib/accessContext";
 
 function ProgressRing({
