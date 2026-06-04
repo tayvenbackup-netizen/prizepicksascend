@@ -145,12 +145,11 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
             </span>
           </div>
 
-          {/* Tabs (3) */}
-          <div className="mt-2 grid grid-cols-3 rounded-full bg-black/30 p-0.5">
+          {/* Tabs (2) */}
+          <div className="mt-2 grid grid-cols-2 rounded-full bg-black/30 p-0.5">
             {([
               { id: "profile" as const, label: "Profile", Icon: User },
               { id: "lists" as const, label: "Lists", Icon: ListChecks },
-              { id: "parlay" as const, label: "Parlay", Icon: Layers },
             ]).map(({ id, label, Icon }) => {
               const active = tab === id;
               return (
