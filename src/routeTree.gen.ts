@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicEspnTeamsRouteImport } from './routes/api/public/espn-teams'
+import { Route as ApiPublicEspnScoreboardRouteImport } from './routes/api/public/espn-scoreboard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,43 @@ const ApiPublicEspnTeamsRoute = ApiPublicEspnTeamsRouteImport.update({
   path: '/api/public/espn-teams',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEspnScoreboardRoute = ApiPublicEspnScoreboardRouteImport.update({
+  id: '/api/public/espn-scoreboard',
+  path: '/api/public/espn-scoreboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/espn-scoreboard': typeof ApiPublicEspnScoreboardRoute
   '/api/public/espn-teams': typeof ApiPublicEspnTeamsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/espn-scoreboard': typeof ApiPublicEspnScoreboardRoute
   '/api/public/espn-teams': typeof ApiPublicEspnTeamsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/espn-scoreboard': typeof ApiPublicEspnScoreboardRoute
   '/api/public/espn-teams': typeof ApiPublicEspnTeamsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/espn-teams'
+  fullPaths: '/' | '/api/public/espn-scoreboard' | '/api/public/espn-teams'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/espn-teams'
-  id: '__root__' | '/' | '/api/public/espn-teams'
+  to: '/' | '/api/public/espn-scoreboard' | '/api/public/espn-teams'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/public/espn-scoreboard'
+    | '/api/public/espn-teams'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicEspnScoreboardRoute: typeof ApiPublicEspnScoreboardRoute
   ApiPublicEspnTeamsRoute: typeof ApiPublicEspnTeamsRoute
 }
 
@@ -65,11 +79,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEspnTeamsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/espn-scoreboard': {
+      id: '/api/public/espn-scoreboard'
+      path: '/api/public/espn-scoreboard'
+      fullPath: '/api/public/espn-scoreboard'
+      preLoaderRoute: typeof ApiPublicEspnScoreboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicEspnScoreboardRoute: ApiPublicEspnScoreboardRoute,
   ApiPublicEspnTeamsRoute: ApiPublicEspnTeamsRoute,
 }
 export const routeTree = rootRouteImport
