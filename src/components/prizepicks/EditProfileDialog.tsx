@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useProfile, type ProfileData } from "./ProfileContext";
 import { PLogo } from "./Icons";
-import { ParlayGen } from "./ParlayGen";
+// ParlayGen has moved into the Share button (see ShareParlayBuilder).
 import { ListsEditor } from "./ListsEditor";
-import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, Layers, ListChecks, Award, Activity } from "lucide-react";
+import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, ListChecks, Award, Activity } from "lucide-react";
 
 const defaultData: ProfileData = {
   name: "ascend2k",
@@ -67,7 +67,7 @@ const sections: { title: string; fields: FieldDef[] }[] = [
 export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const { data, setData } = useProfile();
   const [form, setForm] = useState<ProfileData>(data);
-  const [tab, setTab] = useState<"profile" | "lists" | "parlay">("profile");
+  const [tab, setTab] = useState<"profile" | "lists">("profile");
 
   useEffect(() => {
     if (open) setForm(data);
@@ -145,12 +145,11 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
             </span>
           </div>
 
-          {/* Tabs (3) */}
-          <div className="mt-2 grid grid-cols-3 rounded-full bg-black/30 p-0.5">
+          {/* Tabs (2) */}
+          <div className="mt-2 grid grid-cols-2 rounded-full bg-black/30 p-0.5">
             {([
               { id: "profile" as const, label: "Profile", Icon: User },
               { id: "lists" as const, label: "Lists", Icon: ListChecks },
-              { id: "parlay" as const, label: "Parlay", Icon: Layers },
             ]).map(({ id, label, Icon }) => {
               const active = tab === id;
               return (
@@ -294,7 +293,7 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
               </Button>
             </div>
           </>
-        ) : tab === "lists" ? (
+        ) : (
           <>
             <div className="flex-1 min-h-0 overflow-y-auto px-3.5 py-2.5">
               <ListsEditor />
@@ -322,10 +321,6 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
               </Button>
             </div>
           </>
-        ) : (
-          <div className="flex-1 min-h-0 flex flex-col">
-            <ParlayGen onClose={() => onOpenChange(false)} />
-          </div>
         )}
       </DialogContent>
     </Dialog>
