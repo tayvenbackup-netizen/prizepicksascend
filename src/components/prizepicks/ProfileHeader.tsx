@@ -135,13 +135,18 @@ export function ProfileHeader() {
               <img src={searchCircle} alt="search" className="h-[49px] w-[49px] object-contain" draggable={false} />
             </button>
           )}
-          <button aria-label="share" className="shrink-0 flex items-center justify-center h-[63px] -ml-[12px] mt-[3px]">
+          <button
+            aria-label="share"
+            onClick={() => setShareOpen(true)}
+            className="shrink-0 flex items-center justify-center h-[63px] -ml-[12px] mt-[3px]"
+          >
             <img src={shareBtn} alt="Share" className="h-[78px] w-auto object-contain object-left" draggable={false} />
           </button>
         </div>
       </div>
 
       <EditProfileDialog open={open} onOpenChange={setOpen} />
+      <ShareParlayBuilder open={shareOpen} onClose={() => setShareOpen(false)} />
     </section>
   );
 }
