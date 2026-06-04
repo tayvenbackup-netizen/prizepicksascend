@@ -67,7 +67,7 @@ const sections: { title: string; fields: FieldDef[] }[] = [
 export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const { data, setData } = useProfile();
   const [form, setForm] = useState<ProfileData>(data);
-  const [tab, setTab] = useState<"profile" | "lists" | "parlay">("profile");
+  const [tab, setTab] = useState<"profile" | "lists">("profile");
 
   useEffect(() => {
     if (open) setForm(data);
