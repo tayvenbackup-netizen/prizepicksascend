@@ -4,6 +4,7 @@ import flagIcon from "@/assets/flag-icon.png";
 import { useEntries, type Entry } from "./EntriesContext";
 import { CheckBadge, XBadge } from "./Icons";
 import { fmtMoney } from "@/lib/fmt";
+import { EntryDetailSheet } from "./EntryDetailSheet";
 
 export function EntriesView() {
   const [tab, setTab] = useState<"open" | "past">("open");
