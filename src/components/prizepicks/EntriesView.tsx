@@ -8,6 +8,7 @@ import { EntryDetailSheet } from "./EntryDetailSheet";
 
 export function EntriesView() {
   const [tab, setTab] = useState<"open" | "past">("open");
+  const [openEntryId, setOpenEntryId] = useState<string | null>(null);
   const { entries } = useEntries();
 
   const open = entries.filter((e) => e.status === "live" || e.status === "upcoming");
