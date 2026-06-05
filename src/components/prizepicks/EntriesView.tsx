@@ -153,7 +153,7 @@ function planLabel(entry: Entry) {
   return `${entry.picks.length}-Pick ${entry.type === "power" ? "Power" : "Flex"} Play`;
 }
 
-function EntryCard({ entry }: { entry: Entry }) {
+function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
   const visible = entry.picks.slice(0, 4);
   const extra = entry.picks.length - visible.length;
   const namesList = entry.picks
@@ -163,7 +163,11 @@ function EntryCard({ entry }: { entry: Entry }) {
   const namesSuffix = entry.picks.length > 5 ? `, +${entry.picks.length - 5}` : "";
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-surface p-4">
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left rounded-2xl border border-white/5 bg-surface p-4 active:scale-[0.99] transition-transform"
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-[15px] font-bold">
