@@ -4,9 +4,11 @@ import flagIcon from "@/assets/flag-icon.png";
 import { useEntries, type Entry } from "./EntriesContext";
 import { CheckBadge, XBadge } from "./Icons";
 import { fmtMoney } from "@/lib/fmt";
+import { EntryDetailSheet } from "./EntryDetailSheet";
 
 export function EntriesView() {
   const [tab, setTab] = useState<"open" | "past">("open");
+  const [openEntryId, setOpenEntryId] = useState<string | null>(null);
   const { entries } = useEntries();
 
   const open = entries.filter((e) => e.status === "live" || e.status === "upcoming");
@@ -97,18 +99,24 @@ export function EntriesView() {
               <>
                 {live.length > 0 && (
                   <Section title="Live">
-                    {live.map((e) => <EntryCard key={e.id} entry={e} />)}
+                    {live.map((e) => (
+                      <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
+                    ))}
                   </Section>
                 )}
                 {upcoming.length > 0 && (
                   <Section title="Upcoming">
-                    {upcoming.map((e) => <EntryCard key={e.id} entry={e} />)}
+                    {upcoming.map((e) => (
+                      <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
+                    ))}
                   </Section>
                 )}
               </>
             ) : (
               <Section title="Past">
-                {past.map((e) => <EntryCard key={e.id} entry={e} />)}
+                {past.map((e) => (
+                  <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
+                ))}
               </Section>
             )}
           </div>
@@ -121,6 +129,12 @@ export function EntriesView() {
           <FilterPill />
         </div>
       </div>
+
+      <EntryDetailSheet
+        entryId={openEntryId}
+        open={openEntryId !== null}
+        onOpenChange={(v) => !v && setOpenEntryId(null)}
+      />
     </div>
 
   );
@@ -139,7 +153,7 @@ function planLabel(entry: Entry) {
   return `${entry.picks.length}-Pick ${entry.type === "power" ? "Power" : "Flex"} Play`;
 }
 
-function EntryCard({ entry }: { entry: Entry }) {
+function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
   const visible = entry.picks.slice(0, 4);
   const extra = entry.picks.length - visible.length;
   const namesList = entry.picks
@@ -149,7 +163,11 @@ function EntryCard({ entry }: { entry: Entry }) {
   const namesSuffix = entry.picks.length > 5 ? `, +${entry.picks.length - 5}` : "";
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-surface p-4">
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left rounded-2xl border border-white/5 bg-surface p-4 active:scale-[0.99] transition-transform"
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-[15px] font-bold">
@@ -196,7 +214,7 @@ function EntryCard({ entry }: { entry: Entry }) {
         {namesList}
         {namesSuffix}
       </div>
-    </div>
+    </button>
   );
 }
 
