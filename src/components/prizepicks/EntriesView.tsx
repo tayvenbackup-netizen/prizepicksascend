@@ -99,18 +99,24 @@ export function EntriesView() {
               <>
                 {live.length > 0 && (
                   <Section title="Live">
-                    {live.map((e) => <EntryCard key={e.id} entry={e} />)}
+                    {live.map((e) => (
+                      <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
+                    ))}
                   </Section>
                 )}
                 {upcoming.length > 0 && (
                   <Section title="Upcoming">
-                    {upcoming.map((e) => <EntryCard key={e.id} entry={e} />)}
+                    {upcoming.map((e) => (
+                      <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
+                    ))}
                   </Section>
                 )}
               </>
             ) : (
               <Section title="Past">
-                {past.map((e) => <EntryCard key={e.id} entry={e} />)}
+                {past.map((e) => (
+                  <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
+                ))}
               </Section>
             )}
           </div>
@@ -123,6 +129,12 @@ export function EntriesView() {
           <FilterPill />
         </div>
       </div>
+
+      <EntryDetailSheet
+        entryId={openEntryId}
+        open={openEntryId !== null}
+        onOpenChange={(v) => !v && setOpenEntryId(null)}
+      />
     </div>
 
   );
