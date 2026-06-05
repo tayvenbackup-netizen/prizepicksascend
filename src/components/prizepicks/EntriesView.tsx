@@ -214,7 +214,7 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
         {namesList}
         {namesSuffix}
       </div>
-    </div>
+    </button>
   );
 }
 
