@@ -11,6 +11,8 @@ export type ParlayPick = {
   /** result: pending while live/upcoming, win/loss after settlement */
   result?: "pending" | "win" | "loss";
   photo?: string;
+  /** Current/final stat value used to fill the progress bar. */
+  currentValue?: number;
 };
 
 export type ParlayType = "power" | "flex";
@@ -30,6 +32,8 @@ type Ctx = {
   entries: Entry[];
   addEntry: (e: Omit<Entry, "id" | "createdAt">) => void;
   removeEntry: (id: string) => void;
+  updateEntry: (id: string, patch: Partial<Omit<Entry, "id" | "createdAt">>) => void;
+  updatePick: (entryId: string, pickId: string, patch: Partial<ParlayPick>) => void;
 };
 
 const EntriesContext = createContext<Ctx | null>(null);
@@ -51,8 +55,22 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
   const removeEntry = (id: string) =>
     setEntries((prev) => prev.filter((e) => e.id !== id));
 
+  const updateEntry: Ctx["updateEntry"] = (id, patch) =>
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+
+  const updatePick: Ctx["updatePick"] = (entryId, pickId, patch) =>
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id !== entryId
+          ? e
+          : { ...e, picks: e.picks.map((p) => (p.id === pickId ? { ...p, ...patch } : p)) },
+      ),
+    );
+
   return (
-    <EntriesContext.Provider value={{ entries, addEntry, removeEntry }}>
+    <EntriesContext.Provider
+      value={{ entries, addEntry, removeEntry, updateEntry, updatePick }}
+    >
       {children}
     </EntriesContext.Provider>
   );
