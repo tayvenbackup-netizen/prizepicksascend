@@ -4,6 +4,8 @@ import IntroOverlay from './IntroOverlay';
 import AdminPanel from '../admin/AdminPanel';
 import { useAccessControl } from '@/hooks/useAccessControl';
 import { AccessContext } from '@/lib/accessContext';
+import introVideo from '@/assets/intro.mp4.asset.json';
+
 
 interface Props { children: ReactNode }
 
@@ -27,11 +29,19 @@ export const GateRoot = ({ children }: Props) => {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: '#0a0a14', color: '#bbaefc' }}>
-        <div className="text-xs uppercase tracking-[0.3em]">Ascend2k LarpPickz</div>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black">
+        <video
+          src={introVideo.url}
+          autoPlay
+          muted
+          playsInline
+          loop
+          className="w-full h-full object-cover"
+        />
       </div>
     );
   }
+
 
   if (!isAuthed) {
     return (
