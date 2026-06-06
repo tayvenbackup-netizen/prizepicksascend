@@ -543,9 +543,13 @@ function Header({
         ? `${step.sport} · Next 10 Days`
         : step.kind === "teams"
           ? "Pick a team"
-          : step.kind === "roster"
-            ? step.team.name
-            : step.player.name;
+          : step.kind === "pastTeams"
+            ? `${step.sport} · All Teams`
+            : step.kind === "roster"
+              ? step.team.name
+              : step.kind === "markets"
+                ? step.player.name
+                : "";
   return (
     <div className="flex shrink-0 items-center gap-2 px-3 pb-2">
       <button onClick={onBack} className="p-1 text-white" aria-label="Back">
