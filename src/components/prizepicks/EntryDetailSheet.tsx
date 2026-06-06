@@ -162,7 +162,7 @@ function SheetBody({
     statusLabel === "Win"
       ? "bg-success/15 text-success"
       : statusLabel === "Loss"
-      ? "bg-destructive/15 text-destructive"
+      ? "bg-white/[0.06] text-foreground/80"
       : statusLabel === "Past"
       ? "bg-white/10 text-foreground/70"
       : "bg-destructive/15 text-destructive";
