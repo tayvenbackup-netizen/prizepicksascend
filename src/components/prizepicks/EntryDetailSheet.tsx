@@ -513,6 +513,18 @@ function PickRow({
           </div>
         </div>
       )}
+      {editing && (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Modifier
+          </span>
+          <BadgePicker
+            value={pick.badge ?? null}
+            size="xs"
+            onChange={(b) => onUpdate(pick.id, { badge: b })}
+          />
+        </div>
+      )}
     </div>
   );
 }
