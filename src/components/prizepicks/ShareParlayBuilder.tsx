@@ -7,10 +7,12 @@ import {
   useEntries,
   type ParlayPick,
   type ParlayType,
+  type PickBadge,
 } from "./EntriesContext";
 import { SUPPORTED_SPORTS, marketsFor, type Market, type SportKey } from "@/lib/sportsMarkets";
 import { fmtMoney } from "@/lib/fmt";
 import { Jersey } from "./Jersey";
+import { BadgePicker } from "./Badges";
 
 type Game = {
   id: string;
