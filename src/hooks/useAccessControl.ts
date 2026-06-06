@@ -19,6 +19,10 @@ const API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-key`
 const SESSION_STORAGE_KEY = 'tl_ac_session_v2';
 
 function getDeviceFingerprint(): string {
+  if (typeof navigator === 'undefined' || typeof screen === 'undefined') {
+    return 'server';
+  }
+
   const signals = [
     navigator.userAgent, navigator.language,
     screen.width + 'x' + screen.height, screen.colorDepth?.toString() ?? '',
@@ -38,7 +42,7 @@ function getDeviceFingerprint(): string {
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 
-const DEVICE_FP = getDeviceFingerprint();
+const DEVICE_FP = typeof window !== 'undefined' ? getDeviceFingerprint() : 'server';
 
 async function loadPersistedSession(): Promise<SessionInfo | null> {
   try {

@@ -10,7 +10,8 @@ interface Props { children: ReactNode }
 export const GateRoot = ({ children }: Props) => {
   const { isAuthed, isAdmin, isLoading, validateKey, error, session } = useAccessControl();
   const [adminOpen, setAdminOpen] = useState(false);
-  const [introSrc, setIntroSrc] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+  const [introReady, setIntroReady] = useState(false);
   const [introStarted, setIntroStarted] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const introVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -26,54 +27,37 @@ export const GateRoot = ({ children }: Props) => {
   }, [isAdmin]);
 
   useEffect(() => {
-    let cancelled = false;
-    let objectUrl: string | null = null;
-
-    const preloadIntro = async () => {
-      try {
-        const response = await fetch(introVideo.url, { cache: 'force-cache' });
-        const blob = await response.blob();
-        if (cancelled) return;
-        objectUrl = URL.createObjectURL(blob);
-        setIntroSrc(objectUrl);
-      } catch {
-        if (!cancelled) {
-          setIntroSrc(introVideo.url);
-        }
-      }
-    };
-
-    void preloadIntro();
-
-    return () => {
-      cancelled = true;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
+    setIsClient(true);
   }, []);
 
   useEffect(() => {
-    if (!introSrc || introStarted || introDone) return;
+    if (!isClient || introDone || introStarted) return;
 
     const video = introVideoRef.current;
     if (!video) return;
 
     const startPlayback = async () => {
       try {
+        video.muted = true;
+        video.defaultMuted = true;
         video.currentTime = 0;
         await video.play();
         setIntroStarted(true);
-      } catch {
-        setIntroStarted(false);
-      }
+      } catch {}
     };
 
     void startPlayback();
-  }, [introDone, introSrc, introStarted]);
+    const retryTimer = window.setInterval(() => {
+      if (!introStarted) {
+        void startPlayback();
+      }
+    }, 250);
+
+    return () => window.clearInterval(retryTimer);
+  }, [introDone, introStarted, isClient]);
 
   useEffect(() => {
-    if (introDone || introStarted) return;
+    if (!isClient || introDone || introStarted) return;
 
     const video = introVideoRef.current;
     if (!video) return;
@@ -84,35 +68,9 @@ export const GateRoot = ({ children }: Props) => {
 
     window.addEventListener('pointerdown', resumePlayback, { once: true });
     return () => window.removeEventListener('pointerdown', resumePlayback);
-  }, [introDone, introStarted]);
+  }, [introDone, introStarted, isClient]);
 
-  const showIntroVideo = !introDone || isLoading;
-
-  if (showIntroVideo) {
-    return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black">
-        {introSrc ? (
-          <video
-            ref={introVideoRef}
-            src={introSrc}
-            autoPlay
-            muted
-            playsInline
-            preload="auto"
-            onPlaying={() => setIntroStarted(true)}
-            onEnded={() => setIntroDone(true)}
-            className="h-full w-full object-cover"
-          />
-        ) : null}
-      </div>
-    );
-  }
-
-  if (!isAuthed) {
-    return <KeyEntryScreen onValidate={validateKey} error={error} />;
-  }
-
-  return (
+  const appContent = isAuthed ? (
     <AccessContext.Provider value={{ isAdmin }}>
       {children}
       <AdminPanel
@@ -121,5 +79,38 @@ export const GateRoot = ({ children }: Props) => {
         subAdminId={session?.is_sub_admin ? session.sub_admin_id : undefined}
       />
     </AccessContext.Provider>
+  ) : isLoading ? (
+    <div className="fixed inset-0 bg-background" />
+  ) : (
+    <KeyEntryScreen onValidate={validateKey} error={error} />
+  );
+
+  return (
+    <>
+      {appContent}
+      {isClient && !introDone ? (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black">
+          <video
+            ref={introVideoRef}
+            src={introVideo.url}
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            onLoadedData={() => setIntroReady(true)}
+            onCanPlay={() => setIntroReady(true)}
+            onPlaying={() => {
+              setIntroReady(true);
+              setIntroStarted(true);
+            }}
+            onEnded={() => setIntroDone(true)}
+            onError={() => setIntroDone(true)}
+            disablePictureInPicture
+            controls={false}
+            className={`h-full w-full object-cover transition-opacity duration-300 ${introReady ? 'opacity-100' : 'opacity-0'}`}
+          />
+        </div>
+      ) : null}
+    </>
   );
 };
