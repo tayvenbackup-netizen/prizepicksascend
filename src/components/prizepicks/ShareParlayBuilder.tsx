@@ -312,6 +312,36 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                   </div>
                 </div>
 
+                {/* Past mode toggle */}
+                <div className="mt-2 px-4">
+                  <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2">
+                    <div>
+                      <div className="text-[11px] font-bold text-white">Log as past pick</div>
+                      <div className="text-[10px] text-white/55">Record an already-played parlay.</div>
+                    </div>
+                    <button
+                      onClick={() => setPastMode((v) => !v)}
+                      className={`relative h-5 w-9 rounded-full transition-colors ${pastMode ? "bg-[#7c3aed]" : "bg-white/15"}`}
+                      aria-label="Toggle past mode"
+                    >
+                      <span
+                        className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${pastMode ? "left-[18px]" : "left-0.5"}`}
+                      />
+                    </button>
+                  </div>
+                  {pastMode && (
+                    <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2">
+                      <label className="text-[10px] uppercase tracking-wider text-white/55">Date</label>
+                      <input
+                        type="date"
+                        value={pastDate}
+                        onChange={(e) => setPastDate(e.target.value)}
+                        className="ml-auto h-7 rounded-md bg-black/40 px-2 text-[11px] text-white outline-none ring-1 ring-white/10 focus:ring-[#7c3aed]"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* PP import */}
                 <div className="mt-3 px-4">
                   <div className="rounded-xl border border-white/10 bg-white/[0.02] p-2">
