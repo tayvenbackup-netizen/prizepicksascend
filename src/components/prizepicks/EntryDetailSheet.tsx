@@ -13,6 +13,7 @@ import { CheckBadge, XBadge, ShareIcon } from "./Icons";
 import { useEntries, type Entry, type ParlayPick } from "./EntriesContext";
 import { fmtMoney } from "@/lib/fmt";
 import { computePayout } from "./EntriesContext";
+import { BadgeIcon, BadgePicker } from "./Badges";
 
 type Tab = "entry" | "pulse" | "details";
 
@@ -152,7 +153,7 @@ function SheetBody({
   } Play`;
 
   const groups = entry.picks.reduce<Record<string, ParlayPick[]>>((acc, p) => {
-    const key = `${p.league ?? "—"}::${p.team ?? "—"}`;
+    const key = `${p.league ?? "—"}::${p.gameLabel ?? p.team ?? "—"}`;
     (acc[key] ||= []).push(p);
     return acc;
   }, {});
@@ -321,10 +322,14 @@ function SheetBody({
               <MatchupGroup
                 key={key}
                 league={picks[0].league ?? "—"}
-                team={picks[0].team ?? "—"}
+                gameLabel={picks[0].gameLabel ?? picks[0].team ?? "—"}
                 picks={picks}
                 editing={editing}
+                isPast={isPast}
                 onUpdate={(pid, patch) => updatePick(entry.id, pid, patch)}
+                onUpdateGroupLabel={(label) =>
+                  picks.forEach((p) => updatePick(entry.id, p.id, { gameLabel: label }))
+                }
               />
             ))}
           </div>
@@ -340,27 +345,43 @@ function SheetBody({
 
 function MatchupGroup({
   league,
-  team,
+  gameLabel,
   picks,
   editing,
+  isPast,
   onUpdate,
+  onUpdateGroupLabel,
 }: {
   league: string;
-  team: string;
+  gameLabel: string;
   picks: ParlayPick[];
   editing: boolean;
+  isPast: boolean;
   onUpdate: (pickId: string, patch: Partial<ParlayPick>) => void;
+  onUpdateGroupLabel: (label: string) => void;
 }) {
   return (
     <div className="rounded-2xl bg-surface">
-      <div className="flex items-center justify-between px-3 py-2.5 text-[12px]">
-        <div className="flex items-center gap-2">
-          <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-semibold text-foreground/90">
+      <div className="flex items-center justify-between gap-2 px-3 py-2.5 text-[12px]">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-semibold text-foreground/90 shrink-0">
             {league}
           </span>
-          <span className="text-foreground/80">{team}</span>
+          {editing && isPast ? (
+            <input
+              type="text"
+              value={gameLabel}
+              onChange={(e) => onUpdateGroupLabel(e.target.value)}
+              placeholder="ATL 0 vs IND 0"
+              className="min-w-0 flex-1 rounded-md bg-black/40 px-2 py-0.5 text-[12px] text-foreground/90 outline-none ring-1 ring-white/10 focus:ring-primary"
+            />
+          ) : (
+            <span className="truncate text-foreground/80">{gameLabel}</span>
+          )}
         </div>
-        <span className="text-muted-foreground">Final</span>
+        <span className="text-muted-foreground shrink-0">
+          {isPast ? "Final" : "Live"}
+        </span>
       </div>
       <div className="px-3 pb-3 space-y-3">
         {picks.map((p, i) => (
@@ -427,6 +448,7 @@ function PickRow({
         </div>
         <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-right ring-1 ring-white/10">
           <div className="flex items-center justify-end gap-1 text-[14px] font-bold">
+            {pick.badge && <BadgeIcon badge={pick.badge} size={14} />}
             <span>{pick.pick === "over" ? "↑" : "↓"}</span>
             <span>{pick.line}</span>
           </div>
@@ -489,6 +511,18 @@ function PickRow({
               </button>
             ))}
           </div>
+        </div>
+      )}
+      {editing && (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Modifier
+          </span>
+          <BadgePicker
+            value={pick.badge ?? null}
+            size="xs"
+            onChange={(b) => onUpdate(pick.id, { badge: b })}
+          />
         </div>
       )}
     </div>

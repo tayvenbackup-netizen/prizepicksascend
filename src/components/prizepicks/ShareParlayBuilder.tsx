@@ -7,10 +7,12 @@ import {
   useEntries,
   type ParlayPick,
   type ParlayType,
+  type PickBadge,
 } from "./EntriesContext";
 import { SUPPORTED_SPORTS, marketsFor, type Market, type SportKey } from "@/lib/sportsMarkets";
 import { fmtMoney } from "@/lib/fmt";
 import { Jersey } from "./Jersey";
+import { BadgePicker } from "./Badges";
 
 type Game = {
   id: string;
@@ -41,7 +43,7 @@ type Step =
   | { kind: "teams"; sport: SportKey; game: Game }
   | { kind: "roster"; sport: SportKey; team: TeamLite; gameLabel: string }
   | { kind: "pastTeams"; sport: SportKey }
-  | { kind: "markets"; sport: SportKey; player: Player };
+  | { kind: "markets"; sport: SportKey; player: Player; gameLabel?: string };
 
 type Draft = {
   key: string;
@@ -50,6 +52,8 @@ type Draft = {
   market: Market;
   pick: "over" | "under";
   line: string;
+  badge?: PickBadge;
+  gameLabel?: string;
 };
 
 function fmtShort(iso: string) {
@@ -133,6 +137,8 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       photo: d.player.photo || undefined,
       // Always start neutral; client edits the value later.
       currentValue: 0,
+      badge: d.badge ?? null,
+      gameLabel: d.gameLabel,
     }));
     addEntry({
       type: effectiveType,
@@ -188,7 +194,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
             onBack={() => {
               if (step.kind === "markets") {
                 if (pastMode) setStep({ kind: "pastTeams", sport: step.sport });
-                else setStep({ kind: "roster", sport: step.sport, team: { id: step.player.team, name: step.player.team, abbr: step.player.team, logo: null }, gameLabel: "" });
+                else setStep({ kind: "roster", sport: step.sport, team: { id: step.player.team, name: step.player.team, abbr: step.player.team, logo: null }, gameLabel: step.gameLabel ?? "" });
               }
               else if (step.kind === "roster") setStep(pastMode ? { kind: "pastTeams", sport: step.sport } : { kind: "sports" });
               else if (step.kind === "pastTeams") setStep({ kind: "sports" });
@@ -227,7 +233,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     kind: "roster",
                     sport: step.sport,
                     team: t,
-                    gameLabel: `${step.game.away.abbr} @ ${step.game.home.abbr} · ${step.game.shortLabel}`,
+                    gameLabel: `${step.game.away.abbr} vs ${step.game.home.abbr} · ${step.game.shortLabel}`,
                   })
                 }
               />
@@ -248,7 +254,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                 sport={step.sport}
                 team={step.team}
                 gameLabel={step.gameLabel}
-                onPick={(p) => setStep({ kind: "markets", sport: step.sport, player: p })}
+                onPick={(p) => setStep({ kind: "markets", sport: step.sport, player: p, gameLabel: step.gameLabel })}
               />
             )}
             {step.kind === "markets" && (
@@ -263,6 +269,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     market,
                     pick,
                     line,
+                    gameLabel: step.gameLabel,
                   })
                 }
               />
@@ -458,6 +465,20 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                                 </button>
                               ))}
                             </div>
+                          </div>
+                          <div className="mt-2 flex items-center justify-between gap-2">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-white/45">
+                              Modifier
+                            </span>
+                            <BadgePicker
+                              value={d.badge ?? null}
+                              size="xs"
+                              onChange={(b) =>
+                                setPicks((arr) =>
+                                  arr.map((x) => (x.key === d.key ? { ...x, badge: b } : x)),
+                                )
+                              }
+                            />
                           </div>
                           {pastMode && (
                             <div className="mt-2 flex gap-1">

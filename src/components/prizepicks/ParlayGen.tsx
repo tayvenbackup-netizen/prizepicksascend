@@ -6,18 +6,21 @@ import {
   useEntries,
   type ParlayPick,
   type ParlayType,
+  type PickBadge,
 } from "./EntriesContext";
 import { MOCK_PLAYERS, SPORT_ORDER, type PlayerOption, type Sport } from "./parlayData";
 import { Sparkles, Link2, Loader2 } from "lucide-react";
 import { fmtMoney } from "@/lib/fmt";
 import { fetchUpcomingTeamSet, teamIsUpcoming } from "@/lib/sportsdb";
 import { Jersey } from "./Jersey";
+import { BadgePicker } from "./Badges";
 
 type Draft = {
   player: PlayerOption;
   pick: "over" | "under";
   /** allow user to override the line — kept as string so the input can be cleared */
   line: string;
+  badge?: PickBadge;
 };
 
 export function ParlayGen({ onClose }: { onClose: () => void }) {
@@ -174,6 +177,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       pick: d.pick,
       result: "pending",
       photo: d.player.photo,
+      badge: d.badge ?? null,
     }));
     addEntry({
       type: effectiveType,
@@ -303,6 +307,13 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                       </button>
                     ))}
                   </div>
+                </div>
+                <div className="mt-1.5 flex items-center justify-end">
+                  <BadgePicker
+                    value={d.badge ?? null}
+                    size="xs"
+                    onChange={(b) => updatePick(i, { badge: b })}
+                  />
                 </div>
               </li>
             ))}
