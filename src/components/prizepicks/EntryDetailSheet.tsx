@@ -448,6 +448,7 @@ function PickRow({
         </div>
         <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-right ring-1 ring-white/10">
           <div className="flex items-center justify-end gap-1 text-[14px] font-bold">
+            {pick.badge && <BadgeIcon badge={pick.badge} size={14} />}
             <span>{pick.pick === "over" ? "↑" : "↓"}</span>
             <span>{pick.line}</span>
           </div>
