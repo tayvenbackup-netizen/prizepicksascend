@@ -183,6 +183,70 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
                     <div className="h-px flex-1 bg-white/5" />
                   </div>
                   <div className="grid gap-1.5">
+                    {section.title === "Identity" && (
+                      <>
+                        {/* Key Name */}
+                        <div
+                          className="group flex items-center gap-2 rounded-lg px-2 py-1.5"
+                          style={{
+                            background: "rgba(255,255,255,0.03)",
+                            border: "1px solid rgba(255,255,255,0.06)",
+                          }}
+                        >
+                          <div
+                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+                            style={{
+                              background: "color-mix(in oklab, var(--primary) 18%, transparent)",
+                              color: "var(--primary)",
+                            }}
+                          >
+                            <KeyRound className="h-3 w-3" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <label className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                              Key name
+                            </label>
+                            <span className="text-[12px] font-semibold text-foreground/80">
+                              {session?.key_name || "—"}
+                            </span>
+                          </div>
+                        </div>
+                        {/* Key Duration */}
+                        <div
+                          className="group flex items-center gap-2 rounded-lg px-2 py-1.5"
+                          style={{
+                            background: "rgba(255,255,255,0.03)",
+                            border: "1px solid rgba(255,255,255,0.06)",
+                          }}
+                        >
+                          <div
+                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+                            style={{
+                              background: "color-mix(in oklab, var(--primary) 18%, transparent)",
+                              color: "var(--primary)",
+                            }}
+                          >
+                            {session?.key_type === "lifetime" || session?.key_type === "admin" ? (
+                              <InfinityIcon className="h-3 w-3" />
+                            ) : (
+                              <Calendar className="h-3 w-3" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <label className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                              Duration
+                            </label>
+                            <span className="text-[12px] font-semibold text-foreground/80">
+                              {session?.key_type === "lifetime" || session?.key_type === "admin"
+                                ? "Lifetime"
+                                : session?.key_type
+                                  ? session.key_type.charAt(0).toUpperCase() + session.key_type.slice(1)
+                                  : "—"}
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    )}
                     {section.fields.map((f) => {
                       const Icon = f.icon;
                       return (
