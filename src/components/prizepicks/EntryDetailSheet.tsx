@@ -409,18 +409,15 @@ function PickRow({
   const line = pick.line || 1;
   const result = pick.result ?? "pending";
   const isNeutral = result === "pending" && current === 0;
-  // Bar fills to 100% whenever the pick is decided (win or loss) or when
-  // the current value meets/exceeds the line in either direction.
+  // Bar fill ALWAYS reflects current value vs line, regardless of win/loss.
+  // For both Over and Under, ratio = current / line (clamped 0–1+).
+  // We allow it to visually cap at 100% but the underlying value is preserved
+  // for the chip. The bar color still reflects the result.
   let ratio: number;
-  if (isNeutral) {
+  if (current <= 0 || line <= 0) {
     ratio = 0;
-  } else if (result === "win" || result === "loss") {
-    ratio = 1;
-  } else if (pick.pick === "over") {
-    ratio = Math.min(1, Math.max(0, current / line));
   } else {
-    // under: progress toward staying below the line; once exceeded → full
-    ratio = current >= line ? 1 : Math.min(1, Math.max(0, current / line));
+    ratio = Math.min(1, current / line);
   }
 
   const barColor =
