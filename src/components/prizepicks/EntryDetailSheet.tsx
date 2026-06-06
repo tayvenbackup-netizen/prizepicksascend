@@ -12,7 +12,7 @@ import { Jersey } from "./Jersey";
 import { CheckBadge, XBadge, ShareIcon } from "./Icons";
 import { useEntries, type Entry, type ParlayPick } from "./EntriesContext";
 import { fmtMoney } from "@/lib/fmt";
-import { computePayout } from "./EntriesContext";
+import { computePayout, maxPayout } from "./EntriesContext";
 import { BadgeIcon, BadgePicker } from "./Badges";
 
 type Tab = "entry" | "pulse" | "details";
