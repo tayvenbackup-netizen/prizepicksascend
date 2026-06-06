@@ -322,10 +322,14 @@ function SheetBody({
               <MatchupGroup
                 key={key}
                 league={picks[0].league ?? "—"}
-                team={picks[0].team ?? "—"}
+                gameLabel={picks[0].gameLabel ?? picks[0].team ?? "—"}
                 picks={picks}
                 editing={editing}
+                isPast={isPast}
                 onUpdate={(pid, patch) => updatePick(entry.id, pid, patch)}
+                onUpdateGroupLabel={(label) =>
+                  picks.forEach((p) => updatePick(entry.id, p.id, { gameLabel: label }))
+                }
               />
             ))}
           </div>
