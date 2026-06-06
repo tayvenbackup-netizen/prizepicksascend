@@ -152,8 +152,10 @@ function SheetBody({
     entry.type === "power" ? "Power" : "Flex"
   } Play`;
 
+  // Group key MUST be stable across edits — do NOT include gameLabel,
+  // otherwise editing the label remounts the input and dismisses the keyboard.
   const groups = entry.picks.reduce<Record<string, ParlayPick[]>>((acc, p) => {
-    const key = `${p.league ?? "—"}::${p.gameLabel ?? p.team ?? "—"}`;
+    const key = `${p.league ?? "—"}::${p.team ?? "—"}`;
     (acc[key] ||= []).push(p);
     return acc;
   }, {});
