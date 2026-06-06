@@ -466,6 +466,20 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                               ))}
                             </div>
                           </div>
+                          <div className="mt-2 flex items-center justify-between gap-2">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-white/45">
+                              Modifier
+                            </span>
+                            <BadgePicker
+                              value={d.badge ?? null}
+                              size="xs"
+                              onChange={(b) =>
+                                setPicks((arr) =>
+                                  arr.map((x) => (x.key === d.key ? { ...x, badge: b } : x)),
+                                )
+                              }
+                            />
+                          </div>
                           {pastMode && (
                             <div className="mt-2 flex gap-1">
                               {(["win", "pending", "loss"] as const).map((r) => {
