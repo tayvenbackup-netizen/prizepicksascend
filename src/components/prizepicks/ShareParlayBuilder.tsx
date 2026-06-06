@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, X, Search, Sparkles, Link2, Loader2, ChevronRight, Plus, Check, Trash2 } from "lucide-react";
 import {
-  maxPayout,
+  maxPayoutWithBadges as maxPayout,
   POWER_MULTIPLIERS,
   useEntries,
   type ParlayPick,
