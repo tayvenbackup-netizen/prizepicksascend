@@ -187,11 +187,11 @@ function SheetBody({
       </div>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 px-5 pt-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <PLogo size={36} />
+      <div className="flex items-start justify-between gap-2.5 px-4 pt-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <PLogo size={28} />
           <div className="min-w-0">
-            <div className="text-[17px] font-bold leading-tight truncate">
+            <div className="text-[14px] font-bold leading-tight truncate">
               <span className={isWin ? "text-success" : undefined}>
                 {fmtMoney(entry.entryAmount)}
               </span>{" "}
@@ -200,10 +200,10 @@ function SheetBody({
                 {fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks, entry.entryAmount) : finalPayout)}
               </span>
             </div>
-            <div className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground">
+            <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <span>{planLabel}</span>
               <span
-                className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${statusClass}`}
+                className={`rounded px-1.5 py-px text-[9px] font-semibold ${statusClass}`}
               >
                 {statusLabel}
               </span>
