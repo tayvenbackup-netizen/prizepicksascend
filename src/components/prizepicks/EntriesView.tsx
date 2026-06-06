@@ -337,7 +337,7 @@ function PickAvatar({ pick }: { pick: Entry["picks"][number] }) {
         className="flex h-full w-full items-center justify-center rounded-full"
         style={{ background: ringColor, padding: 2 }}
       >
-        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[11px] font-bold">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[13px] font-bold">
           {pick.photo ? (
             <img src={pick.photo} alt="" className="h-full w-full object-cover" />
           ) : (
