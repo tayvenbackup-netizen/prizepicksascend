@@ -175,6 +175,13 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
     .join(", ");
   const namesSuffix = entry.picks.length > 5 ? `, +${entry.picks.length - 5}` : "";
 
+  const isPast = entry.status === "past";
+  const hits = entry.picks.filter((p) => p.result === "win").length;
+  const settled = entry.picks.every((p) => p.result && p.result !== "pending");
+  const actualPayout = computePayout(entry.type, entry.picks.length, hits, entry.entryAmount);
+  const potentialMax = maxPayout(entry.type, entry.picks.length, entry.entryAmount);
+  const isWin = isPast && settled && actualPayout > 0;
+
   return (
     <button
       type="button"
