@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useTransform, animate } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,16 +34,23 @@ export function EntryDetailSheet({
   const [tab, setTab] = useState<Tab>("entry");
   const [editing, setEditing] = useState(false);
 
-  const y = useMotionValue(0);
+  const y = useMotionValue(typeof window !== "undefined" ? window.innerHeight : 1000);
   const overlayOpacity = useTransform(y, [0, 400], [1, 0]);
 
   useEffect(() => {
     if (!open) {
       setEditing(false);
       setTab("entry");
-    } else {
-      y.set(0);
+      return;
     }
+    // Animate the sheet up from the bottom imperatively so the motion value
+    // (which is also bound to drag) doesn't fight the entrance animation.
+    y.set(typeof window !== "undefined" ? window.innerHeight : 1000);
+    const controls = animate(y, 0, {
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1],
+    });
+    return () => controls.stop();
   }, [open, y]);
 
   // lock body scroll
@@ -56,6 +63,15 @@ export function EntryDetailSheet({
     };
   }, [open]);
 
+  const handleClose = () => {
+    const target = typeof window !== "undefined" ? window.innerHeight : 1000;
+    animate(y, target, {
+      duration: 0.4,
+      ease: [0.32, 0, 0.67, 0],
+      onComplete: () => onOpenChange(false),
+    });
+  };
+
   return (
     <AnimatePresence>
       {open && entry && (
@@ -66,26 +82,23 @@ export function EntryDetailSheet({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => onOpenChange(false)}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            onClick={handleClose}
           />
           <motion.div
             key="entry-sheet"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.6 }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}
             style={{ y, top: "calc(env(safe-area-inset-top, 0px) + 56px)" }}
             onDragEnd={(_, info) => {
               if (info.offset.y > 140 || info.velocity.y > 700) {
-                onOpenChange(false);
+                handleClose();
               } else {
-                y.set(0);
+                animate(y, 0, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
               }
             }}
-            className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background"
+            className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background will-change-transform"
           >
             <SheetBody
               entry={entry}
@@ -93,7 +106,7 @@ export function EntryDetailSheet({
               setTab={setTab}
               editing={editing}
               setEditing={setEditing}
-              onClose={() => onOpenChange(false)}
+              onClose={handleClose}
               updateEntry={updateEntry}
               updatePick={updatePick}
               removeEntry={removeEntry}
@@ -174,11 +187,11 @@ function SheetBody({
       </div>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 px-5 pt-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <PLogo size={36} />
+      <div className="flex items-start justify-between gap-2.5 px-4 pt-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <PLogo size={28} />
           <div className="min-w-0">
-            <div className="text-[17px] font-bold leading-tight truncate">
+            <div className="text-[14px] font-bold leading-tight truncate">
               <span className={isWin ? "text-success" : undefined}>
                 {fmtMoney(entry.entryAmount)}
               </span>{" "}
@@ -187,10 +200,10 @@ function SheetBody({
                 {fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks, entry.entryAmount) : finalPayout)}
               </span>
             </div>
-            <div className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground">
+            <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <span>{planLabel}</span>
               <span
-                className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${statusClass}`}
+                className={`rounded px-1.5 py-px text-[9px] font-semibold ${statusClass}`}
               >
                 {statusLabel}
               </span>
@@ -278,14 +291,14 @@ function SheetBody({
       </div>
 
       {/* Tabs */}
-      <div className="mt-4 grid grid-cols-3 px-5">
+      <div className="mt-3 grid grid-cols-3 px-4">
         {(["entry", "pulse", "details"] as Tab[]).map((t) => {
           const active = tab === t;
           return (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`relative pb-2 text-center text-[14px] capitalize transition-colors ${
+              className={`relative pb-1.5 text-center text-[12px] capitalize transition-colors ${
                 active ? "font-bold text-foreground" : "text-muted-foreground"
               }`}
             >
@@ -301,10 +314,10 @@ function SheetBody({
 
       {/* Edit bar */}
       {editing && (
-        <div className="flex items-center justify-between gap-3 px-5 py-3">
-          <label className="text-[12px] text-muted-foreground">Entry amount</label>
-          <div className="flex items-center gap-1 rounded-lg bg-surface px-2 py-1.5">
-            <span className="text-[13px] text-muted-foreground">$</span>
+        <div className="flex items-center justify-between gap-2 px-4 py-2">
+          <label className="text-[11px] text-muted-foreground">Entry amount</label>
+          <div className="flex items-center gap-1 rounded-md bg-surface px-2 py-1">
+            <span className="text-[12px] text-muted-foreground">$</span>
             <input
               type="text"
               inputMode="decimal"
@@ -321,16 +334,16 @@ function SheetBody({
                 }
               }}
               placeholder="0"
-              className="w-20 bg-transparent text-right text-[14px] font-semibold outline-none placeholder:text-muted-foreground/40"
+              className="w-20 bg-transparent text-right text-[13px] font-semibold outline-none placeholder:text-muted-foreground/40"
             />
           </div>
         </div>
       )}
 
       {/* Body */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-3 pb-8">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-6">
         {tab === "entry" ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {Object.entries(groups).map(([key, picks]) => (
               <MatchupGroup
                 key={key}
@@ -374,10 +387,10 @@ function MatchupGroup({
   onUpdateGroupLabel: (label: string) => void;
 }) {
   return (
-    <div className="rounded-2xl bg-surface">
-      <div className="flex items-center justify-between gap-2 px-3 py-2.5 text-[12px]">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-semibold text-foreground/90 shrink-0">
+    <div className="rounded-xl bg-surface">
+      <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 text-[10px]">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          <span className="rounded bg-white/10 px-1.5 py-px font-semibold text-foreground/90 shrink-0">
             {league}
           </span>
           {editing && isPast ? (
@@ -386,7 +399,7 @@ function MatchupGroup({
               value={gameLabel}
               onChange={(e) => onUpdateGroupLabel(e.target.value)}
               placeholder="ATL 0 vs IND 0"
-              className="min-w-0 flex-1 rounded-md bg-black/40 px-2 py-0.5 text-[12px] text-foreground/90 outline-none ring-1 ring-white/10 focus:ring-primary"
+              className="min-w-0 flex-1 rounded bg-black/40 px-1.5 py-0.5 text-[10px] text-foreground/90 outline-none ring-1 ring-white/10 focus:ring-primary"
             />
           ) : (
             <span className="truncate text-foreground/80">{gameLabel}</span>
@@ -396,10 +409,10 @@ function MatchupGroup({
           {isPast ? "Final" : "Live"}
         </span>
       </div>
-      <div className="px-3 pb-3 space-y-3">
+      <div className="px-2.5 pb-2.5 space-y-2.5">
         {picks.map((p, i) => (
           <div key={p.id}>
-            {i > 0 && <div className="-mx-3 mb-3 h-px bg-white/5" />}
+            {i > 0 && <div className="-mx-2.5 mb-2.5 h-px bg-white/5" />}
             <PickRow pick={p} editing={editing} onUpdate={onUpdate} />
           </div>
         ))}
@@ -422,10 +435,6 @@ function PickRow({
   const line = pick.line || 1;
   const result = pick.result ?? "pending";
   const isNeutral = result === "pending" && current === 0;
-  // Bar fill ALWAYS reflects current value vs line, regardless of win/loss.
-  // For both Over and Under, ratio = current / line (clamped 0–1+).
-  // We allow it to visually cap at 100% but the underlying value is preserved
-  // for the chip. The bar color still reflects the result.
   let ratio: number;
   if (current <= 0 || line <= 0) {
     ratio = 0;
@@ -448,41 +457,42 @@ function PickRow({
 
   return (
     <div>
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2.5">
         <PickAvatar pick={pick} />
         <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-bold leading-tight truncate">{pick.player}</div>
-          <div className="mt-0.5 text-[12px] text-muted-foreground truncate">
+          <div className="text-[13px] font-bold leading-tight truncate">{pick.player}</div>
+          <div className="mt-0.5 text-[10px] text-muted-foreground truncate">
             {pick.team ?? "—"} · {pick.league ?? "—"}
           </div>
         </div>
-        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-right ring-1 ring-white/10">
-          <div className="flex items-center justify-end gap-1 text-[14px] font-bold">
-            {pick.badge && <BadgeIcon badge={pick.badge} size={14} />}
+        <div className="rounded-lg bg-white/[0.04] px-2 py-1 text-right ring-1 ring-white/10">
+          <div className="flex items-center justify-end gap-1 text-[12px] font-bold">
+            {pick.badge && <BadgeIcon badge={pick.badge} size={12} />}
             <span>{pick.pick === "over" ? "↑" : "↓"}</span>
             <span>{pick.line}</span>
           </div>
-          <div className="text-[11px] text-muted-foreground">{pick.stat}</div>
+          <div className="text-[9px] text-muted-foreground">{pick.stat}</div>
         </div>
       </div>
 
       {/* Progress bar with value chip */}
-      <div className="relative mt-3 h-2 rounded-full bg-white/[0.06]">
+      <div className="relative mt-2.5 h-1.5 rounded-full bg-white/[0.06]">
         <div
           className={`absolute inset-y-0 left-0 rounded-full ${barColor} transition-all`}
           style={{ width: `${ratio * 100}%` }}
         />
         <div
-          className="absolute -top-2.5 -translate-x-1/2"
+          className="absolute -top-2 -translate-x-1/2"
           style={{ left: `${ratio * 100}%` }}
         >
           <div
-            className={`min-w-[34px] rounded-full border bg-background px-2 py-0.5 text-center text-[11px] font-bold ${valueColor}`}
+            className={`min-w-[28px] rounded-full border bg-background px-1.5 py-px text-center text-[9px] font-bold ${valueColor}`}
           >
             {Number.isInteger(current) ? current : current.toFixed(1)}
           </div>
         </div>
       </div>
+
 
       {editing && (
         <div className="mt-3 flex items-center gap-2">
@@ -550,14 +560,14 @@ function PickAvatar({ pick }: { pick: ParlayPick }) {
   return (
     <div className="relative shrink-0">
       <div
-        className="flex h-11 w-11 items-center justify-center rounded-full"
+        className="flex h-9 w-9 items-center justify-center rounded-full"
         style={{ background: ring, padding: 2 }}
       >
         <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#2a2540]">
           {pick.photo ? (
             <img src={pick.photo} alt="" className="h-full w-full object-cover" />
           ) : (
-            <Jersey team={pick.team ?? "??"} size={40} />
+            <Jersey team={pick.team ?? "??"} size={32} />
           )}
         </div>
       </div>
