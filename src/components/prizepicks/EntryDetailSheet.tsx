@@ -153,7 +153,7 @@ function SheetBody({
   } Play`;
 
   const groups = entry.picks.reduce<Record<string, ParlayPick[]>>((acc, p) => {
-    const key = `${p.league ?? "—"}::${p.team ?? "—"}`;
+    const key = `${p.league ?? "—"}::${p.gameLabel ?? p.team ?? "—"}`;
     (acc[key] ||= []).push(p);
     return acc;
   }, {});
