@@ -597,11 +597,40 @@ function Header({
 
 /* -------------------- Sports tabs -------------------- */
 
-function SportsScreen({ onPick }: { onPick: (s: SportKey) => void }) {
+function SportsScreen({
+  onPick,
+  pastMode,
+  onTogglePast,
+}: {
+  onPick: (s: SportKey) => void;
+  pastMode: boolean;
+  onTogglePast: (v: boolean) => void;
+}) {
   return (
     <div className="h-full overflow-y-auto px-4 py-2">
+      <div className="mb-3 grid grid-cols-2 rounded-full bg-white/[0.05] p-0.5">
+        {([
+          { k: false, label: "Live" },
+          { k: true, label: "Past Plays" },
+        ] as const).map((opt) => {
+          const active = pastMode === opt.k;
+          return (
+            <button
+              key={opt.label}
+              onClick={() => onTogglePast(opt.k)}
+              className={`rounded-full py-1.5 text-[11px] font-bold transition-colors ${
+                active ? "bg-[#7c3aed] text-white" : "text-white/60"
+              }`}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
       <p className="mb-3 text-[11px] text-white/55">
-        Select a sport to see all games scheduled in the next 10 days.
+        {pastMode
+          ? "Past Plays: log any historical parlay. Browse all teams or search any player who ever played."
+          : "Select a sport to see all games scheduled in the next 10 days."}
       </p>
       <div className="grid grid-cols-3 gap-2">
         {SUPPORTED_SPORTS.map((s) => (
@@ -616,6 +645,159 @@ function SportsScreen({ onPick }: { onPick: (s: SportKey) => void }) {
             </span>
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------- Past Plays: All Teams + cross-league search -------------------- */
+
+const PAST_TEAM_LEAGUES: SportKey[] = ["NBA", "NFL", "MLB", "NHL", "WNBA", "EPL", "MLS"];
+
+function PastTeamsScreen({
+  sport,
+  onPickTeam,
+  onPickPlayer,
+}: {
+  sport: SportKey;
+  onPickTeam: (t: TeamLite) => void;
+  onPickPlayer: (p: Player) => void;
+}) {
+  const [teams, setTeams] = useState<TeamLite[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [hits, setHits] = useState<Player[]>([]);
+  const supportsTeams = PAST_TEAM_LEAGUES.includes(sport);
+
+  useEffect(() => {
+    if (!supportsTeams) {
+      setTeams([]);
+      return;
+    }
+    let alive = true;
+    setTeams(null);
+    setError(null);
+    fetch(`/api/public/espn-teams?league=${sport}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (!alive) return;
+        const entries: any[] = j?.sports?.[0]?.leagues?.[0]?.teams || [];
+        const list: TeamLite[] = entries
+          .map((e) => e?.team)
+          .filter(Boolean)
+          .map((t: any) => ({
+            id: t.id,
+            name: t.displayName || t.name,
+            abbr: t.abbreviation || t.shortDisplayName || "",
+            logo: t.logos?.[0]?.href || null,
+          }));
+        setTeams(list);
+      })
+      .catch((e) => alive && setError(String(e)));
+    return () => {
+      alive = false;
+    };
+  }, [sport, supportsTeams]);
+
+  // Cross-league player search (TheSportsDB) — works for any player who ever played.
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setHits([]);
+      return;
+    }
+    let alive = true;
+    setSearching(true);
+    const t = setTimeout(() => {
+      fetch(`https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=${encodeURIComponent(q)}`)
+        .then((r) => r.json())
+        .then((j) => {
+          if (!alive) return;
+          const players: any[] = j?.player || [];
+          const list: Player[] = players.slice(0, 25).map((p) => ({
+            id: String(p.idPlayer),
+            name: p.strPlayer,
+            team: p.strTeam || "—",
+            position: p.strPosition || undefined,
+            photo: p.strCutout || p.strThumb || p.strRender || null,
+          }));
+          setHits(list);
+        })
+        .catch(() => alive && setHits([]))
+        .finally(() => alive && setSearching(false));
+    }, 220);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
+  }, [query]);
+
+  const filteredTeams = (teams ?? []).filter((t) =>
+    !query ? true : t.name.toLowerCase().includes(query.toLowerCase()) || t.abbr.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="shrink-0 px-3 pb-2">
+        <div className="flex items-center gap-2 rounded-full bg-white/[0.05] px-3 py-1.5">
+          <Search className="h-3.5 w-3.5 text-white/40" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={`Search any ${sport} player ever…`}
+            className="flex-1 bg-transparent text-[12px] text-white outline-none placeholder:text-white/40"
+          />
+          {searching && <Loader2 className="h-3 w-3 animate-spin text-white/40" />}
+        </div>
+        <p className="mt-1.5 text-[10px] text-white/45">
+          Tip: typos are okay — we'll match the closest name.
+        </p>
+      </div>
+      <div className="flex-1 overflow-y-auto px-3 pb-2">
+        {hits.length > 0 && (
+          <>
+            <p className="mb-1.5 mt-1 text-[10px] uppercase tracking-wider text-white/45">
+              Players · {hits.length}
+            </p>
+            <ul className="mb-3 space-y-1.5">
+              {hits.map((p) => (
+                <PlayerRow key={`pl-${p.id}`} player={p} onPick={() => onPickPlayer(p)} />
+              ))}
+            </ul>
+          </>
+        )}
+        {supportsTeams && (
+          <>
+            <p className="mb-1.5 text-[10px] uppercase tracking-wider text-white/45">
+              All {sport} Teams
+            </p>
+            {error && <Empty label={`Couldn't load teams: ${error}`} />}
+            {!teams && !error && <Loading />}
+            {teams && filteredTeams.length === 0 && !query && (
+              <Empty label="No teams found." />
+            )}
+            <ul className="space-y-1.5">
+              {filteredTeams.map((t) => (
+                <li key={t.id}>
+                  <button
+                    onClick={() => onPickTeam(t)}
+                    className="flex w-full items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-left"
+                  >
+                    <TeamBadge t={t} />
+                    <div className="flex-1 truncate text-[13px] font-bold text-white">
+                      {t.name}
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-white/40" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {!supportsTeams && hits.length === 0 && (
+          <Empty label={`Search any ${sport} athlete above to add to your past parlay.`} />
+        )}
       </div>
     </div>
   );
