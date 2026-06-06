@@ -192,7 +192,7 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
         <div>
           <div className="text-[15px] font-bold">
             {fmtMoney(entry.entryAmount)} {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
-            <span className="text-muted-foreground">
+            <span className={isWin ? "text-success" : "text-muted-foreground"}>
               {fmtMoney(isWin ? actualPayout : isPast ? potentialMax : entry.potential)}
             </span>
           </div>
@@ -251,7 +251,7 @@ function PastStatusBadge({ entry }: { entry: Entry }) {
   const isLoss = losses > 0 && !isWin;
   const label = isWin ? "Win" : isLoss ? "Loss" : "—";
   const tone = isWin
-    ? "bg-success/15 text-success"
+    ? "bg-success/20 text-success ring-1 ring-success/60 shadow-[0_0_12px_-2px_var(--success)]"
     : isLoss
     ? "bg-white/[0.06] text-foreground/80"
     : "bg-white/[0.06] text-muted-foreground";
