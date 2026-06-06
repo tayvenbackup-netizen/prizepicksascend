@@ -33,8 +33,7 @@ export function EntriesView() {
   });
   const entriesWon = wonPast.length;
   const amountWon = wonPast.reduce((s, e) => {
-    const hits = e.picks.filter((p) => p.result === "win").length;
-    return s + computePayout(e.type, e.picks.length, hits, e.entryAmount);
+    return s + computePayout(e.type, e.picks, e.entryAmount);
   }, 0);
 
   const showEmpty = (tab === "open" && open.length === 0) || (tab === "past" && past.length === 0);
