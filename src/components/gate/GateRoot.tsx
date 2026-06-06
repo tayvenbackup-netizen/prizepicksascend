@@ -4,6 +4,8 @@ import IntroOverlay from './IntroOverlay';
 import AdminPanel from '../admin/AdminPanel';
 import { useAccessControl } from '@/hooks/useAccessControl';
 import { AccessContext } from '@/lib/accessContext';
+import introVideo from '@/assets/intro.mp4.asset.json';
+
 
 interface Props { children: ReactNode }
 
