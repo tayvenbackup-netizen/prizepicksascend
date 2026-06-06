@@ -387,10 +387,10 @@ function MatchupGroup({
   onUpdateGroupLabel: (label: string) => void;
 }) {
   return (
-    <div className="rounded-2xl bg-surface">
-      <div className="flex items-center justify-between gap-2 px-3 py-2.5 text-[12px]">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-semibold text-foreground/90 shrink-0">
+    <div className="rounded-xl bg-surface">
+      <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 text-[10px]">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          <span className="rounded bg-white/10 px-1.5 py-px font-semibold text-foreground/90 shrink-0">
             {league}
           </span>
           {editing && isPast ? (
@@ -399,7 +399,7 @@ function MatchupGroup({
               value={gameLabel}
               onChange={(e) => onUpdateGroupLabel(e.target.value)}
               placeholder="ATL 0 vs IND 0"
-              className="min-w-0 flex-1 rounded-md bg-black/40 px-2 py-0.5 text-[12px] text-foreground/90 outline-none ring-1 ring-white/10 focus:ring-primary"
+              className="min-w-0 flex-1 rounded bg-black/40 px-1.5 py-0.5 text-[10px] text-foreground/90 outline-none ring-1 ring-white/10 focus:ring-primary"
             />
           ) : (
             <span className="truncate text-foreground/80">{gameLabel}</span>
@@ -409,10 +409,10 @@ function MatchupGroup({
           {isPast ? "Final" : "Live"}
         </span>
       </div>
-      <div className="px-3 pb-3 space-y-3">
+      <div className="px-2.5 pb-2.5 space-y-2.5">
         {picks.map((p, i) => (
           <div key={p.id}>
-            {i > 0 && <div className="-mx-3 mb-3 h-px bg-white/5" />}
+            {i > 0 && <div className="-mx-2.5 mb-2.5 h-px bg-white/5" />}
             <PickRow pick={p} editing={editing} onUpdate={onUpdate} />
           </div>
         ))}
@@ -435,10 +435,6 @@ function PickRow({
   const line = pick.line || 1;
   const result = pick.result ?? "pending";
   const isNeutral = result === "pending" && current === 0;
-  // Bar fill ALWAYS reflects current value vs line, regardless of win/loss.
-  // For both Over and Under, ratio = current / line (clamped 0–1+).
-  // We allow it to visually cap at 100% but the underlying value is preserved
-  // for the chip. The bar color still reflects the result.
   let ratio: number;
   if (current <= 0 || line <= 0) {
     ratio = 0;
@@ -461,41 +457,42 @@ function PickRow({
 
   return (
     <div>
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2.5">
         <PickAvatar pick={pick} />
         <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-bold leading-tight truncate">{pick.player}</div>
-          <div className="mt-0.5 text-[12px] text-muted-foreground truncate">
+          <div className="text-[13px] font-bold leading-tight truncate">{pick.player}</div>
+          <div className="mt-0.5 text-[10px] text-muted-foreground truncate">
             {pick.team ?? "—"} · {pick.league ?? "—"}
           </div>
         </div>
-        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-right ring-1 ring-white/10">
-          <div className="flex items-center justify-end gap-1 text-[14px] font-bold">
-            {pick.badge && <BadgeIcon badge={pick.badge} size={14} />}
+        <div className="rounded-lg bg-white/[0.04] px-2 py-1 text-right ring-1 ring-white/10">
+          <div className="flex items-center justify-end gap-1 text-[12px] font-bold">
+            {pick.badge && <BadgeIcon badge={pick.badge} size={12} />}
             <span>{pick.pick === "over" ? "↑" : "↓"}</span>
             <span>{pick.line}</span>
           </div>
-          <div className="text-[11px] text-muted-foreground">{pick.stat}</div>
+          <div className="text-[9px] text-muted-foreground">{pick.stat}</div>
         </div>
       </div>
 
       {/* Progress bar with value chip */}
-      <div className="relative mt-3 h-2 rounded-full bg-white/[0.06]">
+      <div className="relative mt-2.5 h-1.5 rounded-full bg-white/[0.06]">
         <div
           className={`absolute inset-y-0 left-0 rounded-full ${barColor} transition-all`}
           style={{ width: `${ratio * 100}%` }}
         />
         <div
-          className="absolute -top-2.5 -translate-x-1/2"
+          className="absolute -top-2 -translate-x-1/2"
           style={{ left: `${ratio * 100}%` }}
         >
           <div
-            className={`min-w-[34px] rounded-full border bg-background px-2 py-0.5 text-center text-[11px] font-bold ${valueColor}`}
+            className={`min-w-[28px] rounded-full border bg-background px-1.5 py-px text-center text-[9px] font-bold ${valueColor}`}
           >
             {Number.isInteger(current) ? current : current.toFixed(1)}
           </div>
         </div>
       </div>
+
 
       {editing && (
         <div className="mt-3 flex items-center gap-2">
