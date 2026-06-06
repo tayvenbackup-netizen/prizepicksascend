@@ -1,7 +1,7 @@
 import { useState } from "react";
 import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
-import { useEntries, type Entry, computePayout } from "./EntriesContext";
+import { useEntries, type Entry, computePayout, maxPayout } from "./EntriesContext";
 import { CheckBadge, XBadge } from "./Icons";
 import { fmtMoney } from "@/lib/fmt";
 import { EntryDetailSheet } from "./EntryDetailSheet";
@@ -175,6 +175,13 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
     .join(", ");
   const namesSuffix = entry.picks.length > 5 ? `, +${entry.picks.length - 5}` : "";
 
+  const isPast = entry.status === "past";
+  const hits = entry.picks.filter((p) => p.result === "win").length;
+  const settled = entry.picks.every((p) => p.result && p.result !== "pending");
+  const actualPayout = computePayout(entry.type, entry.picks.length, hits, entry.entryAmount);
+  const potentialMax = maxPayout(entry.type, entry.picks.length, entry.entryAmount);
+  const isWin = isPast && settled && actualPayout > 0;
+
   return (
     <button
       type="button"
@@ -184,7 +191,10 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-[15px] font-bold">
-            {fmtMoney(entry.entryAmount)} to pay {fmtMoney(entry.potential)}
+            {fmtMoney(entry.entryAmount)} {isWin ? "PAID" : isPast ? "FOR" : "to pay"}{" "}
+            <span className="text-muted-foreground">
+              {fmtMoney(isWin ? actualPayout : isPast ? potentialMax : entry.potential)}
+            </span>
           </div>
           <div className="mt-0.5 text-[13px] text-muted-foreground">
             {planLabel(entry)}

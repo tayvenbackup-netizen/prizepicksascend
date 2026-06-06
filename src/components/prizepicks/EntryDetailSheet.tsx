@@ -132,6 +132,7 @@ function SheetBody({
     ? computePayout(entry.type, entry.picks.length, hits, entry.entryAmount)
     : maxPayout(entry.type, entry.picks.length, entry.entryAmount);
   const isPast = entry.status === "past";
+  const isWin = isPast && settled && finalPayout > 0;
   const statusLabel: "Win" | "Loss" | "Live" | "Past" = isPast
     ? "Past"
     : settled
@@ -173,8 +174,10 @@ function SheetBody({
           <PLogo size={36} />
           <div className="min-w-0">
             <div className="text-[17px] font-bold leading-tight truncate">
-              {fmtMoney(entry.entryAmount)} to pay{" "}
-              <span className="text-muted-foreground">{fmtMoney(finalPayout)}</span>
+              {fmtMoney(entry.entryAmount)} {isWin ? "PAID" : isPast ? "FOR" : "to pay"}{" "}
+              <span className="text-muted-foreground">
+                {fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks.length, entry.entryAmount) : finalPayout)}
+              </span>
             </div>
             <div className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground">
               <span>{planLabel}</span>
