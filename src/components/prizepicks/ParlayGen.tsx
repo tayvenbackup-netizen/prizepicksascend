@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, PlusIcon, XCircle, CheckCircle } from "./Icons";
 import {
-  maxPayout,
+  maxPayoutWithBadges as maxPayout,
   POWER_MULTIPLIERS,
   useEntries,
   type ParlayPick,
