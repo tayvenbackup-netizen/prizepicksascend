@@ -177,6 +177,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       pick: d.pick,
       result: "pending",
       photo: d.player.photo,
+      badge: d.badge ?? null,
     }));
     addEntry({
       type: effectiveType,
