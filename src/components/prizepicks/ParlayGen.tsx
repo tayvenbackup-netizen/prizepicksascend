@@ -183,7 +183,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       type: effectiveType,
       status,
       entryAmount: entryNum,
-      potential: maxPayout(effectiveType, parlayPicks.length, entryNum),
+      potential: maxPayout(effectiveType, parlayPicks, entryNum),
       picks: parlayPicks,
       startTime: status === "upcoming" ? "Next game" : undefined,
     });
