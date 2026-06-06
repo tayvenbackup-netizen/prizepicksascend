@@ -192,7 +192,7 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
         <div>
           <div className="text-[15px] font-bold">
             {fmtMoney(entry.entryAmount)} {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
-            <span className="text-muted-foreground">
+            <span className={isWin ? "text-success" : "text-muted-foreground"}>
               {fmtMoney(isWin ? actualPayout : isPast ? potentialMax : entry.potential)}
             </span>
           </div>
