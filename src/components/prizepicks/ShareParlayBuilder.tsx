@@ -70,6 +70,10 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
   const [ppLink, setPpLink] = useState("");
   const [ppMsg, setPpMsg] = useState<string | null>(null);
   const [ppLoading, setPpLoading] = useState(false);
+  // Past-pick mode lets the user log a parlay that already happened.
+  const [pastMode, setPastMode] = useState(false);
+  const [pastDate, setPastDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [results, setResults] = useState<Record<string, "pending" | "win" | "loss">>({});
 
   useEffect(() => {
     if (!open) {
@@ -77,6 +81,8 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       setShowSlip(false);
       setPpMsg(null);
       setPpLink("");
+      setPastMode(false);
+      setResults({});
     }
   }, [open]);
 
@@ -104,8 +110,13 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
     setStep({ kind: "sports" });
   };
 
-  const removePick = (key: string) =>
+  const removePick = (key: string) => {
     setPicks(picks.filter((p) => p.key !== key));
+    setResults((r) => {
+      const { [key]: _omit, ...rest } = r;
+      return rest;
+    });
+  };
 
   const submit = () => {
     if (!validCount || entryNum <= 0) return;
@@ -117,19 +128,26 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       stat: d.market.label,
       line: Number(d.line) || d.market.line,
       pick: d.pick,
-      result: "pending",
+      result: pastMode ? (results[d.key] ?? "pending") : "pending",
       photo: d.player.photo || undefined,
+      // Always start neutral; client edits the value later.
+      currentValue: 0,
     }));
     addEntry({
       type: effectiveType,
-      status: "upcoming",
+      status: pastMode ? "past" : "upcoming",
       entryAmount: entryNum,
       potential: maxPayout(effectiveType, parlayPicks.length, entryNum),
       picks: parlayPicks,
-      startTime: "Next game",
+      startTime: pastMode
+        ? new Date(pastDate).toLocaleDateString()
+        : "Next game",
+      playedAt: pastMode ? new Date(pastDate).toISOString() : undefined,
     });
     setPicks([]);
+    setResults({});
     setEntryAmount("5");
+    setPastMode(false);
     onClose();
   };
 
@@ -142,7 +160,6 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
     }
     setPpLoading(true);
     setPpMsg(null);
-    // No real PP API access — show a friendly note rather than fake data.
     setTimeout(() => {
       setPpLoading(false);
       setPpMsg("Official PrizePicks links can't be auto-imported. Build the matching slip below.");
