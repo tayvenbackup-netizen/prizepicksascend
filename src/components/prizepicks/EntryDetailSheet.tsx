@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PLogo } from "./PLogo";
@@ -24,38 +25,115 @@ export function EntryDetailSheet({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const { entries, updateEntry, updatePick } = useEntries();
+  const { entries, updateEntry, updatePick, removeEntry } = useEntries();
   const entry = useMemo(
     () => entries.find((e) => e.id === entryId) ?? null,
     [entries, entryId],
   );
   const [tab, setTab] = useState<Tab>("entry");
   const [editing, setEditing] = useState(false);
+
+  const y = useMotionValue(0);
+  const overlayOpacity = useTransform(y, [0, 400], [1, 0]);
+
   useEffect(() => {
     if (!open) {
       setEditing(false);
       setTab("entry");
+    } else {
+      y.set(0);
     }
+  }, [open, y]);
+
+  // lock body scroll
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, [open]);
 
-  if (!entry) {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="bottom"
-          className="h-[92vh] rounded-t-3xl border-0 bg-background p-0"
-        />
-      </Sheet>
-    );
-  }
+  return (
+    <AnimatePresence>
+      {open && entry && (
+        <div className="fixed inset-0 z-[90]">
+          <motion.div
+            className="absolute inset-0 bg-black/70"
+            style={{ opacity: overlayOpacity }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => onOpenChange(false)}
+          />
+          <motion.div
+            key="entry-sheet"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.32 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            style={{ y, top: "calc(env(safe-area-inset-top, 0px) + 56px)" }}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 140 || info.velocity.y > 700) {
+                onOpenChange(false);
+              } else {
+                y.set(0);
+              }
+            }}
+            className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background"
+          >
+            <SheetBody
+              entry={entry}
+              tab={tab}
+              setTab={setTab}
+              editing={editing}
+              setEditing={setEditing}
+              onClose={() => onOpenChange(false)}
+              updateEntry={updateEntry}
+              updatePick={updatePick}
+              removeEntry={removeEntry}
+            />
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
 
+function SheetBody({
+  entry,
+  tab,
+  setTab,
+  editing,
+  setEditing,
+  onClose,
+  updateEntry,
+  updatePick,
+  removeEntry,
+}: {
+  entry: Entry;
+  tab: Tab;
+  setTab: (t: Tab) => void;
+  editing: boolean;
+  setEditing: (v: boolean) => void;
+  onClose: () => void;
+  updateEntry: ReturnType<typeof useEntries>["updateEntry"];
+  updatePick: ReturnType<typeof useEntries>["updatePick"];
+  removeEntry: ReturnType<typeof useEntries>["removeEntry"];
+}) {
   const hits = entry.picks.filter((p) => p.result === "win").length;
-  const losses = entry.picks.filter((p) => p.result === "loss").length;
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
   const finalPayout = settled
     ? computePayout(entry.type, entry.picks.length, hits, entry.entryAmount)
     : entry.potential;
-  const statusLabel: "Win" | "Loss" | "Live" = settled
+  const isPast = entry.status === "past";
+  const statusLabel: "Win" | "Loss" | "Live" | "Past" = isPast
+    ? "Past"
+    : settled
     ? finalPayout > 0
       ? "Win"
       : "Loss"
@@ -65,13 +143,14 @@ export function EntryDetailSheet({
       ? "bg-success/15 text-success"
       : statusLabel === "Loss"
       ? "bg-white/10 text-foreground/80"
+      : statusLabel === "Past"
+      ? "bg-white/10 text-foreground/70"
       : "bg-destructive/15 text-destructive";
 
   const planLabel = `${entry.picks.length}-Pick ${
     entry.type === "power" ? "Power" : "Flex"
   } Play`;
 
-  // group picks by league + matchup (using team only, since matchup unknown)
   const groups = entry.picks.reduce<Record<string, ParlayPick[]>>((acc, p) => {
     const key = `${p.league ?? "—"}::${p.team ?? "—"}`;
     (acc[key] ||= []).push(p);
@@ -79,156 +158,177 @@ export function EntryDetailSheet({
   }, {});
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="bottom"
-        className="h-[92vh] rounded-t-3xl border-0 bg-background p-0 [&>button]:hidden"
-      >
-        <div className="flex h-full flex-col">
-          {/* Drag handle */}
-          <div className="flex justify-center pt-2.5">
-            <div className="h-1 w-10 rounded-full bg-white/20" />
-          </div>
+    <div className="flex h-full max-h-[calc(100vh-env(safe-area-inset-top)-56px)] flex-col">
+      {/* Drag handle (drag area lives here too) */}
+      <div className="flex justify-center pt-2.5 cursor-grab active:cursor-grabbing">
+        <div className="h-1 w-10 rounded-full bg-white/25" />
+      </div>
 
-          {/* Header */}
-          <div className="flex items-start justify-between gap-3 px-5 pt-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <PLogo size={36} />
-              <div className="min-w-0">
-                <div className="text-[17px] font-bold leading-tight truncate">
-                  {fmtMoney(entry.entryAmount)} to pay{" "}
-                  <span className="text-muted-foreground">
-                    {fmtMoney(finalPayout)}
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground">
-                  <span>{planLabel}</span>
-                  <span
-                    className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${statusClass}`}
-                  >
-                    {statusLabel}
-                  </span>
-                </div>
-              </div>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 px-5 pt-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <PLogo size={36} />
+          <div className="min-w-0">
+            <div className="text-[17px] font-bold leading-tight truncate">
+              {fmtMoney(entry.entryAmount)} to pay{" "}
+              <span className="text-muted-foreground">{fmtMoney(finalPayout)}</span>
             </div>
-            <div className="flex items-center gap-3 pt-1 shrink-0">
-              <button className="text-foreground/90">
-                <ShareIcon className="h-5 w-5" />
-              </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center text-foreground/90 outline-none">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                    <circle cx="5" cy="12" r="1.8" />
-                    <circle cx="12" cy="12" r="1.8" />
-                    <circle cx="19" cy="12" r="1.8" />
-                  </svg>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem onClick={() => setEditing((v) => !v)}>
-                    {editing ? "Done editing" : "Edit picks & amount"}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      entry.picks.forEach((p) =>
-                        updatePick(entry.id, p.id, { result: "win" }),
-                      )
-                    }
-                  >
-                    Mark all as Win
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      entry.picks.forEach((p) =>
-                        updatePick(entry.id, p.id, { result: "loss" }),
-                      )
-                    }
-                  >
-                    Mark all as Loss
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      entry.picks.forEach((p) =>
-                        updatePick(entry.id, p.id, { result: "pending" }),
-                      )
-                    }
-                  >
-                    Reset to pending
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground">
+              <span>{planLabel}</span>
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${statusClass}`}
+              >
+                {statusLabel}
+              </span>
             </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="mt-4 grid grid-cols-3 px-5">
-            {(["entry", "pulse", "details"] as Tab[]).map((t) => {
-              const active = tab === t;
-              return (
-                <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`relative pb-2 text-center text-[14px] capitalize transition-colors ${
-                    active ? "font-bold text-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  {t}
-                  {active && (
-                    <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-primary" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          <div className="h-px bg-white/10" />
-
-          {/* Edit bar */}
-          {editing && (
-            <div className="flex items-center justify-between gap-3 px-5 py-3">
-              <label className="text-[12px] text-muted-foreground">
-                Entry amount
-              </label>
-              <div className="flex items-center gap-1 rounded-lg bg-surface px-2 py-1.5">
-                <span className="text-[13px] text-muted-foreground">$</span>
-                <input
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={entry.entryAmount}
-                  onChange={(e) =>
-                    updateEntry(entry.id, {
-                      entryAmount: Math.max(1, Number(e.target.value) || 0),
-                    })
-                  }
-                  className="w-20 bg-transparent text-right text-[14px] font-semibold outline-none"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Body */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-3 pb-8">
-            {tab === "entry" ? (
-              <div className="space-y-3">
-                {Object.entries(groups).map(([key, picks]) => (
-                  <MatchupGroup
-                    key={key}
-                    league={picks[0].league ?? "—"}
-                    team={picks[0].team ?? "—"}
-                    picks={picks}
-                    editing={editing}
-                    onUpdate={(pid, patch) => updatePick(entry.id, pid, patch)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
-                {tab === "pulse" ? "Pulse coming soon." : "No additional details."}
-              </div>
-            )}
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+        <div className="flex items-center gap-3 pt-1 shrink-0">
+          <button className="text-foreground/90" aria-label="Share">
+            <ShareIcon className="h-5 w-5" />
+          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center text-foreground/90 outline-none">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                <circle cx="5" cy="12" r="1.8" />
+                <circle cx="12" cy="12" r="1.8" />
+                <circle cx="19" cy="12" r="1.8" />
+              </svg>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => setEditing(!editing)}>
+                {editing ? "Done editing" : "Edit picks & amount"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() =>
+                  updateEntry(entry.id, {
+                    status: "past",
+                    playedAt: entry.playedAt ?? new Date().toISOString(),
+                  })
+                }
+                disabled={isPast}
+              >
+                Move to Past
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => updateEntry(entry.id, { status: "upcoming" })}
+                disabled={!isPast}
+              >
+                Restore to Open
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() =>
+                  entry.picks.forEach((p) =>
+                    updatePick(entry.id, p.id, { result: "win" }),
+                  )
+                }
+              >
+                Mark all as Win
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  entry.picks.forEach((p) =>
+                    updatePick(entry.id, p.id, { result: "loss" }),
+                  )
+                }
+              >
+                Mark all as Loss
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  entry.picks.forEach((p) =>
+                    updatePick(entry.id, p.id, {
+                      result: "pending",
+                      currentValue: 0,
+                    }),
+                  )
+                }
+              >
+                Reset to neutral
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  removeEntry(entry.id);
+                  onClose();
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                Delete entry
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="mt-4 grid grid-cols-3 px-5">
+        {(["entry", "pulse", "details"] as Tab[]).map((t) => {
+          const active = tab === t;
+          return (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`relative pb-2 text-center text-[14px] capitalize transition-colors ${
+                active ? "font-bold text-foreground" : "text-muted-foreground"
+              }`}
+            >
+              {t}
+              {active && (
+                <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-primary" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <div className="h-px bg-white/10" />
+
+      {/* Edit bar */}
+      {editing && (
+        <div className="flex items-center justify-between gap-3 px-5 py-3">
+          <label className="text-[12px] text-muted-foreground">Entry amount</label>
+          <div className="flex items-center gap-1 rounded-lg bg-surface px-2 py-1.5">
+            <span className="text-[13px] text-muted-foreground">$</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={entry.entryAmount}
+              onChange={(e) =>
+                updateEntry(entry.id, {
+                  entryAmount: Math.max(1, Number(e.target.value) || 0),
+                })
+              }
+              className="w-20 bg-transparent text-right text-[14px] font-semibold outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Body */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-3 pb-8">
+        {tab === "entry" ? (
+          <div className="space-y-3">
+            {Object.entries(groups).map(([key, picks]) => (
+              <MatchupGroup
+                key={key}
+                league={picks[0].league ?? "—"}
+                team={picks[0].team ?? "—"}
+                picks={picks}
+                editing={editing}
+                onUpdate={(pid, patch) => updatePick(entry.id, pid, patch)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
+            {tab === "pulse" ? "Pulse coming soon." : "No additional details."}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -277,18 +377,19 @@ function PickRow({
   editing: boolean;
   onUpdate: (pickId: string, patch: Partial<ParlayPick>) => void;
 }) {
-  const current = pick.currentValue ?? pick.line;
+  // Default to 0 / neutral unless explicitly set by the client.
+  const current = pick.currentValue ?? 0;
   const line = pick.line || 1;
-  // Bar fill: relative to line; >= line = full, otherwise fraction of line.
-  const ratio = pick.pick === "over"
-    ? Math.min(1, Math.max(0.06, current / line))
-    : Math.min(1, Math.max(0.06, line / Math.max(current, line * 0.1)));
+  const isNeutral = (pick.result ?? "pending") === "pending" && current === 0;
+  const rawRatio = pick.pick === "over" ? current / line : line / Math.max(current, line);
+  const ratio = isNeutral ? 0 : Math.min(1, Math.max(0, rawRatio));
+
   const result = pick.result ?? "pending";
   const barColor =
     result === "win"
       ? "bg-success"
       : result === "loss"
-      ? "bg-white/20"
+      ? "bg-destructive/70"
       : "bg-primary";
   const valueColor =
     result === "win"
@@ -302,9 +403,7 @@ function PickRow({
       <div className="flex items-start gap-3">
         <PickAvatar pick={pick} />
         <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-bold leading-tight truncate">
-            {pick.player}
-          </div>
+          <div className="text-[15px] font-bold leading-tight truncate">{pick.player}</div>
           <div className="mt-0.5 text-[12px] text-muted-foreground truncate">
             {pick.team ?? "—"} · {pick.league ?? "—"}
           </div>

@@ -70,6 +70,10 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
   const [ppLink, setPpLink] = useState("");
   const [ppMsg, setPpMsg] = useState<string | null>(null);
   const [ppLoading, setPpLoading] = useState(false);
+  // Past-pick mode lets the user log a parlay that already happened.
+  const [pastMode, setPastMode] = useState(false);
+  const [pastDate, setPastDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [results, setResults] = useState<Record<string, "pending" | "win" | "loss">>({});
 
   useEffect(() => {
     if (!open) {
@@ -77,6 +81,8 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       setShowSlip(false);
       setPpMsg(null);
       setPpLink("");
+      setPastMode(false);
+      setResults({});
     }
   }, [open]);
 
@@ -104,8 +110,13 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
     setStep({ kind: "sports" });
   };
 
-  const removePick = (key: string) =>
+  const removePick = (key: string) => {
     setPicks(picks.filter((p) => p.key !== key));
+    setResults((r) => {
+      const { [key]: _omit, ...rest } = r;
+      return rest;
+    });
+  };
 
   const submit = () => {
     if (!validCount || entryNum <= 0) return;
@@ -117,19 +128,26 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       stat: d.market.label,
       line: Number(d.line) || d.market.line,
       pick: d.pick,
-      result: "pending",
+      result: pastMode ? (results[d.key] ?? "pending") : "pending",
       photo: d.player.photo || undefined,
+      // Always start neutral; client edits the value later.
+      currentValue: 0,
     }));
     addEntry({
       type: effectiveType,
-      status: "upcoming",
+      status: pastMode ? "past" : "upcoming",
       entryAmount: entryNum,
       potential: maxPayout(effectiveType, parlayPicks.length, entryNum),
       picks: parlayPicks,
-      startTime: "Next game",
+      startTime: pastMode
+        ? new Date(pastDate).toLocaleDateString()
+        : "Next game",
+      playedAt: pastMode ? new Date(pastDate).toISOString() : undefined,
     });
     setPicks([]);
+    setResults({});
     setEntryAmount("5");
+    setPastMode(false);
     onClose();
   };
 
@@ -142,7 +160,6 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
     }
     setPpLoading(true);
     setPpMsg(null);
-    // No real PP API access — show a friendly note rather than fake data.
     setTimeout(() => {
       setPpLoading(false);
       setPpMsg("Official PrizePicks links can't be auto-imported. Build the matching slip below.");
@@ -295,6 +312,36 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                   </div>
                 </div>
 
+                {/* Past mode toggle */}
+                <div className="mt-2 px-4">
+                  <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2">
+                    <div>
+                      <div className="text-[11px] font-bold text-white">Log as past pick</div>
+                      <div className="text-[10px] text-white/55">Record an already-played parlay.</div>
+                    </div>
+                    <button
+                      onClick={() => setPastMode((v) => !v)}
+                      className={`relative h-5 w-9 rounded-full transition-colors ${pastMode ? "bg-[#7c3aed]" : "bg-white/15"}`}
+                      aria-label="Toggle past mode"
+                    >
+                      <span
+                        className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${pastMode ? "left-[18px]" : "left-0.5"}`}
+                      />
+                    </button>
+                  </div>
+                  {pastMode && (
+                    <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2">
+                      <label className="text-[10px] uppercase tracking-wider text-white/55">Date</label>
+                      <input
+                        type="date"
+                        value={pastDate}
+                        onChange={(e) => setPastDate(e.target.value)}
+                        className="ml-auto h-7 rounded-md bg-black/40 px-2 text-[11px] text-white outline-none ring-1 ring-white/10 focus:ring-[#7c3aed]"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* PP import */}
                 <div className="mt-3 px-4">
                   <div className="rounded-xl border border-white/10 bg-white/[0.02] p-2">
@@ -390,6 +437,32 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                               ))}
                             </div>
                           </div>
+                          {pastMode && (
+                            <div className="mt-2 flex gap-1">
+                              {(["win", "pending", "loss"] as const).map((r) => {
+                                const sel = (results[d.key] ?? "pending") === r;
+                                return (
+                                  <button
+                                    key={r}
+                                    onClick={() =>
+                                      setResults((cur) => ({ ...cur, [d.key]: r }))
+                                    }
+                                    className={`flex-1 rounded-md py-1 text-[10px] font-bold uppercase ring-1 ${
+                                      sel
+                                        ? r === "win"
+                                          ? "bg-green-500/20 text-green-300 ring-green-400/40"
+                                          : r === "loss"
+                                          ? "bg-red-500/20 text-red-300 ring-red-400/40"
+                                          : "bg-white/10 text-white/80 ring-white/20"
+                                        : "text-white/45 ring-white/10"
+                                    }`}
+                                  >
+                                    {r}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -435,7 +508,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-[#7c3aed] py-2.5 text-[13px] font-bold text-white shadow-lg shadow-[#7c3aed]/30 disabled:opacity-40"
                   >
                     <Check className="h-3.5 w-3.5" />
-                    Submit Entry
+                    {pastMode ? "Save Past Entry" : "Submit Entry"}
                   </button>
                 </div>
               </motion.div>
