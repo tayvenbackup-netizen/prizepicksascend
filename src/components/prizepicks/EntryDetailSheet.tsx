@@ -291,14 +291,14 @@ function SheetBody({
       </div>
 
       {/* Tabs */}
-      <div className="mt-4 grid grid-cols-3 px-5">
+      <div className="mt-3 grid grid-cols-3 px-4">
         {(["entry", "pulse", "details"] as Tab[]).map((t) => {
           const active = tab === t;
           return (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`relative pb-2 text-center text-[14px] capitalize transition-colors ${
+              className={`relative pb-1.5 text-center text-[12px] capitalize transition-colors ${
                 active ? "font-bold text-foreground" : "text-muted-foreground"
               }`}
             >
@@ -314,10 +314,10 @@ function SheetBody({
 
       {/* Edit bar */}
       {editing && (
-        <div className="flex items-center justify-between gap-3 px-5 py-3">
-          <label className="text-[12px] text-muted-foreground">Entry amount</label>
-          <div className="flex items-center gap-1 rounded-lg bg-surface px-2 py-1.5">
-            <span className="text-[13px] text-muted-foreground">$</span>
+        <div className="flex items-center justify-between gap-2 px-4 py-2">
+          <label className="text-[11px] text-muted-foreground">Entry amount</label>
+          <div className="flex items-center gap-1 rounded-md bg-surface px-2 py-1">
+            <span className="text-[12px] text-muted-foreground">$</span>
             <input
               type="text"
               inputMode="decimal"
@@ -334,16 +334,16 @@ function SheetBody({
                 }
               }}
               placeholder="0"
-              className="w-20 bg-transparent text-right text-[14px] font-semibold outline-none placeholder:text-muted-foreground/40"
+              className="w-20 bg-transparent text-right text-[13px] font-semibold outline-none placeholder:text-muted-foreground/40"
             />
           </div>
         </div>
       )}
 
       {/* Body */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-3 pb-8">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-6">
         {tab === "entry" ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {Object.entries(groups).map(([key, picks]) => (
               <MatchupGroup
                 key={key}
