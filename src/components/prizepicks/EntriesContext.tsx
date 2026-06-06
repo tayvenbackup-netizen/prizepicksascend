@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 export type ParlayPick = {
   id: string;
@@ -11,7 +11,7 @@ export type ParlayPick = {
   /** result: pending while live/upcoming, win/loss after settlement */
   result?: "pending" | "win" | "loss";
   photo?: string;
-  /** Current/final stat value used to fill the progress bar. */
+  /** Current/final stat value used to fill the progress bar. Defaults to 0 (neutral). */
   currentValue?: number;
 };
 
@@ -20,11 +20,13 @@ export type ParlayType = "power" | "flex";
 export type Entry = {
   id: string;
   type: ParlayType;
-  status: "live" | "upcoming";
+  status: "live" | "upcoming" | "past";
   entryAmount: number;
   potential: number;
   picks: ParlayPick[];
   startTime?: string;
+  /** ISO date (for past entries) */
+  playedAt?: string;
   createdAt: number;
 };
 
@@ -37,9 +39,26 @@ type Ctx = {
 };
 
 const EntriesContext = createContext<Ctx | null>(null);
+const STORAGE_KEY = "pp_entries_v1";
 
 export function EntriesProvider({ children }: { children: ReactNode }) {
-  const [entries, setEntries] = useState<Entry[]>([]);
+  const [entries, setEntries] = useState<Entry[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as Entry[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    } catch {
+      /* ignore quota */
+    }
+  }, [entries]);
 
   const addEntry: Ctx["addEntry"] = (e) => {
     setEntries((prev) => [
@@ -84,10 +103,6 @@ export function useEntries() {
 
 /* ====== PrizePicks payout math ====== */
 
-/**
- * Power Play (all picks must hit) multipliers used by PrizePicks.
- * 2:3x, 3:5x, 4:10x, 5:20x, 6:25x (1-pick is not a real PP entry; treated as 1x).
- */
 export const POWER_MULTIPLIERS: Record<number, number> = {
   1: 1,
   2: 3,
@@ -97,10 +112,6 @@ export const POWER_MULTIPLIERS: Record<number, number> = {
   6: 25,
 };
 
-/**
- * Flex Play partial-payout table (1 miss allowed for 4–6 picks, additional misses pay less).
- * Returns { hits: multiplier } for a given pick count.
- */
 export const FLEX_TABLE: Record<number, Record<number, number>> = {
   3: { 3: 2.25, 2: 1.25 },
   4: { 4: 5, 3: 1.5 },
@@ -124,9 +135,6 @@ export function computePayout(
   return entryAmount * mult;
 }
 
-/**
- * Maximum potential payout (all picks hit) used to display "to pay $X" on entry cards.
- */
 export function maxPayout(
   type: ParlayType,
   pickCount: number,
