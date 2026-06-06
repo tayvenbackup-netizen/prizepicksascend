@@ -332,7 +332,7 @@ function PickAvatar({ pick }: { pick: Entry["picks"][number] }) {
     .join("");
 
   return (
-    <div className="relative" style={{ width: 36, height: 36 }}>
+    <div className="relative" style={{ width: 44, height: 44 }}>
       <div
         className="flex h-full w-full items-center justify-center rounded-full"
         style={{ background: ringColor, padding: 2 }}
