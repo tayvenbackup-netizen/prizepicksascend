@@ -508,7 +508,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-[#7c3aed] py-2.5 text-[13px] font-bold text-white shadow-lg shadow-[#7c3aed]/30 disabled:opacity-40"
                   >
                     <Check className="h-3.5 w-3.5" />
-                    Submit Entry
+                    {pastMode ? "Save Past Entry" : "Submit Entry"}
                   </button>
                 </div>
               </motion.div>
