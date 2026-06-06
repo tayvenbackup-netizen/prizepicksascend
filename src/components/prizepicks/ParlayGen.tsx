@@ -6,12 +6,14 @@ import {
   useEntries,
   type ParlayPick,
   type ParlayType,
+  type PickBadge,
 } from "./EntriesContext";
 import { MOCK_PLAYERS, SPORT_ORDER, type PlayerOption, type Sport } from "./parlayData";
 import { Sparkles, Link2, Loader2 } from "lucide-react";
 import { fmtMoney } from "@/lib/fmt";
 import { fetchUpcomingTeamSet, teamIsUpcoming } from "@/lib/sportsdb";
 import { Jersey } from "./Jersey";
+import { BadgePicker } from "./Badges";
 
 type Draft = {
   player: PlayerOption;
