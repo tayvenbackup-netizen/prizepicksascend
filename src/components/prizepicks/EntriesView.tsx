@@ -269,7 +269,7 @@ function PastStatusBadge({ entry }: { entry: Entry }) {
     ? "bg-white/[0.06] text-foreground/80"
     : "bg-white/[0.06] text-muted-foreground";
   return (
-    <span className={`inline-flex rounded-[3px] px-1 py-0.5 text-[10px] font-semibold ${tone}`}>
+    <span className={`inline-flex rounded px-1.5 py-0.5 text-[12px] font-semibold ${tone}`}>
       {label}
     </span>
   );
