@@ -21,10 +21,14 @@ export function EntryDetailSheet({
   entryId,
   open,
   onOpenChange,
+  siblingIds,
+  onNavigate,
 }: {
   entryId: string | null;
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  siblingIds?: string[];
+  onNavigate?: (id: string) => void;
 }) {
   const { entries, updateEntry, updatePick, removeEntry } = useEntries();
   const entry = useMemo(
