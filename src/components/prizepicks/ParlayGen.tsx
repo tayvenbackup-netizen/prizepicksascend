@@ -308,6 +308,13 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
                     ))}
                   </div>
                 </div>
+                <div className="mt-1.5 flex items-center justify-end">
+                  <BadgePicker
+                    value={d.badge ?? null}
+                    size="xs"
+                    onChange={(b) => updatePick(i, { badge: b })}
+                  />
+                </div>
               </li>
             ))}
           </ul>
