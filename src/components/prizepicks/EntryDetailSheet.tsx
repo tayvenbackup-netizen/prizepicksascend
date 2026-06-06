@@ -176,7 +176,7 @@ function SheetBody({
             <div className="text-[17px] font-bold leading-tight truncate">
               {fmtMoney(entry.entryAmount)} {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
               <span className="text-muted-foreground">
-                {fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks.length, entry.entryAmount) : finalPayout)}
+                {fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks, entry.entryAmount) : finalPayout)}
               </span>
             </div>
             <div className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground">
