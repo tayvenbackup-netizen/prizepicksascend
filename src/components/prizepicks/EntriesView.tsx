@@ -1,7 +1,12 @@
 import { useState } from "react";
 import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
-import { useEntries, type Entry, computePayout, maxPayout } from "./EntriesContext";
+import {
+  useEntries,
+  type Entry,
+  computePayoutWithBadges as computePayout,
+  maxPayoutWithBadges as maxPayout,
+} from "./EntriesContext";
 import { CheckBadge, XBadge } from "./Icons";
 import { fmtMoney } from "@/lib/fmt";
 import { EntryDetailSheet } from "./EntryDetailSheet";
