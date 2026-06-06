@@ -237,11 +237,8 @@ function PastStatusBadge({ entry }: { entry: Entry }) {
 
 function PastList({ past, onOpen }: { past: Entry[]; onOpen: (id: string) => void }) {
   const groups = new Map<string, Entry[]>();
-  for (const e of [...past].sort((a, b) => {
-    const ad = e_date(a);
-    const bd = e_date(b);
-    return bd - ad;
-  })) {
+  const sorted = [...past].sort((a, b) => e_date(b) - e_date(a));
+  for (const e of sorted) {
     const key = fmtDateHeader(e_date(e));
     const arr = groups.get(key) ?? [];
     arr.push(e);
