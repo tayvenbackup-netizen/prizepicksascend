@@ -186,8 +186,12 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
             step={step}
             picks={picks}
             onBack={() => {
-              if (step.kind === "markets") setStep({ kind: "roster", sport: step.sport, team: { id: step.player.team, name: step.player.team, abbr: step.player.team, logo: null }, gameLabel: "" });
-              else if (step.kind === "roster") setStep({ kind: "sports" });
+              if (step.kind === "markets") {
+                if (pastMode) setStep({ kind: "pastTeams", sport: step.sport });
+                else setStep({ kind: "roster", sport: step.sport, team: { id: step.player.team, name: step.player.team, abbr: step.player.team, logo: null }, gameLabel: "" });
+              }
+              else if (step.kind === "roster") setStep(pastMode ? { kind: "pastTeams", sport: step.sport } : { kind: "sports" });
+              else if (step.kind === "pastTeams") setStep({ kind: "sports" });
               else if (step.kind === "teams") setStep({ kind: "games", sport: step.sport });
               else if (step.kind === "games") setStep({ kind: "sports" });
               else onClose();
@@ -198,7 +202,13 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
 
           <div className="flex-1 min-h-0 overflow-hidden">
             {step.kind === "sports" && (
-              <SportsScreen onPick={(s) => setStep({ kind: "games", sport: s })} />
+              <SportsScreen
+                pastMode={pastMode}
+                onTogglePast={setPastMode}
+                onPick={(s) =>
+                  setStep(pastMode ? { kind: "pastTeams", sport: s } : { kind: "games", sport: s })
+                }
+              />
             )}
             {step.kind === "games" && (
               <GamesScreen
@@ -219,6 +229,17 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     team: t,
                     gameLabel: `${step.game.away.abbr} @ ${step.game.home.abbr} · ${step.game.shortLabel}`,
                   })
+                }
+              />
+            )}
+            {step.kind === "pastTeams" && (
+              <PastTeamsScreen
+                sport={step.sport}
+                onPickTeam={(t) =>
+                  setStep({ kind: "roster", sport: step.sport, team: t, gameLabel: "" })
+                }
+                onPickPlayer={(p) =>
+                  setStep({ kind: "markets", sport: step.sport, player: p })
                 }
               />
             )}
