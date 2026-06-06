@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
+export type PickBadge = "demon" | "goblin" | null;
+
 export type ParlayPick = {
   id: string;
   player: string;
@@ -13,6 +15,10 @@ export type ParlayPick = {
   photo?: string;
   /** Current/final stat value used to fill the progress bar. Defaults to 0 (neutral). */
   currentValue?: number;
+  /** Optional “demon” (harder) or “goblin” (easier) modifier shown next to the line. */
+  badge?: PickBadge;
+  /** Per-pick game label shown above the player (e.g. "ATL 12 vs IND 18"). Editable for past entries. */
+  gameLabel?: string;
 };
 
 export type ParlayType = "power" | "flex";
