@@ -116,6 +116,18 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  /* Smoother, 120fps-feel default motion across the app */
+  html { scroll-behavior: smooth; }
+  *, *::before, *::after {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    button, a, [role="button"], [data-state] {
+      transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      transition-duration: 220ms;
+    }
+  }
   html, body, #root { height: 100%; overflow: hidden; }
   html {
     -webkit-text-size-adjust: 100%;
