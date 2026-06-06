@@ -251,7 +251,7 @@ function PastStatusBadge({ entry }: { entry: Entry }) {
   const isLoss = losses > 0 && !isWin;
   const label = isWin ? "Win" : isLoss ? "Loss" : "—";
   const tone = isWin
-    ? "bg-success/20 text-success ring-1 ring-success/60 shadow-[0_0_12px_-2px_var(--success)]"
+    ? "bg-[#4ade1f] text-black"
     : isLoss
     ? "bg-white/[0.06] text-foreground/80"
     : "bg-white/[0.06] text-muted-foreground";
