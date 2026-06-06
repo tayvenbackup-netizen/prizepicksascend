@@ -386,11 +386,22 @@ function PickRow({
   // Default to 0 / neutral unless explicitly set by the client.
   const current = pick.currentValue ?? 0;
   const line = pick.line || 1;
-  const isNeutral = (pick.result ?? "pending") === "pending" && current === 0;
-  const rawRatio = pick.pick === "over" ? current / line : line / Math.max(current, line);
-  const ratio = isNeutral ? 0 : Math.min(1, Math.max(0, rawRatio));
-
   const result = pick.result ?? "pending";
+  const isNeutral = result === "pending" && current === 0;
+  // Bar fills to 100% whenever the pick is decided (win or loss) or when
+  // the current value meets/exceeds the line in either direction.
+  let ratio: number;
+  if (isNeutral) {
+    ratio = 0;
+  } else if (result === "win" || result === "loss") {
+    ratio = 1;
+  } else if (pick.pick === "over") {
+    ratio = Math.min(1, Math.max(0, current / line));
+  } else {
+    // under: progress toward staying below the line; once exceeded → full
+    ratio = current >= line ? 1 : Math.min(1, Math.max(0, current / line));
+  }
+
   const barColor =
     result === "win"
       ? "bg-success"
@@ -416,7 +427,6 @@ function PickRow({
         </div>
         <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-right ring-1 ring-white/10">
           <div className="flex items-center justify-end gap-1 text-[14px] font-bold">
-            <span className="text-success">😈</span>
             <span>{pick.pick === "over" ? "↑" : "↓"}</span>
             <span>{pick.line}</span>
           </div>
