@@ -345,27 +345,43 @@ function SheetBody({
 
 function MatchupGroup({
   league,
-  team,
+  gameLabel,
   picks,
   editing,
+  isPast,
   onUpdate,
+  onUpdateGroupLabel,
 }: {
   league: string;
-  team: string;
+  gameLabel: string;
   picks: ParlayPick[];
   editing: boolean;
+  isPast: boolean;
   onUpdate: (pickId: string, patch: Partial<ParlayPick>) => void;
+  onUpdateGroupLabel: (label: string) => void;
 }) {
   return (
     <div className="rounded-2xl bg-surface">
-      <div className="flex items-center justify-between px-3 py-2.5 text-[12px]">
-        <div className="flex items-center gap-2">
-          <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-semibold text-foreground/90">
+      <div className="flex items-center justify-between gap-2 px-3 py-2.5 text-[12px]">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-semibold text-foreground/90 shrink-0">
             {league}
           </span>
-          <span className="text-foreground/80">{team}</span>
+          {editing && isPast ? (
+            <input
+              type="text"
+              value={gameLabel}
+              onChange={(e) => onUpdateGroupLabel(e.target.value)}
+              placeholder="ATL 0 vs IND 0"
+              className="min-w-0 flex-1 rounded-md bg-black/40 px-2 py-0.5 text-[12px] text-foreground/90 outline-none ring-1 ring-white/10 focus:ring-primary"
+            />
+          ) : (
+            <span className="truncate text-foreground/80">{gameLabel}</span>
+          )}
         </div>
-        <span className="text-muted-foreground">Final</span>
+        <span className="text-muted-foreground shrink-0">
+          {isPast ? "Final" : "Live"}
+        </span>
       </div>
       <div className="px-3 pb-3 space-y-3">
         {picks.map((p, i) => (
