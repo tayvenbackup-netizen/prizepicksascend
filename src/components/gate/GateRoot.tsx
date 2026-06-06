@@ -1,6 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import KeyEntryScreen from './KeyEntryScreen';
-import IntroOverlay from './IntroOverlay';
 import AdminPanel from '../admin/AdminPanel';
 import { useAccessControl } from '@/hooks/useAccessControl';
 import { AccessContext } from '@/lib/accessContext';
@@ -11,11 +10,10 @@ interface Props { children: ReactNode }
 export const GateRoot = ({ children }: Props) => {
   const { isAuthed, isAdmin, isLoading, validateKey, error, session } = useAccessControl();
   const [adminOpen, setAdminOpen] = useState(false);
-  const [introDone, setIntroDone] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return sessionStorage.getItem('ascend:intro-played') === '1';
-  });
-  const [videoDone, setVideoDone] = useState(false);
+  const [introSrc, setIntroSrc] = useState<string | null>(null);
+  const [introStarted, setIntroStarted] = useState(false);
+  const [introDone, setIntroDone] = useState(false);
+  const introVideoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     const open = () => setAdminOpen(true);
@@ -27,23 +25,85 @@ export const GateRoot = ({ children }: Props) => {
     document.body.dataset.isAdmin = isAdmin ? '1' : '0';
   }, [isAdmin]);
 
-  const showIntroVideo = !videoDone && !introDone;
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
 
-  if (isLoading || showIntroVideo) {
+    const preloadIntro = async () => {
+      try {
+        const response = await fetch(introVideo.url, { cache: 'force-cache' });
+        const blob = await response.blob();
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setIntroSrc(objectUrl);
+      } catch {
+        if (!cancelled) {
+          setIntroSrc(introVideo.url);
+        }
+      }
+    };
+
+    void preloadIntro();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!introSrc || introStarted || introDone) return;
+
+    const video = introVideoRef.current;
+    if (!video) return;
+
+    const startPlayback = async () => {
+      try {
+        video.currentTime = 0;
+        await video.play();
+        setIntroStarted(true);
+      } catch {
+        setIntroStarted(false);
+      }
+    };
+
+    void startPlayback();
+  }, [introDone, introSrc, introStarted]);
+
+  useEffect(() => {
+    if (introDone || introStarted) return;
+
+    const video = introVideoRef.current;
+    if (!video) return;
+
+    const resumePlayback = () => {
+      void video.play().then(() => setIntroStarted(true)).catch(() => undefined);
+    };
+
+    window.addEventListener('pointerdown', resumePlayback, { once: true });
+    return () => window.removeEventListener('pointerdown', resumePlayback);
+  }, [introDone, introStarted]);
+
+  const showIntroVideo = !introDone || isLoading;
+
+  if (showIntroVideo) {
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black">
-        <video
-          src={introVideo.url}
-          autoPlay
-          muted
-          playsInline
-          onEnded={() => {
-            sessionStorage.setItem('ascend:intro-played', '1');
-            setVideoDone(true);
-            setIntroDone(true);
-          }}
-          className="w-full h-full object-cover"
-        />
+        {introSrc ? (
+          <video
+            ref={introVideoRef}
+            src={introSrc}
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            onPlaying={() => setIntroStarted(true)}
+            onEnded={() => setIntroDone(true)}
+            className="h-full w-full object-cover"
+          />
+        ) : null}
       </div>
     );
   }

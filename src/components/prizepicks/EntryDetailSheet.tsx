@@ -189,7 +189,7 @@ function SheetBody({
       {/* Header */}
       <div className="flex items-start justify-between gap-2.5 px-4 pt-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <PLogo size={36} />
+          <PLogo size={49} />
           <div className="min-w-0">
             <div className="text-[14px] font-bold leading-tight truncate">
               <span className={isWin ? "text-success" : undefined}>
