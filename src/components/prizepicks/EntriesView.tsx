@@ -1,7 +1,7 @@
 import { useState } from "react";
 import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
-import { useEntries, type Entry } from "./EntriesContext";
+import { useEntries, type Entry, computePayout } from "./EntriesContext";
 import { CheckBadge, XBadge } from "./Icons";
 import { fmtMoney } from "@/lib/fmt";
 import { EntryDetailSheet } from "./EntryDetailSheet";
@@ -20,6 +20,17 @@ export function EntriesView() {
 
   const totalOpen = open.length;
   const totalPotential = open.reduce((s, e) => s + e.potential, 0);
+
+  const wonPast = past.filter((e) => {
+    const hits = e.picks.filter((p) => p.result === "win").length;
+    const total = e.picks.length;
+    return e.type === "power" ? hits === total : hits >= Math.ceil(total / 2);
+  });
+  const entriesWon = wonPast.length;
+  const amountWon = wonPast.reduce((s, e) => {
+    const hits = e.picks.filter((p) => p.result === "win").length;
+    return s + computePayout(e.type, e.picks.length, hits, e.entryAmount);
+  }, 0);
 
   const showEmpty = (tab === "open" && open.length === 0) || (tab === "past" && past.length === 0);
 
@@ -54,14 +65,20 @@ export function EntriesView() {
 
         <div className="grid grid-cols-2 gap-2.5 px-4 pt-3 pb-1.5">
           <div className="rounded-2xl bg-surface px-3 py-3.5 text-center">
-            <div className="text-[20px] font-bold leading-none">{totalOpen}</div>
-            <div className="mt-1.5 text-[11px] text-foreground/90">Entries Open</div>
+            <div className="text-[20px] font-bold leading-none">
+              {tab === "open" ? totalOpen : entriesWon}
+            </div>
+            <div className="mt-1.5 text-[11px] text-foreground/90">
+              {tab === "open" ? "Entries Open" : "Entries Won"}
+            </div>
           </div>
           <div className="rounded-2xl bg-surface px-3 py-3.5 text-center">
             <div className="text-[20px] font-bold leading-none">
-              {fmtMoney(totalPotential)}
+              {fmtMoney(tab === "open" ? totalPotential : amountWon)}
             </div>
-            <div className="mt-1.5 text-[11px] text-foreground/90">Potential Winnings</div>
+            <div className="mt-1.5 text-[11px] text-foreground/90">
+              {tab === "open" ? "Potential Winnings" : "Amount Won"}
+            </div>
           </div>
         </div>
       </div>
