@@ -292,16 +292,22 @@ function SheetBody({
           <div className="flex items-center gap-1 rounded-lg bg-surface px-2 py-1.5">
             <span className="text-[13px] text-muted-foreground">$</span>
             <input
-              type="number"
-              min={1}
-              step={1}
-              value={entry.entryAmount}
-              onChange={(e) =>
-                updateEntry(entry.id, {
-                  entryAmount: Math.max(1, Number(e.target.value) || 0),
-                })
-              }
-              className="w-20 bg-transparent text-right text-[14px] font-semibold outline-none"
+              type="text"
+              inputMode="decimal"
+              value={entry.entryAmount === 0 ? "" : String(entry.entryAmount)}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === "" || /^\d*\.?\d*$/.test(v)) {
+                  updateEntry(entry.id, { entryAmount: v === "" ? 0 : Number(v) });
+                }
+              }}
+              onBlur={(e) => {
+                if (e.target.value === "" || Number(e.target.value) < 1) {
+                  updateEntry(entry.id, { entryAmount: 1 });
+                }
+              }}
+              placeholder="0"
+              className="w-20 bg-transparent text-right text-[14px] font-semibold outline-none placeholder:text-muted-foreground/40"
             />
           </div>
         </div>
