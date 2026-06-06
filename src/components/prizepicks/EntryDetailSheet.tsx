@@ -130,7 +130,7 @@ function SheetBody({
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
   const finalPayout = settled
     ? computePayout(entry.type, entry.picks.length, hits, entry.entryAmount)
-    : entry.potential;
+    : maxPayout(entry.type, entry.picks.length, entry.entryAmount);
   const isPast = entry.status === "past";
   const statusLabel: "Win" | "Loss" | "Live" | "Past" = isPast
     ? "Past"
