@@ -53,8 +53,8 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
   const validCount = count >= 2 && count <= 6;
 
   const potential = useMemo(
-    () => maxPayout(type, count, entryNum),
-    [type, count, entryNum],
+    () => maxPayout(type, picks.map((p) => ({ badge: p.badge ?? null })), entryNum),
+    [type, picks, entryNum],
   );
 
   const supportedFlex = count >= 3 && count <= 6;
