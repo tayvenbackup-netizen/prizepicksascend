@@ -104,8 +104,8 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
   const supportedFlex = count >= 3 && count <= 6;
   const effectiveType = supportedFlex ? type : "power";
   const potential = useMemo(
-    () => maxPayout(effectiveType, count, entryNum),
-    [effectiveType, count, entryNum],
+    () => maxPayout(effectiveType, picks.map((p) => ({ badge: p.badge ?? null })), entryNum),
+    [effectiveType, picks, entryNum],
   );
 
   const addPick = (d: Draft) => {
