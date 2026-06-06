@@ -34,16 +34,23 @@ export function EntryDetailSheet({
   const [tab, setTab] = useState<Tab>("entry");
   const [editing, setEditing] = useState(false);
 
-  const y = useMotionValue(0);
+  const y = useMotionValue(typeof window !== "undefined" ? window.innerHeight : 1000);
   const overlayOpacity = useTransform(y, [0, 400], [1, 0]);
 
   useEffect(() => {
     if (!open) {
       setEditing(false);
       setTab("entry");
-    } else {
-      y.set(0);
+      return;
     }
+    // Animate the sheet up from the bottom imperatively so the motion value
+    // (which is also bound to drag) doesn't fight the entrance animation.
+    y.set(typeof window !== "undefined" ? window.innerHeight : 1000);
+    const controls = animate(y, 0, {
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1],
+    });
+    return () => controls.stop();
   }, [open, y]);
 
   // lock body scroll
@@ -56,6 +63,15 @@ export function EntryDetailSheet({
     };
   }, [open]);
 
+  const handleClose = () => {
+    const target = typeof window !== "undefined" ? window.innerHeight : 1000;
+    animate(y, target, {
+      duration: 0.4,
+      ease: [0.32, 0, 0.67, 0],
+      onComplete: () => onOpenChange(false),
+    });
+  };
+
   return (
     <AnimatePresence>
       {open && entry && (
@@ -66,26 +82,23 @@ export function EntryDetailSheet({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => onOpenChange(false)}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            onClick={handleClose}
           />
           <motion.div
             key="entry-sheet"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.6 }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}
             style={{ y, top: "calc(env(safe-area-inset-top, 0px) + 56px)" }}
             onDragEnd={(_, info) => {
               if (info.offset.y > 140 || info.velocity.y > 700) {
-                onOpenChange(false);
+                handleClose();
               } else {
-                y.set(0);
+                animate(y, 0, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
               }
             }}
-            className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background"
+            className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background will-change-transform"
           >
             <SheetBody
               entry={entry}
@@ -93,7 +106,7 @@ export function EntryDetailSheet({
               setTab={setTab}
               editing={editing}
               setEditing={setEditing}
-              onClose={() => onOpenChange(false)}
+              onClose={handleClose}
               updateEntry={updateEntry}
               updatePick={updatePick}
               removeEntry={removeEntry}
