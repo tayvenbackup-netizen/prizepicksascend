@@ -43,7 +43,7 @@ type Step =
   | { kind: "teams"; sport: SportKey; game: Game }
   | { kind: "roster"; sport: SportKey; team: TeamLite; gameLabel: string }
   | { kind: "pastTeams"; sport: SportKey }
-  | { kind: "markets"; sport: SportKey; player: Player };
+  | { kind: "markets"; sport: SportKey; player: Player; gameLabel?: string };
 
 type Draft = {
   key: string;
@@ -52,6 +52,8 @@ type Draft = {
   market: Market;
   pick: "over" | "under";
   line: string;
+  badge?: PickBadge;
+  gameLabel?: string;
 };
 
 function fmtShort(iso: string) {
