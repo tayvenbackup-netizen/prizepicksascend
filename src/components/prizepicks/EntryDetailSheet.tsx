@@ -73,7 +73,7 @@ export function EntryDetailSheet({
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.32 }}
+            transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.6 }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}
