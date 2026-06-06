@@ -151,6 +151,8 @@ export function EntriesView() {
         entryId={openEntryId}
         open={openEntryId !== null}
         onOpenChange={(v) => !v && setOpenEntryId(null)}
+        siblingIds={tab === "past" ? past.map((e) => e.id) : undefined}
+        onNavigate={(id) => setOpenEntryId(id)}
       />
     </div>
 
