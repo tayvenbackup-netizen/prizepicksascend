@@ -194,7 +194,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
             onBack={() => {
               if (step.kind === "markets") {
                 if (pastMode) setStep({ kind: "pastTeams", sport: step.sport });
-                else setStep({ kind: "roster", sport: step.sport, team: { id: step.player.team, name: step.player.team, abbr: step.player.team, logo: null }, gameLabel: "" });
+                else setStep({ kind: "roster", sport: step.sport, team: { id: step.player.team, name: step.player.team, abbr: step.player.team, logo: null }, gameLabel: step.gameLabel ?? "" });
               }
               else if (step.kind === "roster") setStep(pastMode ? { kind: "pastTeams", sport: step.sport } : { kind: "sports" });
               else if (step.kind === "pastTeams") setStep({ kind: "sports" });
@@ -233,7 +233,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     kind: "roster",
                     sport: step.sport,
                     team: t,
-                    gameLabel: `${step.game.away.abbr} @ ${step.game.home.abbr} · ${step.game.shortLabel}`,
+                    gameLabel: `${step.game.away.abbr} vs ${step.game.home.abbr} · ${step.game.shortLabel}`,
                   })
                 }
               />
@@ -254,7 +254,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                 sport={step.sport}
                 team={step.team}
                 gameLabel={step.gameLabel}
-                onPick={(p) => setStep({ kind: "markets", sport: step.sport, player: p })}
+                onPick={(p) => setStep({ kind: "markets", sport: step.sport, player: p, gameLabel: step.gameLabel })}
               />
             )}
             {step.kind === "markets" && (
@@ -269,6 +269,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     market,
                     pick,
                     line,
+                    gameLabel: step.gameLabel,
                   })
                 }
               />
