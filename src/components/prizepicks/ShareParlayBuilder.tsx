@@ -144,7 +144,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       type: effectiveType,
       status: pastMode ? "past" : "upcoming",
       entryAmount: entryNum,
-      potential: maxPayout(effectiveType, parlayPicks.length, entryNum),
+      potential: maxPayout(effectiveType, parlayPicks, entryNum),
       picks: parlayPicks,
       startTime: pastMode
         ? new Date(pastDate).toLocaleDateString()
