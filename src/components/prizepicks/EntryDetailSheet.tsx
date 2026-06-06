@@ -129,8 +129,8 @@ function SheetBody({
   const hits = entry.picks.filter((p) => p.result === "win").length;
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
   const finalPayout = settled
-    ? computePayout(entry.type, entry.picks.length, hits, entry.entryAmount)
-    : maxPayout(entry.type, entry.picks.length, entry.entryAmount);
+    ? computePayout(entry.type, entry.picks, entry.entryAmount)
+    : maxPayout(entry.type, entry.picks, entry.entryAmount);
   const isPast = entry.status === "past";
   const isWin = isPast && settled && finalPayout > 0;
   const statusLabel: "Win" | "Loss" | "Live" | "Past" = isPast
