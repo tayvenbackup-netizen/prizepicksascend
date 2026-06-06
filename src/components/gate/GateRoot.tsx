@@ -6,7 +6,6 @@ import { useAccessControl } from '@/hooks/useAccessControl';
 import { AccessContext } from '@/lib/accessContext';
 import introVideo from '@/assets/intro.mp4.asset.json';
 
-
 interface Props { children: ReactNode }
 
 export const GateRoot = ({ children }: Props) => {
@@ -16,6 +15,7 @@ export const GateRoot = ({ children }: Props) => {
     if (typeof window === 'undefined') return true;
     return sessionStorage.getItem('ascend:intro-played') === '1';
   });
+  const [videoDone, setVideoDone] = useState(false);
 
   useEffect(() => {
     const open = () => setAdminOpen(true);
@@ -27,7 +27,9 @@ export const GateRoot = ({ children }: Props) => {
     document.body.dataset.isAdmin = isAdmin ? '1' : '0';
   }, [isAdmin]);
 
-  if (isLoading) {
+  const showIntroVideo = !videoDone && !introDone;
+
+  if (isLoading || showIntroVideo) {
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black">
         <video
@@ -35,28 +37,19 @@ export const GateRoot = ({ children }: Props) => {
           autoPlay
           muted
           playsInline
-          loop
+          onEnded={() => {
+            sessionStorage.setItem('ascend:intro-played', '1');
+            setVideoDone(true);
+            setIntroDone(true);
+          }}
           className="w-full h-full object-cover"
         />
       </div>
     );
   }
 
-
   if (!isAuthed) {
-    return (
-      <>
-        <KeyEntryScreen onValidate={validateKey} error={error} />
-        {!introDone && (
-          <IntroOverlay
-            onDone={() => {
-              sessionStorage.setItem('ascend:intro-played', '1');
-              setIntroDone(true);
-            }}
-          />
-        )}
-      </>
-    );
+    return <KeyEntryScreen onValidate={validateKey} error={error} />;
   }
 
   return (
