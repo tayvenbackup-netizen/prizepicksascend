@@ -113,11 +113,7 @@ export function EntriesView() {
                 )}
               </>
             ) : (
-              <Section title="Past">
-                {past.map((e) => (
-                  <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
-                ))}
-              </Section>
+              <PastList past={past} onOpen={(id) => setOpenEntryId(id)} />
             )}
           </div>
         )}
@@ -201,6 +197,8 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
               <span className="h-2 w-2 rounded-full bg-destructive" />
               Live
             </div>
+          ) : entry.status === "past" ? (
+            <PastStatusBadge entry={entry} />
           ) : (
             <>
               <div className="text-[12px] text-muted-foreground">Next game</div>
@@ -216,6 +214,67 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
       </div>
     </button>
   );
+}
+
+function PastStatusBadge({ entry }: { entry: Entry }) {
+  const hits = entry.picks.filter((p) => p.result === "win").length;
+  const losses = entry.picks.filter((p) => p.result === "loss").length;
+  const total = entry.picks.length;
+  const isWin = entry.type === "power" ? hits === total : hits >= Math.ceil(total / 2);
+  const isLoss = losses > 0 && !isWin;
+  const label = isWin ? "Win" : isLoss ? "Loss" : "—";
+  const tone = isWin
+    ? "bg-success/15 text-success"
+    : isLoss
+    ? "bg-white/[0.06] text-foreground/80"
+    : "bg-white/[0.06] text-muted-foreground";
+  return (
+    <span className={`inline-flex rounded-md px-2 py-1 text-[12px] font-semibold ${tone}`}>
+      {label}
+    </span>
+  );
+}
+
+function PastList({ past, onOpen }: { past: Entry[]; onOpen: (id: string) => void }) {
+  const groups = new Map<string, Entry[]>();
+  const sorted = [...past].sort((a, b) => e_date(b) - e_date(a));
+  for (const e of sorted) {
+    const key = fmtDateHeader(e_date(e));
+    const arr = groups.get(key) ?? [];
+    arr.push(e);
+    groups.set(key, arr);
+  }
+  return (
+    <>
+      {[...groups.entries()].map(([date, items]) => (
+        <div key={date} className="mb-5">
+          <h3 className="mb-2 text-[13px] font-semibold text-foreground/90">{date}</h3>
+          <div className="space-y-3">
+            {items.map((e) => (
+              <EntryCard key={e.id} entry={e} onClick={() => onOpen(e.id)} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function e_date(e: Entry): number {
+  if (e.playedAt) {
+    const t = Date.parse(e.playedAt);
+    if (!Number.isNaN(t)) return t;
+  }
+  return e.createdAt ?? 0;
+}
+
+function fmtDateHeader(ms: number): string {
+  if (!ms) return "—";
+  return new Date(ms).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function PickAvatar({ pick }: { pick: Entry["picks"][number] }) {
