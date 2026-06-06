@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, X, Search, Sparkles, Link2, Loader2, ChevronRight, Plus, Check, Trash2 } from "lucide-react";
 import {
-  maxPayout,
+  maxPayoutWithBadges as maxPayout,
   POWER_MULTIPLIERS,
   useEntries,
   type ParlayPick,
@@ -104,8 +104,8 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
   const supportedFlex = count >= 3 && count <= 6;
   const effectiveType = supportedFlex ? type : "power";
   const potential = useMemo(
-    () => maxPayout(effectiveType, count, entryNum),
-    [effectiveType, count, entryNum],
+    () => maxPayout(effectiveType, picks.map((p) => ({ badge: p.badge ?? null })), entryNum),
+    [effectiveType, picks, entryNum],
   );
 
   const addPick = (d: Draft) => {
@@ -144,7 +144,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       type: effectiveType,
       status: pastMode ? "past" : "upcoming",
       entryAmount: entryNum,
-      potential: maxPayout(effectiveType, parlayPicks.length, entryNum),
+      potential: maxPayout(effectiveType, parlayPicks, entryNum),
       picks: parlayPicks,
       startTime: pastMode
         ? new Date(pastDate).toLocaleDateString()

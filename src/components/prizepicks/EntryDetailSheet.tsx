@@ -12,7 +12,7 @@ import { Jersey } from "./Jersey";
 import { CheckBadge, XBadge, ShareIcon } from "./Icons";
 import { useEntries, type Entry, type ParlayPick } from "./EntriesContext";
 import { fmtMoney } from "@/lib/fmt";
-import { computePayout, maxPayout } from "./EntriesContext";
+import { computePayoutWithBadges as computePayout, maxPayoutWithBadges as maxPayout } from "./EntriesContext";
 import { BadgeIcon, BadgePicker } from "./Badges";
 
 type Tab = "entry" | "pulse" | "details";
@@ -129,8 +129,8 @@ function SheetBody({
   const hits = entry.picks.filter((p) => p.result === "win").length;
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
   const finalPayout = settled
-    ? computePayout(entry.type, entry.picks.length, hits, entry.entryAmount)
-    : maxPayout(entry.type, entry.picks.length, entry.entryAmount);
+    ? computePayout(entry.type, entry.picks, entry.entryAmount)
+    : maxPayout(entry.type, entry.picks, entry.entryAmount);
   const isPast = entry.status === "past";
   const isWin = isPast && settled && finalPayout > 0;
   const statusLabel: "Win" | "Loss" | "Live" | "Past" = isPast
@@ -176,7 +176,7 @@ function SheetBody({
             <div className="text-[17px] font-bold leading-tight truncate">
               {fmtMoney(entry.entryAmount)} {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
               <span className="text-muted-foreground">
-                {fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks.length, entry.entryAmount) : finalPayout)}
+                {fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks, entry.entryAmount) : finalPayout)}
               </span>
             </div>
             <div className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground">

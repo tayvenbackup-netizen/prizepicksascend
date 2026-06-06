@@ -1,7 +1,12 @@
 import { useState } from "react";
 import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
-import { useEntries, type Entry, computePayout, maxPayout } from "./EntriesContext";
+import {
+  useEntries,
+  type Entry,
+  computePayoutWithBadges as computePayout,
+  maxPayoutWithBadges as maxPayout,
+} from "./EntriesContext";
 import { CheckBadge, XBadge } from "./Icons";
 import { fmtMoney } from "@/lib/fmt";
 import { EntryDetailSheet } from "./EntryDetailSheet";
@@ -28,8 +33,7 @@ export function EntriesView() {
   });
   const entriesWon = wonPast.length;
   const amountWon = wonPast.reduce((s, e) => {
-    const hits = e.picks.filter((p) => p.result === "win").length;
-    return s + computePayout(e.type, e.picks.length, hits, e.entryAmount);
+    return s + computePayout(e.type, e.picks, e.entryAmount);
   }, 0);
 
   const showEmpty = (tab === "open" && open.length === 0) || (tab === "past" && past.length === 0);
@@ -178,8 +182,9 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
   const isPast = entry.status === "past";
   const hits = entry.picks.filter((p) => p.result === "win").length;
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
-  const actualPayout = computePayout(entry.type, entry.picks.length, hits, entry.entryAmount);
-  const potentialMax = maxPayout(entry.type, entry.picks.length, entry.entryAmount);
+  const actualPayout = computePayout(entry.type, entry.picks, entry.entryAmount);
+  const potentialMax = maxPayout(entry.type, entry.picks, entry.entryAmount);
+  
   const isWin = isPast && settled && actualPayout > 0;
 
   return (

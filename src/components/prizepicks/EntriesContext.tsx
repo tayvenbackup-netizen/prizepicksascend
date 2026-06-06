@@ -148,3 +148,62 @@ export function maxPayout(
 ): number {
   return computePayout(type, pickCount, pickCount, entryAmount);
 }
+
+/**
+ * Official PrizePicks badge multipliers, applied per-pick on top of the base
+ * power/flex payout.
+ *  - Goblin: 0.65x — easier line, smaller payout
+ *  - Demon:  1.5x  — harder line, bigger payout
+ *  - none:   1x    — standard 50/50 line
+ */
+export const BADGE_MULTIPLIERS = {
+  demon: 1.5,
+  goblin: 0.65,
+  none: 1,
+} as const;
+
+export function badgeMult(badge: PickBadge | undefined): number {
+  if (badge === "demon") return BADGE_MULTIPLIERS.demon;
+  if (badge === "goblin") return BADGE_MULTIPLIERS.goblin;
+  return BADGE_MULTIPLIERS.none;
+}
+
+/** Product of badge multipliers across all picks (used for max/potential). */
+export function badgeMultiplierForBadges(
+  badges: (PickBadge | undefined)[],
+): number {
+  return badges.reduce((m, b) => m * badgeMult(b), 1);
+}
+
+/** Product of badge multipliers across winning picks only (final payouts). */
+export function badgeMultiplierForWins(picks: ParlayPick[]): number {
+  return picks.reduce(
+    (m, p) => (p.result === "win" ? m * badgeMult(p.badge ?? null) : m),
+    1,
+  );
+}
+
+/** Convenience: settled payout including badge multipliers. */
+export function computePayoutWithBadges(
+  type: ParlayType,
+  picks: ParlayPick[],
+  entryAmount: number,
+): number {
+  const hits = picks.filter((p) => p.result === "win").length;
+  const base = computePayout(type, picks.length, hits, entryAmount);
+  if (base === 0) return 0;
+  return base * badgeMultiplierForWins(picks);
+}
+
+/** Convenience: max payout including badge multipliers. */
+export function maxPayoutWithBadges(
+  type: ParlayType,
+  picks: { badge?: PickBadge | null }[],
+  entryAmount: number,
+): number {
+  const base = maxPayout(type, picks.length, entryAmount);
+  return (
+    base *
+    badgeMultiplierForBadges(picks.map((p) => p.badge ?? null))
+  );
+}

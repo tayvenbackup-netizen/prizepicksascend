@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, PlusIcon, XCircle, CheckCircle } from "./Icons";
 import {
-  maxPayout,
+  maxPayoutWithBadges as maxPayout,
   POWER_MULTIPLIERS,
   useEntries,
   type ParlayPick,
@@ -53,8 +53,8 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
   const validCount = count >= 2 && count <= 6;
 
   const potential = useMemo(
-    () => maxPayout(type, count, entryNum),
-    [type, count, entryNum],
+    () => maxPayout(type, picks.map((p) => ({ badge: p.badge ?? null })), entryNum),
+    [type, picks, entryNum],
   );
 
   const supportedFlex = count >= 3 && count <= 6;
@@ -183,7 +183,7 @@ export function ParlayGen({ onClose }: { onClose: () => void }) {
       type: effectiveType,
       status,
       entryAmount: entryNum,
-      potential: maxPayout(effectiveType, parlayPicks.length, entryNum),
+      potential: maxPayout(effectiveType, parlayPicks, entryNum),
       picks: parlayPicks,
       startTime: status === "upcoming" ? "Next game" : undefined,
     });
