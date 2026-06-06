@@ -113,11 +113,7 @@ export function EntriesView() {
                 )}
               </>
             ) : (
-              <Section title="Past">
-                {past.map((e) => (
-                  <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
-                ))}
-              </Section>
+              <PastList past={past} onOpen={(id) => setOpenEntryId(id)} />
             )}
           </div>
         )}
