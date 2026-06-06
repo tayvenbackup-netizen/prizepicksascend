@@ -20,6 +20,7 @@ type Draft = {
   pick: "over" | "under";
   /** allow user to override the line — kept as string so the input can be cleared */
   line: string;
+  badge?: PickBadge;
 };
 
 export function ParlayGen({ onClose }: { onClose: () => void }) {
