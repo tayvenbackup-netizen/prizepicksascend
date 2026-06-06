@@ -12,7 +12,7 @@ import { Jersey } from "./Jersey";
 import { CheckBadge, XBadge, ShareIcon } from "./Icons";
 import { useEntries, type Entry, type ParlayPick } from "./EntriesContext";
 import { fmtMoney } from "@/lib/fmt";
-import { computePayout } from "./EntriesContext";
+import { computePayout, maxPayout } from "./EntriesContext";
 import { BadgeIcon, BadgePicker } from "./Badges";
 
 type Tab = "entry" | "pulse" | "details";
@@ -130,7 +130,7 @@ function SheetBody({
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
   const finalPayout = settled
     ? computePayout(entry.type, entry.picks.length, hits, entry.entryAmount)
-    : entry.potential;
+    : maxPayout(entry.type, entry.picks.length, entry.entryAmount);
   const isPast = entry.status === "past";
   const statusLabel: "Win" | "Loss" | "Live" | "Past" = isPast
     ? "Past"

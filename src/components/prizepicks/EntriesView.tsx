@@ -185,12 +185,12 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
           {visible.map((p) => (
             <PickAvatar key={p.id} pick={p} />
           ))}
-          {extra > 0 && (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.06] text-[12px] font-bold">
-              +{extra}
-            </div>
-          )}
         </div>
+        {extra > 0 && (
+          <span className="ml-2 text-[13px] font-bold text-foreground/90">
+            +{extra}
+          </span>
+        )}
         <div className="ml-auto text-right">
           {entry.status === "live" ? (
             <div className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
