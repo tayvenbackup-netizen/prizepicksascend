@@ -560,14 +560,14 @@ function PickAvatar({ pick }: { pick: ParlayPick }) {
   return (
     <div className="relative shrink-0">
       <div
-        className="flex h-11 w-11 items-center justify-center rounded-full"
+        className="flex h-9 w-9 items-center justify-center rounded-full"
         style={{ background: ring, padding: 2 }}
       >
         <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#2a2540]">
           {pick.photo ? (
             <img src={pick.photo} alt="" className="h-full w-full object-cover" />
           ) : (
-            <Jersey team={pick.team ?? "??"} size={40} />
+            <Jersey team={pick.team ?? "??"} size={32} />
           )}
         </div>
       </div>
