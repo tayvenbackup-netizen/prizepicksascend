@@ -137,6 +137,8 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       photo: d.player.photo || undefined,
       // Always start neutral; client edits the value later.
       currentValue: 0,
+      badge: d.badge ?? null,
+      gameLabel: d.gameLabel,
     }));
     addEntry({
       type: effectiveType,
