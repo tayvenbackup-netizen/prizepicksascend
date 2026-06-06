@@ -3,10 +3,11 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useProfile, type ProfileData } from "./ProfileContext";
+import { useAccessControl } from "@/hooks/useAccessControl";
 import { PLogo } from "./Icons";
 // ParlayGen has moved into the Share button (see ShareParlayBuilder).
 import { ListsEditor } from "./ListsEditor";
-import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, ListChecks, Award, Activity } from "lucide-react";
+import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, ListChecks, Award, Activity, KeyRound, Infinity as InfinityIcon } from "lucide-react";
 
 const defaultData: ProfileData = {
   name: "ascend2k",
