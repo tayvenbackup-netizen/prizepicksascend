@@ -133,8 +133,13 @@ function SheetBody({
     : maxPayout(entry.type, entry.picks, entry.entryAmount);
   const isPast = entry.status === "past";
   const isWin = isPast && settled && finalPayout > 0;
+  const isLoss = isPast && settled && finalPayout === 0;
   const statusLabel: "Win" | "Loss" | "Live" | "Past" = isPast
-    ? "Past"
+    ? settled
+      ? finalPayout > 0
+        ? "Win"
+        : "Loss"
+      : "Past"
     : settled
     ? finalPayout > 0
       ? "Win"
@@ -144,7 +149,7 @@ function SheetBody({
     statusLabel === "Win"
       ? "bg-success/15 text-success"
       : statusLabel === "Loss"
-      ? "bg-white/10 text-foreground/80"
+      ? "bg-destructive/15 text-destructive"
       : statusLabel === "Past"
       ? "bg-white/10 text-foreground/70"
       : "bg-destructive/15 text-destructive";
@@ -174,8 +179,11 @@ function SheetBody({
           <PLogo size={36} />
           <div className="min-w-0">
             <div className="text-[17px] font-bold leading-tight truncate">
-              {fmtMoney(entry.entryAmount)} {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
-              <span className="text-muted-foreground">
+              <span className={isWin ? "text-success" : undefined}>
+                {fmtMoney(entry.entryAmount)}
+              </span>{" "}
+              {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
+              <span className={isWin ? "text-success" : "text-muted-foreground"}>
                 {fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks, entry.entryAmount) : finalPayout)}
               </span>
             </div>
