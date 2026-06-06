@@ -40,6 +40,7 @@ type Step =
   | { kind: "games"; sport: SportKey }
   | { kind: "teams"; sport: SportKey; game: Game }
   | { kind: "roster"; sport: SportKey; team: TeamLite; gameLabel: string }
+  | { kind: "pastTeams"; sport: SportKey }
   | { kind: "markets"; sport: SportKey; player: Player };
 
 type Draft = {
