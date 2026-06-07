@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useTransform, animate } from "framer-motion";
 import {
   DropdownMenu,
@@ -16,6 +16,8 @@ import { computePayoutWithBadges as computePayout, maxPayoutWithBadges as maxPay
 import { BadgeIcon, BadgePicker } from "./Badges";
 
 type Tab = "entry" | "pulse" | "details";
+
+const PEEK = 18; // px of neighbor card visible on each side
 
 export function EntryDetailSheet({
   entryId,
@@ -38,26 +40,50 @@ export function EntryDetailSheet({
   const [tab, setTab] = useState<Tab>("entry");
   const [editing, setEditing] = useState(false);
 
+  const [vw, setVw] = useState(typeof window !== "undefined" ? window.innerWidth : 390);
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const ids = siblingIds && siblingIds.length > 1 ? siblingIds : entryId ? [entryId] : [];
+  const idx = entryId ? ids.indexOf(entryId) : -1;
+  const hasPager = ids.length > 1 && idx >= 0;
+  const slideW = hasPager ? vw - PEEK * 2 : vw;
+
   const y = useMotionValue(typeof window !== "undefined" ? window.innerHeight : 1000);
   const overlayOpacity = useTransform(y, [0, 400], [1, 0]);
+  const x = useMotionValue(0);
+  const prevIdxRef = useRef<number>(-1);
 
   useEffect(() => {
     if (!open) {
       setEditing(false);
       setTab("entry");
+      prevIdxRef.current = -1;
       return;
     }
-    // Animate the sheet up from the bottom imperatively so the motion value
-    // (which is also bound to drag) doesn't fight the entrance animation.
     y.set(typeof window !== "undefined" ? window.innerHeight : 1000);
-    const controls = animate(y, 0, {
-      duration: 0.55,
-      ease: [0.22, 1, 0.36, 1],
-    });
+    const controls = animate(y, 0, { duration: 0.55, ease: [0.22, 1, 0.36, 1] });
     return () => controls.stop();
   }, [open, y]);
 
-  // lock body scroll
+  // Horizontal pager position: keep current slide centered with peek on both sides
+  useEffect(() => {
+    if (!hasPager || idx < 0) {
+      x.set(0);
+      return;
+    }
+    const target = -idx * slideW + (vw - slideW) / 2;
+    if (prevIdxRef.current === -1) {
+      x.set(target);
+    } else if (prevIdxRef.current !== idx) {
+      animate(x, target, { duration: 0.42, ease: [0.22, 1, 0.36, 1] });
+    }
+    prevIdxRef.current = idx;
+  }, [idx, slideW, vw, hasPager, x]);
+
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -103,29 +129,48 @@ export function EntryDetailSheet({
               }
             }}
             onPanEnd={(_, info) => {
-              if (!siblingIds || siblingIds.length < 2 || !entryId || !onNavigate) return;
+              if (!hasPager || !onNavigate) return;
               const dx = info.offset.x;
               const dy = info.offset.y;
-              if (Math.abs(dx) < 70 || Math.abs(dx) <= Math.abs(dy) * 1.2) return;
-              const idx = siblingIds.indexOf(entryId);
-              if (idx === -1) return;
+              if (Math.abs(dx) < 60 || Math.abs(dx) <= Math.abs(dy) * 1.2) return;
               const nextIdx = dx < 0 ? idx + 1 : idx - 1;
-              if (nextIdx < 0 || nextIdx >= siblingIds.length) return;
-              onNavigate(siblingIds[nextIdx]);
+              if (nextIdx < 0 || nextIdx >= ids.length) return;
+              onNavigate(ids[nextIdx]);
             }}
-            className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background will-change-transform"
+            className="absolute inset-x-0 bottom-0 will-change-transform overflow-visible"
           >
-            <SheetBody
-              entry={entry}
-              tab={tab}
-              setTab={setTab}
-              editing={editing}
-              setEditing={setEditing}
-              onClose={handleClose}
-              updateEntry={updateEntry}
-              updatePick={updatePick}
-              removeEntry={removeEntry}
-            />
+            <motion.div
+              style={{ x }}
+              className="flex h-full"
+            >
+              {ids.map((id, i) => {
+                const e = entries.find((ee) => ee.id === id);
+                const renderBody = Math.abs(i - idx) <= 1 && !!e;
+                return (
+                  <div
+                    key={id}
+                    className="shrink-0 h-full px-1"
+                    style={{ width: slideW }}
+                  >
+                    <div className="h-full overflow-hidden rounded-t-3xl bg-background">
+                      {renderBody && e ? (
+                        <SheetBody
+                          entry={e}
+                          tab={i === idx ? tab : "entry"}
+                          setTab={setTab}
+                          editing={i === idx ? editing : false}
+                          setEditing={setEditing}
+                          onClose={handleClose}
+                          updateEntry={updateEntry}
+                          updatePick={updatePick}
+                          removeEntry={removeEntry}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
           </motion.div>
         </div>
       )}
