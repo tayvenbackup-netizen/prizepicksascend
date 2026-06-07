@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PLogo } from "./PLogo";
 import { Jersey } from "./Jersey";
-import { CheckBadge, XBadge, ShareIcon } from "./Icons";
+import { CheckBadge, XBadge } from "./Icons";
+import { Share } from "lucide-react";
 import { useEntries, type Entry, type ParlayPick } from "./EntriesContext";
 import { fmtMoney } from "@/lib/fmt";
 import { computePayoutWithBadges as computePayout, maxPayoutWithBadges as maxPayout } from "./EntriesContext";
@@ -305,9 +306,21 @@ function SheetBody({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3 pt-1 shrink-0">
-          <button className="text-foreground/90" aria-label="Share">
-            <ShareIcon className="h-5 w-5" />
+        <div className="flex items-center gap-1 pt-1 shrink-0">
+          <button
+            className="flex h-7 w-7 items-center justify-center text-foreground/90 outline-none"
+            aria-label="Share"
+            onClick={() => {
+              const planLabelText = `${entry.picks.length}-Pick ${entry.type === "power" ? "Power" : "Flex"} Play`;
+              const text = `${fmtMoney(entry.entryAmount)} ${isWin ? "paid" : isPast ? "for" : "to pay"} ${fmtMoney(isWin ? finalPayout : isPast ? maxPayout(entry.type, entry.picks, entry.entryAmount) : finalPayout)} — ${planLabelText}`;
+              if (typeof navigator !== "undefined" && (navigator as Navigator & { share?: (d: ShareData) => Promise<void> }).share) {
+                (navigator as Navigator & { share: (d: ShareData) => Promise<void> }).share({ title: "Entry", text }).catch(() => {});
+              } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+                navigator.clipboard.writeText(text).catch(() => {});
+              }
+            }}
+          >
+            <Share className="h-[18px] w-[18px]" strokeWidth={2} />
           </button>
           <DropdownMenu>
             <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center text-foreground/90 outline-none">
