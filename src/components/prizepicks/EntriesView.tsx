@@ -193,26 +193,21 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="w-full text-left rounded-2xl border border-white/5 bg-surface p-5 active:scale-[0.99] transition-transform"
+      className={`w-full text-left rounded-2xl border border-white/5 bg-surface active:scale-[0.99] transition-transform ${isPast ? "p-4" : "p-5"}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[18px] font-bold leading-tight">
+          <div className={`${isPast ? "text-[16px]" : "text-[18px]"} font-bold leading-tight`}>
             <span className={isWin ? "text-success" : undefined}>
               {fmtMoney(entry.entryAmount)}
             </span>{" "}
-            {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
+            {isWin ? "paid" : isPast ? "to pay" : "to pay"}{" "}
             <span className={isWin ? "text-success" : "text-muted-foreground"}>
               {fmtMoney(isWin ? actualPayout : isPast ? potentialMax : entry.potential)}
             </span>
           </div>
-          <div className="mt-1 text-[14px] text-muted-foreground">
+          <div className={`mt-1 ${isPast ? "text-[13px]" : "text-[14px]"} text-muted-foreground`}>
             {planLabel(entry)}
-            {isPast && (
-              <span className="ml-2 text-foreground/70">
-                · {hits}/{entry.picks.length} hits
-              </span>
-            )}
           </div>
         </div>
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/40 shrink-0">
@@ -220,7 +215,8 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
         </div>
       </div>
 
-      <div className="mt-4 h-px bg-white/5" />
+      <div className={`${isPast ? "mt-3" : "mt-4"} h-px bg-white/5`} />
+
 
       <div className="mt-4 flex items-center gap-3">
         <div className="flex -space-x-2.5">
