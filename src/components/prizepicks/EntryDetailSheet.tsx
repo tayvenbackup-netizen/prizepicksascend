@@ -522,10 +522,12 @@ function MatchupGroup({
 function PickRow({
   pick,
   editing,
+  isActive,
   onUpdate,
 }: {
   pick: ParlayPick;
   editing: boolean;
+  isActive: boolean;
   onUpdate: (pickId: string, patch: Partial<ParlayPick>) => void;
 }) {
   // Default to 0 / neutral unless explicitly set by the client.
