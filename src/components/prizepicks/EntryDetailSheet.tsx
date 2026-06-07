@@ -287,7 +287,7 @@ function SheetBody({
           <PLogo size={49} />
           <div className="min-w-0">
             <div className="text-[14px] font-bold leading-tight truncate">
-              <span className={isWin ? "text-success" : undefined}>
+              <span className="text-foreground">
                 {fmtMoney(entry.entryAmount)}
               </span>{" "}
               {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
