@@ -193,11 +193,11 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left rounded-2xl border border-white/5 bg-surface active:scale-[0.99] transition-transform ${isPast ? "p-4" : "p-5"}`}
+      className={`w-full text-left rounded-2xl border border-white/5 bg-surface active:scale-[0.99] transition-transform ${isPast ? "p-3" : "p-3.5"}`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0">
-          <div className={`${isPast ? "text-[16px]" : "text-[18px]"} font-bold leading-tight`}>
+          <div className={`${isPast ? "text-[14px]" : "text-[15px]"} font-bold leading-tight`}>
             <span className="text-foreground">
               {fmtMoney(entry.entryAmount)}
             </span>{" "}
@@ -206,47 +206,47 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
               {fmtMoney(isWin ? actualPayout : isPast ? potentialMax : entry.potential)}
             </span>
           </div>
-          <div className={`mt-1 ${isPast ? "text-[13px]" : "text-[14px]"} text-muted-foreground`}>
+          <div className={`mt-0.5 ${isPast ? "text-[11px]" : "text-[12px]"} text-muted-foreground`}>
             {planLabel(entry)}
           </div>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/40 shrink-0">
-          <img src={flagIcon} alt="" className="h-6 w-6 object-contain" draggable={false} />
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/40 shrink-0">
+          <img src={flagIcon} alt="" className="h-4 w-4 object-contain" draggable={false} />
         </div>
       </div>
 
-      <div className={`${isPast ? "mt-3" : "mt-4"} h-px bg-white/5`} />
+      <div className={`${isPast ? "mt-2" : "mt-2.5"} h-px bg-white/5`} />
 
 
-      <div className={`${isPast ? "mt-3" : "mt-4"} flex items-center gap-3`}>
-        <div className="flex -space-x-2.5">
+      <div className={`${isPast ? "mt-2" : "mt-2.5"} flex items-center gap-2.5`}>
+        <div className="flex -space-x-2">
           {visible.map((p) => (
             <PickAvatar key={p.id} pick={p} />
           ))}
         </div>
         {extra > 0 && (
-          <span className="ml-2 text-[14px] font-bold text-foreground/90">
+          <span className="ml-1.5 text-[12px] font-bold text-foreground/90">
             +{extra}
           </span>
         )}
         <div className="ml-auto text-right">
           {entry.status === "live" ? (
-            <div className="flex items-center gap-1.5 text-[14px] font-semibold text-foreground">
-              <span className="h-2.5 w-2.5 rounded-full bg-destructive animate-pulse" />
+            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
+              <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
               Live
             </div>
           ) : entry.status === "past" ? (
             <PastStatusBadge entry={entry} />
           ) : (
             <>
-              <div className="text-[12px] text-muted-foreground">Next game</div>
-              <div className="text-[14px] font-semibold">{entry.startTime ?? "—"}</div>
+              <div className="text-[10px] text-muted-foreground">Next game</div>
+              <div className="text-[12px] font-semibold">{entry.startTime ?? "—"}</div>
             </>
           )}
         </div>
       </div>
 
-      <div className={`${isPast ? "mt-2" : "mt-3"} text-[13px] text-muted-foreground truncate`}>
+      <div className={`${isPast ? "mt-1.5" : "mt-2"} text-[11px] text-muted-foreground truncate`}>
         {namesList}
         {namesSuffix}
       </div>
