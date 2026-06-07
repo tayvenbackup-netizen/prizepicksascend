@@ -218,7 +218,7 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
       <div className={`${isPast ? "mt-3" : "mt-4"} h-px bg-white/5`} />
 
 
-      <div className="mt-4 flex items-center gap-3">
+      <div className={`${isPast ? "mt-3" : "mt-4"} flex items-center gap-3`}>
         <div className="flex -space-x-2.5">
           {visible.map((p) => (
             <PickAvatar key={p.id} pick={p} />
@@ -246,10 +246,11 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
         </div>
       </div>
 
-      <div className="mt-3 text-[13px] text-muted-foreground truncate">
+      <div className={`${isPast ? "mt-2" : "mt-3"} text-[13px] text-muted-foreground truncate`}>
         {namesList}
         {namesSuffix}
       </div>
+
     </button>
   );
 }
