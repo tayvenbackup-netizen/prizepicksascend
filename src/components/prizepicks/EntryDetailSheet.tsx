@@ -581,16 +581,18 @@ function PickRow({
           className={`absolute inset-y-0 left-0 rounded-full ${barColor} transition-all`}
           style={{ width: `${ratio * 100}%` }}
         />
-        <div
-          className="absolute -top-2 -translate-x-1/2"
-          style={{ left: `${ratio * 100}%` }}
-        >
+        {isActive && (
           <div
-            className={`min-w-[28px] rounded-full border bg-background px-1.5 py-px text-center text-[9px] font-bold ${valueColor}`}
+            className="absolute -top-2 -translate-x-1/2"
+            style={{ left: `${ratio * 100}%` }}
           >
-            {Number.isInteger(current) ? current : current.toFixed(1)}
+            <div
+              className={`min-w-[28px] rounded-full border bg-background px-1.5 py-px text-center text-[9px] font-bold ${valueColor}`}
+            >
+              {Number.isInteger(current) ? current : current.toFixed(1)}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
 
