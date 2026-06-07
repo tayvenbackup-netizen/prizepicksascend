@@ -122,7 +122,7 @@ export function EntryDetailSheet({
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}
-            style={{ y, top: "calc(env(safe-area-inset-top, 0px) + 56px)" }}
+            style={{ y, top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
             onDragEnd={(_, info) => {
               if (info.offset.y > 140 || info.velocity.y > 700) {
                 handleClose();
@@ -130,24 +130,46 @@ export function EntryDetailSheet({
                 animate(y, 0, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
               }
             }}
-            onPanEnd={(_, info) => {
-              if (!hasPager || !onNavigate) return;
-              const dx = info.offset.x;
-              const dy = info.offset.y;
-              if (Math.abs(dx) < 60 || Math.abs(dx) <= Math.abs(dy) * 1.2) return;
-              const nextIdx = dx < 0 ? idx + 1 : idx - 1;
-              if (nextIdx < 0 || nextIdx >= ids.length) return;
-              onNavigate(ids[nextIdx]);
-            }}
             className="absolute inset-x-0 bottom-0 will-change-transform overflow-visible"
           >
             <motion.div
               style={{ x }}
-              className="flex h-full"
+              drag={hasPager ? "x" : false}
+              dragDirectionLock
+              dragElastic={0.18}
+              dragMomentum={false}
+              dragConstraints={{
+                left: baseX - slideW,
+                right: baseX + slideW,
+              }}
+              onDragStart={() => setIsDraggingX(true)}
+              onDragEnd={(_, info) => {
+                setIsDraggingX(false);
+                const dx = info.offset.x;
+                const vx = info.velocity.x;
+                const threshold = slideW * 0.22;
+                let nextIdx = idx;
+                if ((dx < -threshold || vx < -500) && idx < ids.length - 1) {
+                  nextIdx = idx + 1;
+                } else if ((dx > threshold || vx > 500) && idx > 0) {
+                  nextIdx = idx - 1;
+                }
+                if (nextIdx !== idx && onNavigate) {
+                  onNavigate(ids[nextIdx]);
+                } else {
+                  animate(x, baseX, {
+                    type: "spring",
+                    stiffness: 320,
+                    damping: 36,
+                  });
+                }
+              }}
+              className="flex h-full touch-pan-y"
             >
               {ids.map((id, i) => {
                 const e = entries.find((ee) => ee.id === id);
-                const renderBody = i === idx && !!e;
+                const renderBody =
+                  !!e && (i === idx || (isDraggingX && Math.abs(i - idx) <= 1));
                 return (
                   <div
                     key={id}
@@ -170,6 +192,7 @@ export function EntryDetailSheet({
                       ) : null}
                     </div>
                   </div>
+
                 );
               })}
             </motion.div>
