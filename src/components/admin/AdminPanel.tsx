@@ -47,8 +47,9 @@ const API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-key`
 const ADMIN_TOKEN_KEY = '__ascend_admin_tok';
 const ADMIN_CSRF_KEY = '__ascend_admin_csrf';
 
-let inMemoryCsrf: string | null = sessionStorage.getItem(ADMIN_CSRF_KEY);
-let inMemoryAdminTok: string | null = sessionStorage.getItem(ADMIN_TOKEN_KEY);
+let inMemoryCsrf: string | null = typeof window !== 'undefined' ? sessionStorage.getItem(ADMIN_CSRF_KEY) : null;
+let inMemoryAdminTok: string | null = typeof window !== 'undefined' ? sessionStorage.getItem(ADMIN_TOKEN_KEY) : null;
+
 
 function setAdminAuth(adminToken: string | null, csrf: string | null) {
   inMemoryAdminTok = adminToken;
