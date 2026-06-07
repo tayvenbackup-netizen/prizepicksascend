@@ -198,7 +198,7 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className={`${isPast ? "text-[16px]" : "text-[18px]"} font-bold leading-tight`}>
-            <span className={isWin ? "text-success" : undefined}>
+            <span className="text-foreground">
               {fmtMoney(entry.entryAmount)}
             </span>{" "}
             {isWin ? "paid" : isPast ? "to pay" : "to pay"}{" "}
