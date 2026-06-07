@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PLogo } from "./PLogo";
 import { Jersey } from "./Jersey";
-import { CheckBadge, XBadge, ShareIcon } from "./Icons";
+import { CheckBadge, XBadge } from "./Icons";
+import { Share } from "lucide-react";
 import { useEntries, type Entry, type ParlayPick } from "./EntriesContext";
 import { fmtMoney } from "@/lib/fmt";
 import { computePayoutWithBadges as computePayout, maxPayoutWithBadges as maxPayout } from "./EntriesContext";
