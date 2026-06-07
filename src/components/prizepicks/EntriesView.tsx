@@ -161,9 +161,9 @@ export function EntriesView() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-4">
-      <h3 className="mb-2 text-[15px] font-semibold">{title}</h3>
-      <div className="space-y-3">{children}</div>
+    <div className="mb-3">
+      <h3 className="mb-2 text-[13px] font-semibold">{title}</h3>
+      <div className="space-y-2.5">{children}</div>
     </div>
   );
 }
