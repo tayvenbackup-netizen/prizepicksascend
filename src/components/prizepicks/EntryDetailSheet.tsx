@@ -119,43 +119,42 @@ export function EntryDetailSheet({
           />
           <motion.div
             key="entry-sheet"
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.6 }}
-            style={{ y, top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
-            onDragEnd={(_, info) => {
-              if (info.offset.y > 140 || info.velocity.y > 700) {
-                handleClose();
-              } else {
-                animate(y, 0, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
-              }
+            drag
+            dragDirectionLock
+            dragElastic={0.18}
+            dragMomentum={false}
+            dragConstraints={{
+              top: 0,
+              bottom: 0,
+              left: hasPager ? baseX - slideW : 0,
+              right: hasPager ? baseX + slideW : 0,
             }}
-            className="absolute inset-x-0 bottom-0 will-change-transform overflow-visible"
-          >
-            <motion.div
-              style={{ x }}
-              drag={hasPager ? "x" : false}
-              dragDirectionLock
-              dragElastic={0.18}
-              dragMomentum={false}
-              dragConstraints={{
-                left: baseX - slideW,
-                right: baseX + slideW,
-              }}
-              onDragStart={() => setIsDraggingX(true)}
-              onDragEnd={(_, info) => {
-                setIsDraggingX(false);
-                const dx = info.offset.x;
-                const vx = info.velocity.x;
-                const threshold = slideW * 0.22;
+            style={{ x, y, top: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+            onDragStart={() => setIsDraggingX(true)}
+            onDragEnd={(_, info) => {
+              setIsDraggingX(false);
+              const dx = info.offset.x;
+              const dy = info.offset.y;
+              const vx = info.velocity.x;
+              const vy = info.velocity.y;
+              const horizontal = Math.abs(dx) > Math.abs(dy);
+
+              if (horizontal && hasPager) {
+                const threshold = slideW * 0.32;
                 let nextIdx = idx;
                 if ((dx < -threshold || vx < -500) && idx < ids.length - 1) {
                   nextIdx = idx + 1;
                 } else if ((dx > threshold || vx > 500) && idx > 0) {
                   nextIdx = idx - 1;
                 }
+                animate(y, 0, { type: "spring", stiffness: 320, damping: 36 });
                 if (nextIdx !== idx && onNavigate) {
-                  onNavigate(ids[nextIdx]);
+                  const targetX = -nextIdx * slideW + (vw - slideW) / 2;
+                  animate(x, targetX, {
+                    duration: 0.28,
+                    ease: [0.22, 1, 0.36, 1],
+                    onComplete: () => onNavigate(ids[nextIdx]),
+                  });
                 } else {
                   animate(x, baseX, {
                     type: "spring",
@@ -163,13 +162,21 @@ export function EntryDetailSheet({
                     damping: 36,
                   });
                 }
-              }}
-              className="flex h-full touch-pan-y"
-            >
+              } else {
+                animate(x, baseX, { type: "spring", stiffness: 320, damping: 36 });
+                if (dy > 140 || vy > 700) {
+                  handleClose();
+                } else {
+                  animate(y, 0, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
+                }
+              }
+            }}
+            className="absolute inset-x-0 bottom-0 will-change-transform overflow-visible"
+          >
+            <div className="flex h-full">
               {ids.map((id, i) => {
                 const e = entries.find((ee) => ee.id === id);
-                const renderBody =
-                  !!e && (i === idx || (isDraggingX && Math.abs(i - idx) <= 1));
+                const renderBody = !!e && Math.abs(i - idx) <= 1;
                 return (
                   <div
                     key={id}
@@ -195,7 +202,7 @@ export function EntryDetailSheet({
 
                 );
               })}
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       )}
