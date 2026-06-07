@@ -511,7 +511,7 @@ function MatchupGroup({
         {picks.map((p, i) => (
           <div key={p.id}>
             {i > 0 && <div className="-mx-2.5 mb-5 h-px bg-white/5" />}
-            <PickRow pick={p} editing={editing} onUpdate={onUpdate} />
+            <PickRow pick={p} editing={editing} isActive={isActive} onUpdate={onUpdate} />
           </div>
         ))}
       </div>
