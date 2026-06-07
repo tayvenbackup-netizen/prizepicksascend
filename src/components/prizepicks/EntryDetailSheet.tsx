@@ -145,7 +145,7 @@ export function EntryDetailSheet({
             >
               {ids.map((id, i) => {
                 const e = entries.find((ee) => ee.id === id);
-                const renderBody = Math.abs(i - idx) <= 1 && !!e;
+                const renderBody = i === idx && !!e;
                 return (
                   <div
                     key={id}
