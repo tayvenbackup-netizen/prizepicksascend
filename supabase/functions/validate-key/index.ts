@@ -1,16 +1,25 @@
-const ALLOWED_ORIGIN_PATTERNS = [
-  'f64d7a25-0817-47c0-9c52-d489eb1e7096',
+const ALLOWED_HOSTS = [
   'lovable.app',
   'lovableproject.com',
   'lovable.dev',
   'ascendpickz.store',
   'localhost',
 ];
+const ALLOWED_HOST_EXACT = new Set<string>([
+  'localhost',
+]);
 
 function isAllowedOrigin(origin: string): boolean {
   if (!origin) return false;
-  return ALLOWED_ORIGIN_PATTERNS.some(p => origin.includes(p));
+  try {
+    const host = new URL(origin).hostname;
+    if (ALLOWED_HOST_EXACT.has(host)) return true;
+    return ALLOWED_HOSTS.some(h => host === h || host.endsWith('.' + h));
+  } catch {
+    return false;
+  }
 }
+
 
 const SESSION_COOKIE_NAME = '__larp_sess';
 const CSRF_COOKIE_NAME = '__larp_csrf';
@@ -916,7 +925,8 @@ Deno.serve(async (req) => {
           color: color || '#1475e1',
           created_by: isMaster ? 'master' : adminId,
         }).select().single();
-        if (error) return json({ error: error.message }, 500);
+        if (error) { console.error('create_group failed:', error); return json({ error: 'Failed to create group' }, 500); }
+
         return json({ group });
       }
 
@@ -976,7 +986,7 @@ Deno.serve(async (req) => {
           is_sub_admin: true,
           created_by: null,
         }).select().single();
-        if (error) return json({ error: error.message }, 500);
+        if (error) { console.error('create_sub_admin failed:', error); return json({ error: 'Failed to create sub-admin' }, 500); }
         return json({ key: trimmed, admin: adminKey });
       }
 
@@ -1017,8 +1027,9 @@ Deno.serve(async (req) => {
         if (!['daily', '3day', 'weekly', 'monthly', 'lifetime'].includes(key_type)) {
           return json({ error: 'Invalid key type' }, 400);
         }
-        const randomNum = String(Math.floor(Math.random() * 900) + 100);
-        const rawKey = `A2k-Stake-${randomNum}`;
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        const rawKey = 'A2k-' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
         const keyHash = await hmacHash(rawKey, PEPPER);
         const preview = rawKey.slice(-3);
         const { data: inserted } = await supabase.from('access_keys').insert({
