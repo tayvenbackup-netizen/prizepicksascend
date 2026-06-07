@@ -1026,8 +1026,9 @@ Deno.serve(async (req) => {
         if (!['daily', '3day', 'weekly', 'monthly', 'lifetime'].includes(key_type)) {
           return json({ error: 'Invalid key type' }, 400);
         }
-        const randomNum = String(Math.floor(Math.random() * 900) + 100);
-        const rawKey = `A2k-Stake-${randomNum}`;
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        const rawKey = 'A2k-' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
         const keyHash = await hmacHash(rawKey, PEPPER);
         const preview = rawKey.slice(-3);
         const { data: inserted } = await supabase.from('access_keys').insert({
