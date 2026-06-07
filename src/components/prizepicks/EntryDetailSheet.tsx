@@ -471,6 +471,7 @@ function MatchupGroup({
   picks,
   editing,
   isPast,
+  isActive,
   onUpdate,
   onUpdateGroupLabel,
 }: {
@@ -479,6 +480,7 @@ function MatchupGroup({
   picks: ParlayPick[];
   editing: boolean;
   isPast: boolean;
+  isActive: boolean;
   onUpdate: (pickId: string, patch: Partial<ParlayPick>) => void;
   onUpdateGroupLabel: (label: string) => void;
 }) {
