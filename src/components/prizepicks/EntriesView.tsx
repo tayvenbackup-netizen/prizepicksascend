@@ -151,6 +151,8 @@ export function EntriesView() {
         entryId={openEntryId}
         open={openEntryId !== null}
         onOpenChange={(v) => !v && setOpenEntryId(null)}
+        siblingIds={tab === "past" ? past.map((e) => e.id) : undefined}
+        onNavigate={(id) => setOpenEntryId(id)}
       />
     </div>
 
@@ -171,62 +173,70 @@ function planLabel(entry: Entry) {
 }
 
 function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
-  const visible = entry.picks.slice(0, 4);
+  const visible = entry.picks.slice(0, 5);
   const extra = entry.picks.length - visible.length;
   const namesList = entry.picks
-    .slice(0, 5)
+    .slice(0, 4)
     .map((p) => abbrev(p.player))
     .join(", ");
-  const namesSuffix = entry.picks.length > 5 ? `, +${entry.picks.length - 5}` : "";
+  const namesSuffix = entry.picks.length > 4 ? `, +${entry.picks.length - 4}` : "";
 
   const isPast = entry.status === "past";
-  const hits = entry.picks.filter((p) => p.result === "win").length;
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
   const actualPayout = computePayout(entry.type, entry.picks, entry.entryAmount);
   const potentialMax = maxPayout(entry.type, entry.picks, entry.entryAmount);
-  
+
   const isWin = isPast && settled && actualPayout > 0;
+  const hits = entry.picks.filter((p) => p.result === "win").length;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="w-full text-left rounded-2xl border border-white/5 bg-surface p-4 active:scale-[0.99] transition-transform"
+      className="w-full text-left rounded-2xl border border-white/5 bg-surface p-5 active:scale-[0.99] transition-transform"
     >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-[15px] font-bold">
-            {fmtMoney(entry.entryAmount)} {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
+        <div className="min-w-0">
+          <div className="text-[18px] font-bold leading-tight">
+            <span className={isWin ? "text-success" : undefined}>
+              {fmtMoney(entry.entryAmount)}
+            </span>{" "}
+            {isWin ? "paid" : isPast ? "for" : "to pay"}{" "}
             <span className={isWin ? "text-success" : "text-muted-foreground"}>
               {fmtMoney(isWin ? actualPayout : isPast ? potentialMax : entry.potential)}
             </span>
           </div>
-          <div className="mt-0.5 text-[13px] text-muted-foreground">
+          <div className="mt-1 text-[14px] text-muted-foreground">
             {planLabel(entry)}
+            {isPast && (
+              <span className="ml-2 text-foreground/70">
+                · {hits}/{entry.picks.length} hits
+              </span>
+            )}
           </div>
         </div>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/40">
-          <img src={flagIcon} alt="" className="h-5 w-5 object-contain" draggable={false} />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/40 shrink-0">
+          <img src={flagIcon} alt="" className="h-6 w-6 object-contain" draggable={false} />
         </div>
       </div>
 
-      <div className="mt-3 h-px bg-white/5" />
+      <div className="mt-4 h-px bg-white/5" />
 
-      <div className="mt-3 flex items-center gap-3">
-        <div className="flex -space-x-2">
+      <div className="mt-4 flex items-center gap-3">
+        <div className="flex -space-x-2.5">
           {visible.map((p) => (
             <PickAvatar key={p.id} pick={p} />
           ))}
         </div>
         {extra > 0 && (
-          <span className="ml-2 text-[13px] font-bold text-foreground/90">
+          <span className="ml-2 text-[14px] font-bold text-foreground/90">
             +{extra}
           </span>
         )}
         <div className="ml-auto text-right">
           {entry.status === "live" ? (
-            <div className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
-              <span className="h-2 w-2 rounded-full bg-destructive" />
+            <div className="flex items-center gap-1.5 text-[14px] font-semibold text-foreground">
+              <span className="h-2.5 w-2.5 rounded-full bg-destructive animate-pulse" />
               Live
             </div>
           ) : entry.status === "past" ? (
@@ -234,13 +244,13 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
           ) : (
             <>
               <div className="text-[12px] text-muted-foreground">Next game</div>
-              <div className="text-[13px] font-semibold">{entry.startTime ?? "—"}</div>
+              <div className="text-[14px] font-semibold">{entry.startTime ?? "—"}</div>
             </>
           )}
         </div>
       </div>
 
-      <div className="mt-2 text-[12px] text-muted-foreground truncate">
+      <div className="mt-3 text-[13px] text-muted-foreground truncate">
         {namesList}
         {namesSuffix}
       </div>
@@ -261,7 +271,7 @@ function PastStatusBadge({ entry }: { entry: Entry }) {
     ? "bg-white/[0.06] text-foreground/80"
     : "bg-white/[0.06] text-muted-foreground";
   return (
-    <span className={`inline-flex rounded-[3px] px-1 py-0.5 text-[10px] font-semibold ${tone}`}>
+    <span className={`inline-flex rounded px-1.5 py-0.5 text-[12px] font-semibold ${tone}`}>
       {label}
     </span>
   );
@@ -324,12 +334,12 @@ function PickAvatar({ pick }: { pick: Entry["picks"][number] }) {
     .join("");
 
   return (
-    <div className="relative" style={{ width: 36, height: 36 }}>
+    <div className="relative" style={{ width: 44, height: 44 }}>
       <div
         className="flex h-full w-full items-center justify-center rounded-full"
         style={{ background: ringColor, padding: 2 }}
       >
-        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[11px] font-bold">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#2a2540] text-[13px] font-bold">
           {pick.photo ? (
             <img src={pick.photo} alt="" className="h-full w-full object-cover" />
           ) : (

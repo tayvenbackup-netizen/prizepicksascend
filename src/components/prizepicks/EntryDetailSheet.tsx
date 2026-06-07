@@ -21,10 +21,14 @@ export function EntryDetailSheet({
   entryId,
   open,
   onOpenChange,
+  siblingIds,
+  onNavigate,
 }: {
   entryId: string | null;
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  siblingIds?: string[];
+  onNavigate?: (id: string) => void;
 }) {
   const { entries, updateEntry, updatePick, removeEntry } = useEntries();
   const entry = useMemo(
@@ -97,6 +101,17 @@ export function EntryDetailSheet({
               } else {
                 animate(y, 0, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
               }
+            }}
+            onPanEnd={(_, info) => {
+              if (!siblingIds || siblingIds.length < 2 || !entryId || !onNavigate) return;
+              const dx = info.offset.x;
+              const dy = info.offset.y;
+              if (Math.abs(dx) < 70 || Math.abs(dx) <= Math.abs(dy) * 1.2) return;
+              const idx = siblingIds.indexOf(entryId);
+              if (idx === -1) return;
+              const nextIdx = dx < 0 ? idx + 1 : idx - 1;
+              if (nextIdx < 0 || nextIdx >= siblingIds.length) return;
+              onNavigate(siblingIds[nextIdx]);
             }}
             className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background will-change-transform"
           >
