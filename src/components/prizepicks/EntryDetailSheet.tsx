@@ -447,6 +447,7 @@ function SheetBody({
                 picks={picks}
                 editing={editing}
                 isPast={isPast}
+                isActive={isActive}
                 onUpdate={(pid, patch) => updatePick(entry.id, pid, patch)}
                 onUpdateGroupLabel={(label) =>
                   picks.forEach((p) => updatePick(entry.id, p.id, { gameLabel: label }))
