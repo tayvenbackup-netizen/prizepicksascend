@@ -286,13 +286,14 @@ function PastList({ past, onOpen }: { past: Entry[]; onOpen: (id: string) => voi
   return (
     <>
       {[...groups.entries()].map(([date, items]) => (
-        <div key={date} className="mb-5">
-          <h3 className="mb-2 text-[13px] font-semibold text-foreground/90">{date}</h3>
-          <div className="space-y-3">
+        <div key={date} className="mb-7">
+          <h3 className="mb-3 text-[13px] font-semibold text-foreground/90">{date}</h3>
+          <div className="space-y-4">
             {items.map((e) => (
               <EntryCard key={e.id} entry={e} onClick={() => onOpen(e.id)} />
             ))}
           </div>
+
         </div>
       ))}
     </>
