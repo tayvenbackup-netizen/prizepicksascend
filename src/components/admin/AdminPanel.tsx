@@ -54,11 +54,13 @@ let inMemoryAdminTok: string | null = typeof window !== 'undefined' ? sessionSto
 function setAdminAuth(adminToken: string | null, csrf: string | null) {
   inMemoryAdminTok = adminToken;
   inMemoryCsrf = csrf;
+  if (typeof window === 'undefined') return;
   if (adminToken) sessionStorage.setItem(ADMIN_TOKEN_KEY, adminToken);
   else sessionStorage.removeItem(ADMIN_TOKEN_KEY);
   if (csrf) sessionStorage.setItem(ADMIN_CSRF_KEY, csrf);
   else sessionStorage.removeItem(ADMIN_CSRF_KEY);
 }
+
 
 async function adminApiFetch(body: Record<string, unknown>, csrf?: string | null, adminTok?: string | null) {
   const headers: Record<string, string> = {
