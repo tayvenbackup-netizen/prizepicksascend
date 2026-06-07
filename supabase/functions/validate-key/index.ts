@@ -925,7 +925,8 @@ Deno.serve(async (req) => {
           color: color || '#1475e1',
           created_by: isMaster ? 'master' : adminId,
         }).select().single();
-        if (error) return json({ error: error.message }, 500);
+        if (error) { console.error('create_group failed:', error); return json({ error: 'Failed to create group' }, 500); }
+
         return json({ group });
       }
 
