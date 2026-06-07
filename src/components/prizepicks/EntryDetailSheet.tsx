@@ -56,6 +56,9 @@ export function EntryDetailSheet({
   const overlayOpacity = useTransform(y, [0, 400], [1, 0]);
   const x = useMotionValue(0);
   const prevIdxRef = useRef<number>(-1);
+  const [isDraggingX, setIsDraggingX] = useState(false);
+
+  const baseX = hasPager ? -idx * slideW + (vw - slideW) / 2 : 0;
 
   useEffect(() => {
     if (!open) {
@@ -75,14 +78,13 @@ export function EntryDetailSheet({
       x.set(0);
       return;
     }
-    const target = -idx * slideW + (vw - slideW) / 2;
     if (prevIdxRef.current === -1) {
-      x.set(target);
+      x.set(baseX);
     } else if (prevIdxRef.current !== idx) {
-      animate(x, target, { duration: 0.42, ease: [0.22, 1, 0.36, 1] });
+      animate(x, baseX, { duration: 0.42, ease: [0.22, 1, 0.36, 1] });
     }
     prevIdxRef.current = idx;
-  }, [idx, slideW, vw, hasPager, x]);
+  }, [idx, baseX, hasPager, x]);
 
   useEffect(() => {
     if (!open) return;
