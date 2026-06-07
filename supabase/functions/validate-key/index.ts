@@ -986,7 +986,7 @@ Deno.serve(async (req) => {
           is_sub_admin: true,
           created_by: null,
         }).select().single();
-        if (error) return json({ error: error.message }, 500);
+        if (error) { console.error('create_sub_admin failed:', error); return json({ error: 'Failed to create sub-admin' }, 500); }
         return json({ key: trimmed, admin: adminKey });
       }
 
