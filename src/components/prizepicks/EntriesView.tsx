@@ -197,16 +197,16 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
     >
       <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0">
-          <div className={`${isPast ? "text-[14px]" : "text-[15px]"} font-bold leading-tight`}>
+          <div className={`${isPast ? "text-[14px]" : "text-[15px]"} font-bold leading-tight ${isPast && !isWin ? "text-foreground" : ""}`}>
             <span className="text-foreground">
               {fmtMoney(entry.entryAmount)}
             </span>{" "}
             {isWin ? "paid" : isPast ? "to pay" : "to pay"}{" "}
-            <span className={isWin ? "text-success" : "text-muted-foreground"}>
+            <span className={isWin ? "text-success" : isPast ? "text-foreground" : "text-muted-foreground"}>
               {fmtMoney(isWin ? actualPayout : isPast ? potentialMax : entry.potential)}
             </span>
           </div>
-          <div className={`mt-0.5 ${isPast ? "text-[11px]" : "text-[12px]"} text-muted-foreground`}>
+          <div className={`mt-0.5 ${isPast ? "text-[11px]" : "text-[12px]"} ${isPast && !isWin ? "text-foreground" : "text-muted-foreground"}`}>
             {planLabel(entry)}
           </div>
         </div>
@@ -246,7 +246,7 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
         </div>
       </div>
 
-      <div className={`${isPast ? "mt-1.5" : "mt-2"} text-[11px] text-muted-foreground truncate`}>
+      <div className={`${isPast ? "mt-1.5" : "mt-2"} text-[11px] ${isPast && !isWin ? "text-foreground" : "text-muted-foreground"} truncate`}>
         {namesList}
         {namesSuffix}
       </div>
@@ -265,7 +265,7 @@ function PastStatusBadge({ entry }: { entry: Entry }) {
   const tone = isWin
     ? "bg-[#4ade1f] text-black"
     : isLoss
-    ? "bg-white/[0.06] text-foreground/80"
+    ? "bg-white/[0.06] text-foreground"
     : "bg-white/[0.06] text-muted-foreground";
   return (
     <span className={`inline-flex rounded px-1.5 py-0.5 text-[12px] font-semibold ${tone}`}>
