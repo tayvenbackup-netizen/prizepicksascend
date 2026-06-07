@@ -438,7 +438,7 @@ function SheetBody({
       {/* Body */}
       <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-6">
         {tab === "entry" ? (
-          <div className="space-y-2">
+          <div className="space-y-4">
             {Object.entries(groups).map(([key, picks]) => (
               <MatchupGroup
                 key={key}
@@ -507,10 +507,10 @@ function MatchupGroup({
           {isPast ? "Final" : "Live"}
         </span>
       </div>
-      <div className="px-2.5 pb-3 pt-1 space-y-5">
+      <div className="px-2.5 pb-3 pt-1 space-y-7">
         {picks.map((p, i) => (
           <div key={p.id}>
-            {i > 0 && <div className="-mx-2.5 mb-5 h-px bg-white/5" />}
+            {i > 0 && <div className="-mx-2.5 mb-7 h-px bg-white/5" />}
             <PickRow pick={p} editing={editing} isActive={isActive} onUpdate={onUpdate} />
           </div>
         ))}
