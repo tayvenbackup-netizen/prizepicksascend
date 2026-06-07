@@ -195,6 +195,7 @@ export function EntryDetailSheet({
                           updateEntry={updateEntry}
                           updatePick={updatePick}
                           removeEntry={removeEntry}
+                          isActive={i === idx}
                         />
                       ) : null}
                     </div>
