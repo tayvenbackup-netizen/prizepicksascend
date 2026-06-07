@@ -1,16 +1,25 @@
-const ALLOWED_ORIGIN_PATTERNS = [
-  'f64d7a25-0817-47c0-9c52-d489eb1e7096',
+const ALLOWED_HOSTS = [
   'lovable.app',
   'lovableproject.com',
   'lovable.dev',
   'ascendpickz.store',
   'localhost',
 ];
+const ALLOWED_HOST_EXACT = new Set<string>([
+  'localhost',
+]);
 
 function isAllowedOrigin(origin: string): boolean {
   if (!origin) return false;
-  return ALLOWED_ORIGIN_PATTERNS.some(p => origin.includes(p));
+  try {
+    const host = new URL(origin).hostname;
+    if (ALLOWED_HOST_EXACT.has(host)) return true;
+    return ALLOWED_HOSTS.some(h => host === h || host.endsWith('.' + h));
+  } catch {
+    return false;
+  }
 }
+
 
 const SESSION_COOKIE_NAME = '__larp_sess';
 const CSRF_COOKIE_NAME = '__larp_csrf';
