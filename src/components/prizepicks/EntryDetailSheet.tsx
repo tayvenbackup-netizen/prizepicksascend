@@ -221,6 +221,7 @@ function SheetBody({
   updateEntry,
   updatePick,
   removeEntry,
+  isActive,
 }: {
   entry: Entry;
   tab: Tab;
@@ -231,6 +232,7 @@ function SheetBody({
   updateEntry: ReturnType<typeof useEntries>["updateEntry"];
   updatePick: ReturnType<typeof useEntries>["updatePick"];
   removeEntry: ReturnType<typeof useEntries>["removeEntry"];
+  isActive: boolean;
 }) {
   const hits = entry.picks.filter((p) => p.result === "win").length;
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
