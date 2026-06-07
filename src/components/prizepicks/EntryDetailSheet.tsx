@@ -448,9 +448,9 @@ function MatchupGroup({
 }) {
   return (
     <div className="rounded-xl bg-surface">
-      <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 text-[10px]">
+      <div className="flex items-center justify-between gap-2 bg-white/[0.03] px-2.5 py-2 text-[10px] rounded-t-xl border-b border-white/5">
         <div className="flex min-w-0 flex-1 items-center gap-1.5">
-          <span className="rounded bg-white/10 px-1.5 py-px font-semibold text-foreground/90 shrink-0">
+          <span className="rounded bg-white/[0.08] px-1.5 py-px font-semibold text-muted-foreground shrink-0">
             {league}
           </span>
           {editing && isPast ? (
@@ -459,20 +459,20 @@ function MatchupGroup({
               value={gameLabel}
               onChange={(e) => onUpdateGroupLabel(e.target.value)}
               placeholder="ATL 0 vs IND 0"
-              className="min-w-0 flex-1 rounded bg-black/40 px-1.5 py-0.5 text-[10px] text-foreground/90 outline-none ring-1 ring-white/10 focus:ring-primary"
+              className="min-w-0 flex-1 rounded bg-black/40 px-1.5 py-0.5 text-[10px] text-muted-foreground outline-none ring-1 ring-white/10 focus:ring-primary"
             />
           ) : (
-            <span className="truncate text-foreground/80">{gameLabel}</span>
+            <span className="truncate text-muted-foreground">{gameLabel}</span>
           )}
         </div>
-        <span className="text-muted-foreground shrink-0">
+        <span className="text-muted-foreground/70 shrink-0">
           {isPast ? "Final" : "Live"}
         </span>
       </div>
-      <div className="px-2.5 pb-2.5 space-y-2.5">
+      <div className="px-2.5 pb-3 pt-1 space-y-5">
         {picks.map((p, i) => (
           <div key={p.id}>
-            {i > 0 && <div className="-mx-2.5 mb-2.5 h-px bg-white/5" />}
+            {i > 0 && <div className="-mx-2.5 mb-5 h-px bg-white/5" />}
             <PickRow pick={p} editing={editing} onUpdate={onUpdate} />
           </div>
         ))}
