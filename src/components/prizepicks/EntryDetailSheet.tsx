@@ -195,6 +195,7 @@ export function EntryDetailSheet({
                           updateEntry={updateEntry}
                           updatePick={updatePick}
                           removeEntry={removeEntry}
+                          isActive={i === idx}
                         />
                       ) : null}
                     </div>
@@ -220,6 +221,7 @@ function SheetBody({
   updateEntry,
   updatePick,
   removeEntry,
+  isActive,
 }: {
   entry: Entry;
   tab: Tab;
@@ -230,6 +232,7 @@ function SheetBody({
   updateEntry: ReturnType<typeof useEntries>["updateEntry"];
   updatePick: ReturnType<typeof useEntries>["updatePick"];
   removeEntry: ReturnType<typeof useEntries>["removeEntry"];
+  isActive: boolean;
 }) {
   const hits = entry.picks.filter((p) => p.result === "win").length;
   const settled = entry.picks.every((p) => p.result && p.result !== "pending");
@@ -444,6 +447,7 @@ function SheetBody({
                 picks={picks}
                 editing={editing}
                 isPast={isPast}
+                isActive={isActive}
                 onUpdate={(pid, patch) => updatePick(entry.id, pid, patch)}
                 onUpdateGroupLabel={(label) =>
                   picks.forEach((p) => updatePick(entry.id, p.id, { gameLabel: label }))
@@ -467,6 +471,7 @@ function MatchupGroup({
   picks,
   editing,
   isPast,
+  isActive,
   onUpdate,
   onUpdateGroupLabel,
 }: {
@@ -475,6 +480,7 @@ function MatchupGroup({
   picks: ParlayPick[];
   editing: boolean;
   isPast: boolean;
+  isActive: boolean;
   onUpdate: (pickId: string, patch: Partial<ParlayPick>) => void;
   onUpdateGroupLabel: (label: string) => void;
 }) {
@@ -505,7 +511,7 @@ function MatchupGroup({
         {picks.map((p, i) => (
           <div key={p.id}>
             {i > 0 && <div className="-mx-2.5 mb-5 h-px bg-white/5" />}
-            <PickRow pick={p} editing={editing} onUpdate={onUpdate} />
+            <PickRow pick={p} editing={editing} isActive={isActive} onUpdate={onUpdate} />
           </div>
         ))}
       </div>
@@ -516,10 +522,12 @@ function MatchupGroup({
 function PickRow({
   pick,
   editing,
+  isActive,
   onUpdate,
 }: {
   pick: ParlayPick;
   editing: boolean;
+  isActive: boolean;
   onUpdate: (pickId: string, patch: Partial<ParlayPick>) => void;
 }) {
   // Default to 0 / neutral unless explicitly set by the client.
@@ -573,16 +581,18 @@ function PickRow({
           className={`absolute inset-y-0 left-0 rounded-full ${barColor} transition-all`}
           style={{ width: `${ratio * 100}%` }}
         />
-        <div
-          className="absolute -top-2 -translate-x-1/2"
-          style={{ left: `${ratio * 100}%` }}
-        >
+        {isActive && (
           <div
-            className={`min-w-[28px] rounded-full border bg-background px-1.5 py-px text-center text-[9px] font-bold ${valueColor}`}
+            className="absolute -top-2 -translate-x-1/2"
+            style={{ left: `${ratio * 100}%` }}
           >
-            {Number.isInteger(current) ? current : current.toFixed(1)}
+            <div
+              className={`min-w-[28px] rounded-full border bg-background px-1.5 py-px text-center text-[9px] font-bold ${valueColor}`}
+            >
+              {Number.isInteger(current) ? current : current.toFixed(1)}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
 
