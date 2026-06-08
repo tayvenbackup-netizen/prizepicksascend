@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ChevronRight, Info } from "lucide-react";
 import teamsBeta from "@/assets/menu/teams-beta.png";
@@ -9,6 +9,8 @@ import coinPlayers from "@/assets/menu/coin-players.gif";
 import coinTeams from "@/assets/menu/coin-teams.gif";
 import { useProfile } from "./ProfileContext";
 import { autoComma } from "@/lib/fmt";
+import { WithdrawFlow, WithdrawalNotification } from "./WithdrawFlow";
+
 
 const usefulLinks = [
   "Help Center",
@@ -44,6 +46,8 @@ function Row({ label, badge }: { label: string; badge?: string }) {
 export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { data } = useProfile();
   const balance = `$${autoComma(data.balance)}`;
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -51,6 +55,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
   }, [open]);
+
 
   return (
     <AnimatePresence>
@@ -118,7 +123,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
               </div>
 
               <div className="mt-3.5 grid grid-cols-2 gap-2.5">
-                <button className="h-[38px] rounded-full bg-[#1f202d] text-[13px] font-bold text-white">Withdraw</button>
+                <button onClick={() => setWithdrawOpen(true)} className="h-[38px] rounded-full bg-[#1f202d] text-[13px] font-bold text-white">Withdraw</button>
                 <button className="h-[38px] rounded-full bg-[#7c3aed] text-[13px] font-bold text-white">Deposit</button>
               </div>
 
@@ -178,6 +183,13 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
           </div>
         </motion.div>
       )}
+      <WithdrawFlow
+        open={withdrawOpen}
+        onClose={() => setWithdrawOpen(false)}
+        onSubmitted={() => setNotifyOpen(true)}
+      />
+      <WithdrawalNotification show={notifyOpen} onClose={() => setNotifyOpen(false)} />
     </AnimatePresence>
   );
 }
+
