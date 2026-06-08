@@ -1,4 +1,17 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import type { CardBrand } from "./CardLogo";
+
+export type PaymentMethod = {
+  id: string;
+  brand: CardBrand;
+  last4: string;
+  exp: string;
+};
+
+const defaultPaymentMethods: PaymentMethod[] = [
+  { id: "pm-default-1", brand: "mastercard", last4: "6427", exp: "08/28" },
+  { id: "pm-default-2", brand: "mastercard", last4: "6976", exp: "06/29" },
+];
 
 export type ProfileData = {
   name: string;
