@@ -267,7 +267,7 @@ function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () =
         </div>
       </div>
 
-      <div className={`${isPast ? "mt-1.5" : "mt-2"} text-[11px] ${isPast && !isWin ? "text-foreground" : "text-muted-foreground"} truncate`}>
+      <div className={`mt-1.5 text-[11px] ${isPast && !isWin ? "text-foreground" : "text-muted-foreground"} truncate`}>
         {namesList}
         {namesSuffix}
       </div>
