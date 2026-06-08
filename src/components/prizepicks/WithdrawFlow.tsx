@@ -314,6 +314,7 @@ export function WithdrawFlow({
           </motion.div>
         )}
       </AnimatePresence>
+          <CardManager open={managerOpen} onClose={() => setManagerOpen(false)} />
         </motion.div>
       )}
     </AnimatePresence>
