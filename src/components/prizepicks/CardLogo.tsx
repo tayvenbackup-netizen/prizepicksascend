@@ -1,3 +1,6 @@
+import amexAsset from "@/assets/payments/amex.webp.asset.json";
+import discoverAsset from "@/assets/payments/discover.png.asset.json";
+
 export type CardBrand = "visa" | "mastercard" | "amex" | "discover";
 
 export const BRAND_LABEL: Record<CardBrand, string> = {
@@ -51,15 +54,10 @@ export function CardLogo({ brand, size = 26 }: { brand: CardBrand; size?: number
   if (brand === "amex") {
     return (
       <span
-        className="inline-flex items-center justify-center rounded-[6px] bg-[#1f72cd]"
+        className="inline-flex items-center justify-center overflow-hidden rounded-[6px] bg-white"
         style={baseStyle}
       >
-        <span
-          className="font-extrabold tracking-tight text-white"
-          style={{ fontSize: size * 0.4, lineHeight: 1 }}
-        >
-          AMEX
-        </span>
+        <img src={amexAsset.url} alt="Amex" className="h-full w-full object-contain" />
       </span>
     );
   }
@@ -67,19 +65,10 @@ export function CardLogo({ brand, size = 26 }: { brand: CardBrand; size?: number
   // discover
   return (
     <span
-      className="inline-flex items-center justify-center gap-[2px] rounded-[6px] bg-white"
+      className="inline-flex items-center justify-center overflow-hidden rounded-[6px] bg-white"
       style={baseStyle}
     >
-      <span
-        className="font-extrabold tracking-tight text-[#111]"
-        style={{ fontSize: size * 0.32, lineHeight: 1 }}
-      >
-        DISC
-      </span>
-      <span
-        className="rounded-full bg-[#ff6000]"
-        style={{ width: size * 0.22, height: size * 0.22 }}
-      />
+      <img src={discoverAsset.url} alt="Discover" className="h-full w-full object-contain" />
     </span>
   );
 }
