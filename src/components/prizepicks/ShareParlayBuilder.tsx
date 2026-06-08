@@ -81,6 +81,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
   const [ppLoading, setPpLoading] = useState(false);
   // Past-pick mode lets the user log a parlay that already happened.
   const [pastMode, setPastMode] = useState(false);
+  const [screenshotMode, setScreenshotMode] = useState(false);
   const [pastDate, setPastDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [results, setResults] = useState<Record<string, "pending" | "win" | "loss">>({});
 
@@ -91,6 +92,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       setPpMsg(null);
       setPpLink("");
       setPastMode(false);
+      setScreenshotMode(false);
       setResults({});
     }
   }, [open]);
