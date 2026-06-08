@@ -231,6 +231,7 @@ export function DepositFlow({
   const [cvv, setCvv] = useState("");
   const [zip, setZip] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [applePayOpen, setApplePayOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
