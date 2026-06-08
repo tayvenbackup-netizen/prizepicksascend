@@ -7,7 +7,7 @@ import venmoAsset from "@/assets/payments/venmo.png.asset.json";
 import paypalAsset from "@/assets/payments/paypal.png.asset.json";
 
 type CardKind = "debit" | "credit";
-type Step = "methods" | { kind: "card"; type: CardKind };
+type Step = "methods" | { kind: "card"; type: CardKind } | { kind: "saved"; id: string };
 
 function ApplePayLogo() {
   return (
@@ -130,7 +130,7 @@ export function DepositFlow({
     exit: (d: number) => ({ x: d > 0 ? "-100%" : "100%" }),
   };
 
-  const cardType: CardKind | null = typeof step === "object" ? step.type : null;
+  const cardType: CardKind | null = typeof step === "object" && step.kind === "card" ? step.type : null;
   const detected = detectBrand(cardNumber);
   const brandOk = !!detected && !!cardType && ALLOWED[cardType].includes(detected);
   const amt = parseFloat(amount) || 0;
@@ -223,9 +223,9 @@ export function DepositFlow({
                 </div>
 
                 <div className="px-4">
-                  <div className="grid grid-cols-2 gap-3">
+                  <h3 className="text-[15px] font-bold text-white">Saved Methods</h3>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
                     <button
-                      onClick={() => openCard("debit")}
                       className="relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-[#15172180] py-8"
                     >
                       <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-0.5 rounded-md bg-[#0a0d18] px-2 py-0.5 text-[11px] font-bold text-[#79e54a]">
@@ -235,9 +235,26 @@ export function DepositFlow({
                       <ApplePayLogo />
                       <p className="text-[15px] font-bold text-white">Apple Pay</p>
                     </button>
+
+                    {paymentMethods.map((pm) => (
+                      <button
+                        key={pm.id}
+                        onClick={() => {
+                          setDir(1);
+                          setAmount("100");
+                          setStep({ kind: "saved", id: pm.id });
+                        }}
+                        className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-[#15172180] py-8"
+                      >
+                        <CardLogo brand={pm.brand} size={26} />
+                        <p className="text-[15px] font-bold text-white">Debit Card</p>
+                        <p className="-mt-1 text-[11.5px] text-white/55">****{pm.last4}, exp. {pm.exp}</p>
+                      </button>
+                    ))}
                   </div>
 
                   <h3 className="mt-7 text-[15px] font-bold text-white">Other Methods</h3>
+
 
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <button
@@ -295,7 +312,7 @@ export function DepositFlow({
               </motion.div>
             )}
 
-            {typeof step === "object" && (
+            {typeof step === "object" && step.kind === "card" && (
               <motion.div
                 key="card"
                 custom={dir}
@@ -437,6 +454,115 @@ export function DepositFlow({
                 </div>
               </motion.div>
             )}
+
+            {typeof step === "object" && step.kind === "saved" && (() => {
+              const pm = paymentMethods.find((m) => m.id === step.id);
+              if (!pm) return null;
+              const sAmt = parseFloat(amount) || 0;
+              const sCan = sAmt > 0 && !processing;
+              const sDeposit = () => {
+                if (!sCan) return;
+                setProcessing(true);
+                setTimeout(() => {
+                  onClose();
+                  onSubmitted(sAmt);
+                }, 1600);
+              };
+              return (
+                <motion.div
+                  key="saved"
+                  custom={dir}
+                  variants={slide}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.32 }}
+                  className="absolute inset-0 overflow-y-auto"
+                  style={{
+                    paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
+                    paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
+                  }}
+                >
+                  <div className="flex items-center justify-between px-4 pb-5">
+                    <div className="flex items-center gap-4">
+                      <button onClick={back} aria-label="Back" className="text-white">
+                        <ArrowLeft className="h-6 w-6" strokeWidth={2} />
+                      </button>
+                      <h1 className="text-[22px] font-extrabold text-white">Debit Card</h1>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[14px] text-white">${balance}</span>
+                      <Info className="h-[20px] w-[20px] text-white/85" strokeWidth={1.75} />
+                    </div>
+                  </div>
+
+                  <div className="px-4">
+                    <p className="text-[13px] text-white/65">Deposit amount</p>
+                    <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-3.5">
+                      <DollarSign className="h-[18px] w-[18px] text-white/65" strokeWidth={2} />
+                      <input
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                        inputMode="decimal"
+                        disabled={processing}
+                        className="flex-1 bg-transparent text-[15px] font-semibold text-white outline-none placeholder:text-white/40"
+                      />
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-4 gap-2.5">
+                      {QUICK.map((q) => {
+                        const active = amount === String(q);
+                        return (
+                          <button
+                            key={q}
+                            onClick={() => setAmount(String(q))}
+                            className={`h-11 rounded-full text-[14px] font-semibold ${
+                              active ? "border-2 border-white text-white bg-transparent" : "bg-[#15172180] text-white"
+                            }`}
+                          >
+                            ${q}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 p-4">
+                      <div className="flex items-center gap-3">
+                        <CardLogo brand={pm.brand} size={26} />
+                        <div>
+                          <p className="text-[14px] font-bold text-white">Debit Card</p>
+                          <p className="text-[12px] text-white/55">****{pm.last4}, exp. {pm.exp}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 flex flex-col items-center">
+                      {processing ? (
+                        <div className="flex items-center gap-2 py-3">
+                          <span className="text-[16px] font-extrabold text-white">Processing...</span>
+                          <Loader2 className="h-5 w-5 animate-spin text-[#7c3aed]" strokeWidth={2.5} />
+                        </div>
+                      ) : (
+                        <button
+                          onClick={sDeposit}
+                          disabled={!sCan}
+                          className={`w-full rounded-full py-3.5 text-[15px] font-extrabold transition-colors ${
+                            sCan ? "bg-[#7c3aed] text-white" : "bg-[#1f202d] text-white/45"
+                          }`}
+                        >
+                          Deposit ${amount || "0"}
+                        </button>
+                      )}
+                      <p className="mt-3 text-center text-[12px] text-white/55">
+                        ${amount || "0"} will be available to use in both Players and Teams &amp; Culture after deposit.
+                      </p>
+                    </div>
+
+                    <FooterButtons />
+                  </div>
+                </motion.div>
+              );
+            })()}
           </AnimatePresence>
         </motion.div>
       )}
