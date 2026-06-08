@@ -45,36 +45,143 @@ function PaypalLogo({ size = 30 }: { size?: number }) {
 
 const QUICK = [25, 100, 250, 500];
 
-function onApplePayButtonClicked() {
-  const AP = (window as any).ApplePaySession;
-  if (!AP || typeof AP.canMakePayments !== "function" || !AP.canMakePayments()) {
-    alert("Apple Pay is not available on this device or browser. Please use Safari on an Apple device with Apple Pay set up.");
-    return;
-  }
-  const request = {
-    countryCode: "US",
-    currencyCode: "USD",
-    merchantCapabilities: ["supports3DS"],
-    supportedNetworks: ["visa", "masterCard", "amex", "discover"],
-    total: { label: "Demo (Card is not charged)", type: "final", amount: "1.99" },
+const APPLE_PAY_REQUEST = {
+  countryCode: "US",
+  currencyCode: "USD",
+  merchantCapabilities: ["supports3DS"],
+  supportedNetworks: ["visa", "masterCard", "amex", "discover"],
+  total: { label: "PrizePickz", type: "final", amount: "1.99" },
+};
+
+function ApplePayMark({ size = 22 }: { size?: number }) {
+  return (
+    <span className="inline-flex items-center text-white" style={{ fontSize: size }}>
+      <svg viewBox="0 0 24 24" className="mr-1" style={{ height: size, width: size }} fill="currentColor">
+        <path d="M17.5 12.5c0-2.3 1.9-3.4 2-3.4-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.7 1.1 8.9.7 1.1 1.6 2.3 2.8 2.2 1.1 0 1.6-.7 2.9-.7 1.3 0 1.8.7 3 .7 1.2 0 2-1.1 2.7-2.2.9-1.2 1.2-2.5 1.2-2.5s-2.4-.9-2.4-3.6zM15.3 5.9c.6-.7 1-1.7.9-2.7-.9.1-2 .6-2.6 1.3-.6.6-1 1.6-.9 2.6 1 .1 2-.5 2.6-1.2z" />
+      </svg>
+      <span className="font-semibold tracking-tight" style={{ fontSize: size }}>Pay</span>
+    </span>
+  );
+}
+
+function ApplePaySheet({
+  open,
+  onClose,
+  onPaid,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onPaid: () => void;
+}) {
+  const [paying, setPaying] = useState(false);
+  const lastClick = (typeof window !== "undefined") ? { t: 0 } : { t: 0 };
+
+  useEffect(() => {
+    if (!open) setPaying(false);
+  }, [open]);
+
+  const handleSideTap = () => {
+    const now = Date.now();
+    if (now - lastClick.t < 400) {
+      if (paying) return;
+      setPaying(true);
+      setTimeout(() => {
+        onPaid();
+      }, 900);
+    }
+    lastClick.t = now;
   };
-  try {
-    const session = new AP(3, request);
-    session.onvalidatemerchant = (_event: any) => {
-      // No backend merchant validation in demo — abort gracefully
-      try { session.abort(); } catch {}
-    };
-    session.onpaymentmethodselected = () => {
-      session.completePaymentMethodSelection({});
-    };
-    session.onpaymentauthorized = () => {
-      session.completePayment({ status: AP.STATUS_SUCCESS });
-    };
-    session.oncancel = () => {};
-    session.begin();
-  } catch (e) {
-    alert("Unable to start Apple Pay session.");
-  }
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            key="ap-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] bg-black/55"
+            onClick={onClose}
+          />
+          <motion.div
+            key="ap-sheet"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.32 }}
+            className="fixed inset-x-0 bottom-0 z-[81] rounded-t-[22px] bg-[#0c0c0e] px-5 pt-5"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}
+          >
+            <div className="flex items-center justify-between">
+              <ApplePayMark size={26} />
+              <button
+                aria-label="Close Apple Pay"
+                onClick={onClose}
+                className="grid h-8 w-8 place-items-center rounded-full bg-[#1f2024] text-white"
+              >
+                <X className="h-[16px] w-[16px]" strokeWidth={2} />
+              </button>
+            </div>
+
+            <button className="mt-5 flex w-full items-center justify-between rounded-2xl bg-[#1a1b1f] px-3 py-3 text-left">
+              <div className="flex items-center gap-3">
+                <span className="grid h-8 w-12 place-items-center overflow-hidden rounded-md bg-gradient-to-br from-[#9fd8ff] to-[#cfe8ff]">
+                  <span className="text-[8px] font-extrabold text-[#0a4a8a]">OnePay</span>
+                </span>
+                <span className="text-[15px] font-medium text-white">OnePay Debit Masterca…</span>
+              </div>
+              <span className="text-[15px] font-medium text-white/85">•••• 9129</span>
+            </button>
+
+            <button className="mt-3 flex w-full items-center justify-between rounded-2xl bg-[#1a1b1f] px-4 py-3.5 text-left">
+              <span className="text-[15px] font-medium text-white">Change Payment Method</span>
+              <span className="text-white/45">›</span>
+            </button>
+
+            <div className="mt-5 flex items-end justify-between">
+              <div>
+                <p className="text-[12px] text-white/55">
+                  {APPLE_PAY_REQUEST.total.label} (Card is not charged)
+                </p>
+                <p className="mt-0.5 text-[28px] font-bold leading-none text-white">
+                  ${APPLE_PAY_REQUEST.total.amount}
+                </p>
+              </div>
+              <button aria-label="info" className="grid h-7 w-7 place-items-center rounded-full bg-[#1f2024] text-white/85">
+                <Info className="h-[14px] w-[14px]" strokeWidth={1.75} />
+              </button>
+            </div>
+
+            <div className="mt-6 flex flex-col items-center">
+              <button
+                onClick={handleSideTap}
+                disabled={paying}
+                aria-label="Confirm with Side Button"
+                className="grid h-14 w-14 place-items-center rounded-full border-[2.5px] border-[#0a84ff]"
+              >
+                {paying ? (
+                  <Loader2 className="h-6 w-6 animate-spin text-[#0a84ff]" />
+                ) : (
+                  <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#0a84ff]" fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 6h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4" />
+                    <path d="M14 12H4" />
+                    <path d="m8 8-4 4 4 4" />
+                  </svg>
+                )}
+              </button>
+              <p className="mt-2 text-[13px] font-medium text-white">
+                {paying ? "Processing…" : "Confirm with Side Button"}
+              </p>
+              {!paying && (
+                <p className="mt-1 text-[11px] text-white/45">Double-tap to pay</p>
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
 }
 
 function detectBrand(num: string): CardBrand | null {
@@ -124,6 +231,7 @@ export function DepositFlow({
   const [cvv, setCvv] = useState("");
   const [zip, setZip] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [applePayOpen, setApplePayOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -262,7 +370,7 @@ export function DepositFlow({
                   <h3 className="text-[15px] font-bold text-white">Saved Methods</h3>
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <button
-                      onClick={onApplePayButtonClicked}
+                      onClick={() => setApplePayOpen(true)}
                       className="relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-[#15172180] py-8"
                     >
                       <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-0.5 rounded-md bg-[#0a0d18] px-2 py-0.5 text-[11px] font-bold text-[#79e54a]">
@@ -603,6 +711,15 @@ export function DepositFlow({
           </AnimatePresence>
         </motion.div>
       )}
+      <ApplePaySheet
+        open={applePayOpen}
+        onClose={() => setApplePayOpen(false)}
+        onPaid={() => {
+          setApplePayOpen(false);
+          onClose();
+          onSubmitted(parseFloat(APPLE_PAY_REQUEST.total.amount));
+        }}
+      />
     </AnimatePresence>
   );
 }
