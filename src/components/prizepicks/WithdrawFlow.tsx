@@ -5,6 +5,7 @@ import { useProfile, PaymentMethod } from "./ProfileContext";
 import { PLogo } from "./Icons";
 import { CardLogo, BRAND_LABEL } from "./CardLogo";
 import { CardManager } from "./CardManager";
+import { autoComma, fmtAmountInput, parseAmountInput } from "@/lib/fmt";
 
 type Step = "methods" | "card" | "otp";
 
