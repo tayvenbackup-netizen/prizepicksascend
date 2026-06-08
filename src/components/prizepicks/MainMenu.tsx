@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ChevronRight, Info } from "lucide-react";
 import teamsBeta from "@/assets/menu/teams-beta.png";
@@ -9,6 +9,8 @@ import coinPlayers from "@/assets/menu/coin-players.gif";
 import coinTeams from "@/assets/menu/coin-teams.gif";
 import { useProfile } from "./ProfileContext";
 import { autoComma } from "@/lib/fmt";
+import { WithdrawFlow, WithdrawalNotification } from "./WithdrawFlow";
+
 
 const usefulLinks = [
   "Help Center",
