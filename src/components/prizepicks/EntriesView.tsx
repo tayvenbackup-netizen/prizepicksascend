@@ -132,7 +132,7 @@ export function EntriesView() {
                 {live.length > 0 && (
                   <Section title="Live">
                     {live.map((e) => (
-                      <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
+                      <EntryCard key={e.id} entry={e} forceLive onClick={() => setOpenEntryId(e.id)} />
                     ))}
                   </Section>
                 )}
