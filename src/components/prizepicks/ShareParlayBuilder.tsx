@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, X, Search, Sparkles, Link2, Loader2, ChevronRight, Plus, Check, Trash2, Upload, Image as ImageIcon, Wand2 } from "lucide-react";
+import { ArrowLeft, X, Search, Sparkles, Link2, Loader2, ChevronRight, Plus, Check, Trash2, Upload, Wand2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   maxPayoutWithBadges as maxPayout,
