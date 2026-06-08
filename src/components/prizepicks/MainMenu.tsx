@@ -206,6 +206,12 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
         onSubmitted={handleSubmitted}
       />
       <WithdrawalNotification show={notifyOpen} onClose={() => setNotifyOpen(false)} />
+      <DepositFlow
+        open={depositOpen}
+        onClose={() => setDepositOpen(false)}
+        onSubmitted={handleDeposited}
+      />
+      <DepositNotification show={depositNotifyOpen} onClose={() => setDepositNotifyOpen(false)} />
     </AnimatePresence>
   );
 }
