@@ -54,6 +54,7 @@ type Draft = {
   line: string;
   badge?: PickBadge;
   gameLabel?: string;
+  sameGameDate?: string;
   startsAt?: string;
 };
 
@@ -494,10 +495,19 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                               <SameGamePicker
                                 pick={d}
                                 defaultDate={pastDate}
-                                onGameLabel={(label) =>
+                                otherPicks={picks.filter(
+                                  (x) => x.key !== d.key && x.sport === d.sport,
+                                )}
+                                onGameLabel={(label, chosenDate) =>
                                   setPicks((arr) =>
                                     arr.map((x) =>
-                                      x.key === d.key ? { ...x, gameLabel: label } : x,
+                                      x.key === d.key
+                                        ? {
+                                            ...x,
+                                            gameLabel: label,
+                                            sameGameDate: chosenDate,
+                                          }
+                                        : x,
                                     ),
                                   )
                                 }
@@ -1249,27 +1259,38 @@ function PlayerRow({ player, onPick }: { player: Player; onPick: () => void }) {
 function SameGamePicker({
   pick,
   defaultDate,
+  otherPicks,
   onGameLabel,
 }: {
   pick: Draft;
   defaultDate: string;
-  onGameLabel: (label: string | undefined) => void;
+  otherPicks: Draft[];
+  onGameLabel: (label: string | undefined, chosenDate?: string) => void;
 }) {
   const [enabled, setEnabled] = useState(!!pick.gameLabel);
-  const [date, setDate] = useState(defaultDate);
+  const [date, setDate] = useState(pick.sameGameDate ?? defaultDate);
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">(
     pick.gameLabel ? "ok" : "idle",
   );
   const [err, setErr] = useState<string | null>(null);
 
+  const sharedLabelForDate = (d: string) =>
+    otherPicks.find((x) => x.sameGameDate === d && x.gameLabel)?.gameLabel;
+
   const fallbackLabel = (d: string) => {
-    const teamAbbr = (pick.player.team || "TEAM").toUpperCase();
     const dt = new Date(`${d}T12:00:00`);
     const short = `${dt.getMonth() + 1}/${dt.getDate()}`;
-    return `${teamAbbr} · ${short}`;
+    return `${pick.sport} Same Game · ${short}`;
   };
 
   const lookup = async (d: string) => {
+    const shared = sharedLabelForDate(d);
+    if (shared) {
+      onGameLabel(shared, d);
+      setStatus("ok");
+      setErr(null);
+      return;
+    }
     setStatus("loading");
     setErr(null);
     try {
@@ -1290,7 +1311,7 @@ function SameGamePicker({
       if (!match) {
         // No real game on that date (e.g. offseason). Synthesize a stable
         // label so same-game picks still group together in the entry view.
-        onGameLabel(fallbackLabel(d));
+        onGameLabel(fallbackLabel(d), d);
         setStatus("ok");
         return;
       }
@@ -1304,11 +1325,11 @@ function SameGamePicker({
       const dt = new Date(match.date);
       const short = `${dt.getMonth() + 1}/${dt.getDate()}`;
       const label = `${aAbbr} vs ${hAbbr} · ${short}`;
-      onGameLabel(label);
+      onGameLabel(label, d);
       setStatus("ok");
     } catch {
       // Network/parse failure — still produce a fallback so grouping works.
-      onGameLabel(fallbackLabel(d));
+      onGameLabel(fallbackLabel(d), d);
       setStatus("ok");
     }
   };
@@ -1319,7 +1340,7 @@ function SameGamePicker({
     if (next) {
       lookup(date);
     } else {
-      onGameLabel(undefined);
+      onGameLabel(undefined, undefined);
       setStatus("idle");
       setErr(null);
     }
