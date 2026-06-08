@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Info, DollarSign, Check, X, Landmark, Loader2, CreditCard, HelpCircle, Headphones } from "lucide-react";
 import { useProfile } from "./ProfileContext";
+import { autoComma, fmtAmountInput, parseAmountInput } from "@/lib/fmt";
 import { CardLogo, CardBrand } from "./CardLogo";
 import venmoAsset from "@/assets/payments/venmo.png.asset.json";
 import paypalAsset from "@/assets/payments/paypal.png.asset.json";
@@ -133,7 +134,7 @@ export function DepositFlow({
   const cardType: CardKind | null = typeof step === "object" && step.kind === "card" ? step.type : null;
   const detected = detectBrand(cardNumber);
   const brandOk = !!detected && !!cardType && ALLOWED[cardType].includes(detected);
-  const amt = parseFloat(amount) || 0;
+  const amt = parseAmountInput(amount);
   const digits = cardNumber.replace(/\D/g, "");
   const cvvLen = detected === "amex" ? 4 : 3;
   const maxCardLen = detected === "amex" ? 15 : 16;
@@ -338,7 +339,7 @@ export function DepositFlow({
                     <h1 className="text-[22px] font-extrabold text-white">{headerTitle}</h1>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[14px] text-white">${balance}</span>
+                    <span className="text-[14px] text-white">${autoComma(balance)}</span>
                     <Info className="h-[20px] w-[20px] text-white/85" strokeWidth={1.75} />
                   </div>
                 </div>
@@ -349,7 +350,7 @@ export function DepositFlow({
                     <DollarSign className="h-[18px] w-[18px] text-white/65" strokeWidth={2} />
                     <input
                       value={amount}
-                      onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                      onChange={(e) => setAmount(fmtAmountInput(e.target.value))}
                       inputMode="decimal"
                       disabled={processing}
                       className="flex-1 bg-transparent text-[15px] font-semibold text-white outline-none placeholder:text-white/40"
@@ -358,7 +359,7 @@ export function DepositFlow({
 
                   <div className="mt-3 grid grid-cols-4 gap-2.5">
                     {QUICK.map((q) => {
-                      const active = amount === String(q);
+                      const active = parseAmountInput(amount) === q;
                       return (
                         <button
                           key={q}
@@ -493,29 +494,29 @@ export function DepositFlow({
                       </button>
                       <h1 className="text-[22px] font-extrabold text-white">Debit Card</h1>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[14px] text-white">${balance}</span>
-                      <Info className="h-[20px] w-[20px] text-white/85" strokeWidth={1.75} />
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[14px] text-white">${autoComma(balance)}</span>
+                    <Info className="h-[20px] w-[20px] text-white/85" strokeWidth={1.75} />
+                  </div>
                   </div>
 
                   <div className="px-4">
                     <p className="text-[13px] text-white/65">Deposit amount</p>
                     <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-3.5">
                       <DollarSign className="h-[18px] w-[18px] text-white/65" strokeWidth={2} />
-                      <input
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
-                        inputMode="decimal"
-                        disabled={processing}
-                        className="flex-1 bg-transparent text-[15px] font-semibold text-white outline-none placeholder:text-white/40"
-                      />
+                    <input
+                      value={amount}
+                      onChange={(e) => setAmount(fmtAmountInput(e.target.value))}
+                      inputMode="decimal"
+                      disabled={processing}
+                      className="flex-1 bg-transparent text-[15px] font-semibold text-white outline-none placeholder:text-white/40"
+                    />
                     </div>
 
                     <div className="mt-3 grid grid-cols-4 gap-2.5">
-                      {QUICK.map((q) => {
-                        const active = amount === String(q);
-                        return (
+                    {QUICK.map((q) => {
+                      const active = parseAmountInput(amount) === q;
+                      return (
                           <button
                             key={q}
                             onClick={() => setAmount(String(q))}
