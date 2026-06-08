@@ -37,12 +37,14 @@ export function WithdrawFlow({
   onClose: () => void;
   onSubmitted: (amount: number) => void;
 }) {
-  const { data } = useProfile();
+  const { data, paymentMethods } = useProfile();
   const balance = data.balance;
   const [step, setStep] = useState<Step>("methods");
   const [dir, setDir] = useState(1);
   const [amount, setAmount] = useState("10");
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
+  const [selected, setSelected] = useState<PaymentMethod | null>(null);
+  const [managerOpen, setManagerOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
