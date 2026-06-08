@@ -55,13 +55,14 @@ export function DepositFlow({
   onClose: () => void;
   onSubmitted: (amount: number) => void;
 }) {
-  const { data } = useProfile();
+  const { data, paymentMethods } = useProfile();
   const balance = data.balance;
   const [step, setStep] = useState<Step>("methods");
   const [dir, setDir] = useState(1);
   const [amount, setAmount] = useState("100");
   const [cvv, setCvv] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [selected, setSelected] = useState<PaymentMethod | null>(null);
 
   useEffect(() => {
     if (!open) return;
