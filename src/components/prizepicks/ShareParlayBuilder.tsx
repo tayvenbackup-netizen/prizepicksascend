@@ -682,24 +682,32 @@ function Header({
 function SportsScreen({
   onPick,
   pastMode,
-  onTogglePast,
+  screenshotMode,
+  onSetMode,
 }: {
   onPick: (s: SportKey) => void;
   pastMode: boolean;
-  onTogglePast: (v: boolean) => void;
+  screenshotMode: boolean;
+  onSetMode: (m: "live" | "past" | "screenshot") => void;
 }) {
+  const current: "live" | "past" | "screenshot" = screenshotMode
+    ? "screenshot"
+    : pastMode
+      ? "past"
+      : "live";
   return (
     <div className="h-full overflow-y-auto px-4 py-2">
-      <div className="mb-3 grid grid-cols-2 rounded-full bg-white/[0.05] p-0.5">
+      <div className="mb-3 grid grid-cols-3 rounded-full bg-white/[0.05] p-0.5">
         {([
-          { k: false, label: "Live" },
-          { k: true, label: "Past Plays" },
+          { k: "live", label: "Live" },
+          { k: "past", label: "Past" },
+          { k: "screenshot", label: "Screenshot" },
         ] as const).map((opt) => {
-          const active = pastMode === opt.k;
+          const active = current === opt.k;
           return (
             <button
               key={opt.label}
-              onClick={() => onTogglePast(opt.k)}
+              onClick={() => onSetMode(opt.k)}
               className={`rounded-full py-1.5 text-[11px] font-bold transition-colors ${
                 active ? "bg-[#7c3aed] text-white" : "text-white/60"
               }`}
