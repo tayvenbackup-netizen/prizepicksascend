@@ -216,37 +216,54 @@ export function WithdrawFlow({
               <p className="text-[13px] text-white/65">Withdrawable balance: ${balance}</p>
 
               <h3 className="mt-6 text-[15px] font-bold text-white">Withdrawal Amount</h3>
-              <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/10 px-3 py-3">
-                <DollarSign className="h-[18px] w-[18px] text-white/65" strokeWidth={2} />
-                <input
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
-                  inputMode="decimal"
-                  className="flex-1 bg-transparent text-[15px] font-semibold text-white outline-none placeholder:text-white/40"
-                />
-              </div>
+              {(() => {
+                const amt = parseFloat(amount) || 0;
+                const exceeds = amt > (parseFloat(balance) || 0);
 
-              <div className="mt-6 rounded-xl border border-white/10 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    {selected && <CardLogo brand={selected.brand} size={22} />}
-                    <span className="text-[14px] text-white/80">{selected ? BRAND_LABEL[selected.brand] : ""}</span>
-                  </div>
-                  <span className="text-[14px] text-white/60">Ending {selected?.last4 ?? ""}</span>
-                </div>
+                const invalid = amt <= 0 || exceeds;
+                return (
+                  <>
+                    <div className={`mt-3 flex items-center gap-2 rounded-xl border px-3 py-3 ${exceeds ? "border-[#ef4444]" : "border-white/10"}`}>
+                      <DollarSign className={`h-[18px] w-[18px] ${exceeds ? "text-[#ef4444]" : "text-white/65"}`} strokeWidth={2} />
+                      <input
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                        inputMode="decimal"
+                        className={`flex-1 bg-transparent text-[15px] font-semibold outline-none placeholder:text-white/40 ${exceeds ? "text-[#ef4444]" : "text-white"}`}
+                      />
+                    </div>
+                    {exceeds && (
+                      <p className="mt-2 text-[12px] font-semibold text-[#ef4444]">
+                        You can't exceed your available balance.
+                      </p>
+                    )}
 
-                <div className="mt-6 flex flex-col items-center">
-                  <button
-                    onClick={() => go("otp")}
-                    className="rounded-full bg-[#7c3aed] px-10 py-3 text-[15px] font-extrabold text-white"
-                  >
-                    Withdraw ${amount || "0"}
-                  </button>
-                  <p className="mt-3 text-[12px] text-white/55">
-                    ${amount || "0"} will be deposited into your account
-                  </p>
-                </div>
-              </div>
+                    <div className="mt-6 rounded-xl border border-white/10 p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          {selected && <CardLogo brand={selected.brand} size={22} />}
+                          <span className="text-[14px] text-white/80">{selected ? BRAND_LABEL[selected.brand] : ""}</span>
+                        </div>
+                        <span className="text-[14px] text-white/60">Ending {selected?.last4 ?? ""}</span>
+                      </div>
+
+                      <div className="mt-6 flex flex-col items-center">
+                        <button
+                          onClick={() => !invalid && go("otp")}
+                          disabled={invalid}
+                          className={`rounded-full px-10 py-3 text-[15px] font-extrabold text-white transition-colors ${invalid ? "bg-[#1f202d] text-white/50" : "bg-[#7c3aed]"}`}
+                        >
+                          Withdraw ${amount || "0"}
+                        </button>
+                        <p className="mt-3 text-[12px] text-white/55">
+                          ${amount || "0"} will be deposited into your account
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+
             </div>
           </motion.div>
         )}
