@@ -490,30 +490,43 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                             />
                           </div>
                           {pastMode && (
-                            <div className="mt-2 flex gap-1">
-                              {(["win", "pending", "loss"] as const).map((r) => {
-                                const sel = (results[d.key] ?? "pending") === r;
-                                return (
-                                  <button
-                                    key={r}
-                                    onClick={() =>
-                                      setResults((cur) => ({ ...cur, [d.key]: r }))
-                                    }
-                                    className={`flex-1 rounded-md py-1 text-[10px] font-bold uppercase ring-1 ${
-                                      sel
-                                        ? r === "win"
-                                          ? "bg-green-500/20 text-green-300 ring-green-400/40"
-                                          : r === "loss"
-                                          ? "bg-red-500/20 text-red-300 ring-red-400/40"
-                                          : "bg-white/10 text-white/80 ring-white/20"
-                                        : "text-white/45 ring-white/10"
-                                    }`}
-                                  >
-                                    {r}
-                                  </button>
-                                );
-                              })}
-                            </div>
+                            <>
+                              <SameGamePicker
+                                pick={d}
+                                defaultDate={pastDate}
+                                onGameLabel={(label) =>
+                                  setPicks((arr) =>
+                                    arr.map((x) =>
+                                      x.key === d.key ? { ...x, gameLabel: label } : x,
+                                    ),
+                                  )
+                                }
+                              />
+                              <div className="mt-2 flex gap-1">
+                                {(["win", "pending", "loss"] as const).map((r) => {
+                                  const sel = (results[d.key] ?? "pending") === r;
+                                  return (
+                                    <button
+                                      key={r}
+                                      onClick={() =>
+                                        setResults((cur) => ({ ...cur, [d.key]: r }))
+                                      }
+                                      className={`flex-1 rounded-md py-1 text-[10px] font-bold uppercase ring-1 ${
+                                        sel
+                                          ? r === "win"
+                                            ? "bg-green-500/20 text-green-300 ring-green-400/40"
+                                            : r === "loss"
+                                            ? "bg-red-500/20 text-red-300 ring-red-400/40"
+                                            : "bg-white/10 text-white/80 ring-white/20"
+                                          : "text-white/45 ring-white/10"
+                                      }`}
+                                    >
+                                      {r}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </>
                           )}
                         </li>
                       ))}
