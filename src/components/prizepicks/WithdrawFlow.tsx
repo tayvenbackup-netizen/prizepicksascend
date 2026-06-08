@@ -254,7 +254,7 @@ export function WithdrawFlow({
             <Header title={selected ? BRAND_LABEL[selected.brand] : "Card"} onBack={back} />
 
             <div className="px-4 pt-4">
-              <p className="text-[13px] text-white/65">Withdrawable balance: ${balance}</p>
+              <p className="text-[13px] text-white/65">Withdrawable balance: ${autoComma(balance)}</p>
 
               <h3 className="mt-6 text-[15px] font-bold text-white">Withdrawal Amount</h3>
               {(() => {
