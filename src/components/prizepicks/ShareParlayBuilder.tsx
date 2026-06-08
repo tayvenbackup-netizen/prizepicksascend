@@ -41,9 +41,9 @@ type Step =
   | { kind: "sports" }
   | { kind: "games"; sport: SportKey }
   | { kind: "teams"; sport: SportKey; game: Game }
-  | { kind: "roster"; sport: SportKey; team: TeamLite; gameLabel: string }
+  | { kind: "roster"; sport: SportKey; team: TeamLite; gameLabel: string; startsAt?: string }
   | { kind: "pastTeams"; sport: SportKey }
-  | { kind: "markets"; sport: SportKey; player: Player; gameLabel?: string };
+  | { kind: "markets"; sport: SportKey; player: Player; gameLabel?: string; startsAt?: string };
 
 type Draft = {
   key: string;
@@ -54,6 +54,7 @@ type Draft = {
   line: string;
   badge?: PickBadge;
   gameLabel?: string;
+  startsAt?: string;
 };
 
 function fmtShort(iso: string) {
