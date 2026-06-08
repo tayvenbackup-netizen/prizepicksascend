@@ -219,13 +219,38 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
           />
 
           <div className="flex-1 min-h-0 overflow-hidden">
-            {step.kind === "sports" && (
+            {step.kind === "sports" && !screenshotMode && (
               <SportsScreen
                 pastMode={pastMode}
-                onTogglePast={setPastMode}
+                screenshotMode={screenshotMode}
+                onSetMode={(m) => {
+                  if (m === "screenshot") { setScreenshotMode(true); setPastMode(true); }
+                  else if (m === "past") { setScreenshotMode(false); setPastMode(true); }
+                  else { setScreenshotMode(false); setPastMode(false); }
+                }}
                 onPick={(s) =>
                   setStep(pastMode ? { kind: "pastTeams", sport: s } : { kind: "games", sport: s })
                 }
+              />
+            )}
+            {step.kind === "sports" && screenshotMode && (
+              <ScreenshotImportScreen
+                onAddPicks={(drafts) => {
+                  setPicks((prev) => {
+                    const seen = new Set(prev.map((p) => p.key));
+                    const merged = [...prev];
+                    for (const d of drafts) {
+                      if (merged.length >= 6) break;
+                      if (seen.has(d.key)) continue;
+                      seen.add(d.key);
+                      merged.push(d);
+                    }
+                    return merged;
+                  });
+                  setShowSlip(true);
+                }}
+                onEntryAmount={(n) => { if (n > 0) setEntryAmount(String(n)); }}
+                onParlayType={(t) => { if (t) setType(t); }}
               />
             )}
             {step.kind === "games" && (
