@@ -1,4 +1,17 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import type { CardBrand } from "./CardLogo";
+
+export type PaymentMethod = {
+  id: string;
+  brand: CardBrand;
+  last4: string;
+  exp: string;
+};
+
+const defaultPaymentMethods: PaymentMethod[] = [
+  { id: "pm-default-1", brand: "mastercard", last4: "6427", exp: "08/28" },
+  { id: "pm-default-2", brand: "mastercard", last4: "6976", exp: "06/29" },
+];
 
 export type ProfileData = {
   name: string;
@@ -148,6 +161,8 @@ type Ctx = {
   setPickTeams: (l: PickTeamEntry[]) => void;
   topWins: TopWinEntry[];
   setTopWins: (l: TopWinEntry[]) => void;
+  paymentMethods: PaymentMethod[];
+  setPaymentMethods: (l: PaymentMethod[]) => void;
 };
 
 const ProfileContext = createContext<Ctx | null>(null);
@@ -161,6 +176,7 @@ type PersistedState = {
   winLeagues: WinLeagueEntry[];
   pickTeams: PickTeamEntry[];
   topWins: TopWinEntry[];
+  paymentMethods: PaymentMethod[];
 };
 
 function loadInitialState(): PersistedState {
@@ -171,6 +187,7 @@ function loadInitialState(): PersistedState {
     winLeagues: defaultWinLeagues,
     pickTeams: defaultPickTeams,
     topWins: defaultTopWins,
+    paymentMethods: defaultPaymentMethods,
   };
   if (typeof window === "undefined") return base;
   try {
@@ -184,6 +201,7 @@ function loadInitialState(): PersistedState {
       winLeagues: parsed.winLeagues ?? base.winLeagues,
       pickTeams: parsed.pickTeams ?? base.pickTeams,
       topWins: parsed.topWins ?? base.topWins,
+      paymentMethods: parsed.paymentMethods ?? base.paymentMethods,
     };
   } catch {
     return base;
@@ -198,14 +216,15 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [winLeagues, setWinLeagues] = useState(initial.winLeagues);
   const [pickTeams, setPickTeams] = useState(initial.pickTeams);
   const [topWins, setTopWins] = useState(initial.topWins);
+  const [paymentMethods, setPaymentMethods] = useState(initial.paymentMethods);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ data, winPlayers, pickPlayers, winLeagues, pickTeams, topWins }),
+      JSON.stringify({ data, winPlayers, pickPlayers, winLeagues, pickTeams, topWins, paymentMethods }),
     );
-  }, [data, winPlayers, pickPlayers, winLeagues, pickTeams, topWins]);
+  }, [data, winPlayers, pickPlayers, winLeagues, pickTeams, topWins, paymentMethods]);
   return (
     <ProfileContext.Provider
       value={{
@@ -215,6 +234,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         winLeagues, setWinLeagues,
         pickTeams, setPickTeams,
         topWins, setTopWins,
+        paymentMethods, setPaymentMethods,
       }}
     >
       {children}

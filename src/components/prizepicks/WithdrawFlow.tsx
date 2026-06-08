@@ -1,30 +1,13 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, X, Check, Landmark, DollarSign } from "lucide-react";
-import { useProfile } from "./ProfileContext";
+import { useProfile, PaymentMethod } from "./ProfileContext";
 import { PLogo } from "./Icons";
+import { CardLogo, BRAND_LABEL } from "./CardLogo";
+import { CardManager } from "./CardManager";
 
 type Step = "methods" | "card" | "otp";
 
-function MastercardLogo({ size = 28 }: { size?: number }) {
-  return (
-    <span
-      className="inline-flex items-center justify-center rounded-[6px] bg-white"
-      style={{ width: size + 10, height: size }}
-    >
-      <span className="relative" style={{ width: size, height: size * 0.62 }}>
-        <span
-          className="absolute left-0 top-0 rounded-full bg-[#eb001b]"
-          style={{ width: size * 0.62, height: size * 0.62 }}
-        />
-        <span
-          className="absolute right-0 top-0 rounded-full bg-[#f79e1b] mix-blend-multiply"
-          style={{ width: size * 0.62, height: size * 0.62 }}
-        />
-      </span>
-    </span>
-  );
-}
 
 function Header({ title, onBack }: { title: string; onBack: () => void }) {
   return (
@@ -54,12 +37,14 @@ export function WithdrawFlow({
   onClose: () => void;
   onSubmitted: (amount: number) => void;
 }) {
-  const { data } = useProfile();
+  const { data, paymentMethods } = useProfile();
   const balance = data.balance;
   const [step, setStep] = useState<Step>("methods");
   const [dir, setDir] = useState(1);
   const [amount, setAmount] = useState("10");
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
+  const [selected, setSelected] = useState<PaymentMethod | null>(null);
+  const [managerOpen, setManagerOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -171,19 +156,16 @@ export function WithdrawFlow({
               <h3 className="mt-6 text-[15px] font-bold text-white">Saved Methods</h3>
 
               <div className="mt-3 grid grid-cols-2 gap-3">
-                {[
-                  { last: "6427", exp: "08/28" },
-                  { last: "6976", exp: "06/29" },
-                ].map((c) => (
+                {paymentMethods.map((m) => (
                   <button
-                    key={c.last}
-                    onClick={() => go("card")}
+                    key={m.id}
+                    onClick={() => { setSelected(m); go("card"); }}
                     className="flex flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5"
                   >
-                    <MastercardLogo size={26} />
+                    <CardLogo brand={m.brand} size={26} />
                     <div className="text-center">
-                      <p className="text-[13px] font-bold text-white">Debit Card</p>
-                      <p className="mt-1 text-[11px] text-white/55">****{c.last}, exp. {c.exp}</p>
+                      <p className="text-[13px] font-bold text-white">{BRAND_LABEL[m.brand]}</p>
+                      <p className="mt-1 text-[11px] text-white/55">****{m.last4}, exp. {m.exp}</p>
                     </div>
                   </button>
                 ))}
@@ -195,7 +177,10 @@ export function WithdrawFlow({
               </p>
 
               <div className="mt-3 w-[calc(50%-6px)]">
-                <button className="flex w-full flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5">
+                <button
+                  onClick={() => setManagerOpen(true)}
+                  className="flex w-full flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5"
+                >
                   <Landmark className="h-6 w-6 text-white" strokeWidth={1.75} />
                   <p className="text-[13px] font-bold text-white">Online Banking</p>
                   <div className="flex items-center gap-1.5 opacity-80">
@@ -225,7 +210,7 @@ export function WithdrawFlow({
               paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
             }}
           >
-            <Header title="Mastercard" onBack={back} />
+            <Header title={selected ? BRAND_LABEL[selected.brand] : "Card"} onBack={back} />
 
             <div className="px-4 pt-4">
               <p className="text-[13px] text-white/65">Withdrawable balance: ${balance}</p>
@@ -244,10 +229,10 @@ export function WithdrawFlow({
               <div className="mt-6 rounded-xl border border-white/10 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <MastercardLogo size={22} />
-                    <span className="text-[14px] text-white/80">Mastercard</span>
+                    {selected && <CardLogo brand={selected.brand} size={22} />}
+                    <span className="text-[14px] text-white/80">{selected ? BRAND_LABEL[selected.brand] : ""}</span>
                   </div>
-                  <span className="text-[14px] text-white/60">Ending 6427</span>
+                  <span className="text-[14px] text-white/60">Ending {selected?.last4 ?? ""}</span>
                 </div>
 
                 <div className="mt-6 flex flex-col items-center">
@@ -329,6 +314,7 @@ export function WithdrawFlow({
           </motion.div>
         )}
       </AnimatePresence>
+          <CardManager open={managerOpen} onClose={() => setManagerOpen(false)} />
         </motion.div>
       )}
     </AnimatePresence>
