@@ -150,9 +150,9 @@ export function WithdrawFlow({
               return (
                 <div className="px-4 pt-5">
                   {belowMin && (
-                    <div className="mb-5 flex items-center gap-3 rounded-xl bg-[#facc15] px-4 py-3.5">
-                      <AlertCircle className="h-6 w-6 shrink-0 text-black" strokeWidth={2} />
-                      <p className="text-[14px] font-semibold text-black">
+                    <div className="mb-4 flex items-center gap-2.5 rounded-lg bg-[#ffe600] px-3 py-2">
+                      <AlertCircle className="h-5 w-5 shrink-0 text-black" strokeWidth={2} />
+                      <p className="text-[13px] font-semibold text-black">
                         The minimum balance for withdrawal is $10
                       </p>
                     </div>
