@@ -31,3 +31,25 @@ export function autoComma(value: string): string {
   const withCommas = Number(intPart).toLocaleString("en-US");
   return `${dollar}${sign}${withCommas}${dec}`;
 }
+
+/** Format a raw amount input string with commas (e.g. "1000" → "1,000", "1234.56" → "1,234.56") */
+export function fmtAmountInput(value: string): string {
+  let v = value.replace(/,/g, "");
+  v = v.replace(/[^\d.]/g, "");
+  const firstDot = v.indexOf(".");
+  if (firstDot !== -1) {
+    v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, "");
+  }
+  const [intRaw = "", decRaw = ""] = v.split(".");
+  const intPart = intRaw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (v.includes(".")) {
+    return `${intPart}.${decRaw.slice(0, 2)}`;
+  }
+  return intPart;
+}
+
+/** Parse a formatted amount input string back to a number. */
+export function parseAmountInput(value: string): number {
+  return parseFloat(value.replace(/,/g, "")) || 0;
+}
+
