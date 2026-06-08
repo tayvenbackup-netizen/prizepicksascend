@@ -54,6 +54,7 @@ type Draft = {
   line: string;
   badge?: PickBadge;
   gameLabel?: string;
+  sameGameDate?: string;
   startsAt?: string;
 };
 
@@ -494,10 +495,19 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                               <SameGamePicker
                                 pick={d}
                                 defaultDate={pastDate}
-                                onGameLabel={(label) =>
+                                otherPicks={picks.filter(
+                                  (x) => x.key !== d.key && x.sport === d.sport,
+                                )}
+                                onGameLabel={(label, chosenDate) =>
                                   setPicks((arr) =>
                                     arr.map((x) =>
-                                      x.key === d.key ? { ...x, gameLabel: label } : x,
+                                      x.key === d.key
+                                        ? {
+                                            ...x,
+                                            gameLabel: label,
+                                            sameGameDate: chosenDate,
+                                          }
+                                        : x,
                                     ),
                                   )
                                 }
