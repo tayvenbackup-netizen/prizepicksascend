@@ -1262,6 +1262,13 @@ function SameGamePicker({
   );
   const [err, setErr] = useState<string | null>(null);
 
+  const fallbackLabel = (d: string) => {
+    const teamAbbr = (pick.player.team || "TEAM").toUpperCase();
+    const dt = new Date(`${d}T12:00:00`);
+    const short = `${dt.getMonth() + 1}/${dt.getDate()}`;
+    return `${teamAbbr} · ${short}`;
+  };
+
   const lookup = async (d: string) => {
     setStatus("loading");
     setErr(null);
@@ -1281,9 +1288,10 @@ function SameGamePicker({
         );
       });
       if (!match) {
-        setStatus("err");
-        setErr("No game found for that team on that date.");
-        onGameLabel(undefined);
+        // No real game on that date (e.g. offseason). Synthesize a stable
+        // label so same-game picks still group together in the entry view.
+        onGameLabel(fallbackLabel(d));
+        setStatus("ok");
         return;
       }
       const cs: any[] = match?.competitions?.[0]?.competitors || [];
@@ -1298,10 +1306,10 @@ function SameGamePicker({
       const label = `${aAbbr} vs ${hAbbr} · ${short}`;
       onGameLabel(label);
       setStatus("ok");
-    } catch (e) {
-      setStatus("err");
-      setErr(String(e));
-      onGameLabel(undefined);
+    } catch {
+      // Network/parse failure — still produce a fallback so grouping works.
+      onGameLabel(fallbackLabel(d));
+      setStatus("ok");
     }
   };
 
