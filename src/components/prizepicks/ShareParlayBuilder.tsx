@@ -1721,9 +1721,10 @@ function ScreenshotImportScreen({
           </ul>
           <button
             onClick={addAll}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-[#7c3aed] py-2.5 text-[12px] font-bold text-white shadow-lg shadow-[#7c3aed]/30"
+            disabled={adding}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-[#7c3aed] py-2.5 text-[12px] font-bold text-white shadow-lg shadow-[#7c3aed]/30 disabled:opacity-50"
           >
-            <Plus className="h-3.5 w-3.5" /> Add {picks.length} pick{picks.length === 1 ? "" : "s"} to slip
+            {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />} {adding ? "Enriching…" : `Add ${picks.length} pick${picks.length === 1 ? "" : "s"} to slip`}
           </button>
         </div>
       )}
