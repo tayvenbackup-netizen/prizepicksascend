@@ -312,7 +312,7 @@ export function DepositFlow({
               </motion.div>
             )}
 
-            {typeof step === "object" && (
+            {typeof step === "object" && step.kind === "card" && (
               <motion.div
                 key="card"
                 custom={dir}
