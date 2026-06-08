@@ -7,7 +7,7 @@ import venmoAsset from "@/assets/payments/venmo.png.asset.json";
 import paypalAsset from "@/assets/payments/paypal.png.asset.json";
 
 type CardKind = "debit" | "credit";
-type Step = "methods" | { kind: "card"; type: CardKind };
+type Step = "methods" | { kind: "card"; type: CardKind } | { kind: "saved"; id: string };
 
 function ApplePayLogo() {
   return (
