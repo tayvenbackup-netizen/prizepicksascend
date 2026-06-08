@@ -1,3 +1,6 @@
+import amexAsset from "@/assets/payments/amex.webp.asset.json";
+import discoverAsset from "@/assets/payments/discover.png.asset.json";
+
 export type CardBrand = "visa" | "mastercard" | "amex" | "discover";
 
 export const BRAND_LABEL: Record<CardBrand, string> = {
