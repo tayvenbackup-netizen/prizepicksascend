@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Trash2, Info, DollarSign, Check, X, Landmark, Loader2 } from "lucide-react";
 import { useProfile } from "./ProfileContext";
-import { PLogo } from "./Icons";
+import coinPlayers from "@/assets/menu/coin-players.gif";
+import coinTeams from "@/assets/menu/coin-teams.gif";
+import venmoAsset from "@/assets/payments/venmo.png.asset.json";
+import paypalAsset from "@/assets/payments/paypal.png.asset.json";
 
 type Step = "methods" | "card";
 
@@ -37,19 +40,24 @@ function ApplePayLogo() {
   );
 }
 
-function VenmoLogo() {
+function VenmoLogo({ size = 28 }: { size?: number }) {
   return (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] bg-white">
-      <span className="text-[13px] font-extrabold italic text-[#3D95CE]">v</span>
+    <span
+      className="inline-flex items-center justify-center overflow-hidden rounded-[6px] bg-white"
+      style={{ width: size, height: size }}
+    >
+      <img src={venmoAsset.url} alt="Venmo" className="h-full w-full object-contain" />
     </span>
   );
 }
 
-function PaypalLogo() {
+function PaypalLogo({ size = 28 }: { size?: number }) {
   return (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] bg-white">
-      <span className="text-[11px] font-extrabold italic text-[#003087]">P</span>
-      <span className="-ml-0.5 text-[11px] font-extrabold italic text-[#009cde]">P</span>
+    <span
+      className="inline-flex items-center justify-center overflow-hidden rounded-[6px] bg-white"
+      style={{ width: size, height: size }}
+    >
+      <img src={paypalAsset.url} alt="PayPal" className="h-[78%] w-[78%] object-contain" />
     </span>
   );
 }
@@ -161,15 +169,13 @@ export function DepositFlow({
 
                 {/* Tabs */}
                 <div className="grid grid-cols-2 px-4 mt-1">
-                  <button className="flex items-center justify-center gap-2 pb-2 text-center text-[14px] font-semibold text-white border-b-[3px] border-[#7c3aed]">
-                    <PLogo size={18} />
+                  <button className="flex items-center justify-center gap-1.5 pb-1.5 text-center text-[12px] font-bold text-white border-b-[2.5px] border-[#7c3aed]">
+                    <img src={coinPlayers} alt="" className="h-[14px] w-[14px] rounded-full object-contain" />
                     <span>Players</span>
-                    <span className="text-white/65 font-normal">${balance}</span>
+                    <span className="text-white/55 font-normal">${balance}</span>
                   </button>
-                  <button className="flex items-center justify-center gap-2 pb-2 text-center text-[14px] font-normal text-white/60 border-b border-white/15">
-                    <span className="grid h-[18px] w-[18px] place-items-center rounded-full bg-[#0f5132]">
-                      <span className="text-[10px] font-bold text-[#22c55e]">P</span>
-                    </span>
+                  <button className="flex items-center justify-center gap-1.5 pb-1.5 text-center text-[12px] font-normal text-white/55 border-b border-white/15">
+                    <img src={coinTeams} alt="" className="h-[14px] w-[14px] rounded-full object-contain" />
                     <span>Teams &amp; Culture</span>
                     <span>$0.00</span>
                   </button>
