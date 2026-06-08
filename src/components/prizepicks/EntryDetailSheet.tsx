@@ -267,10 +267,15 @@ function SheetBody({
     entry.type === "power" ? "Power" : "Flex"
   } Play`;
 
-  // Group key MUST be stable across edits — do NOT include gameLabel,
-  // otherwise editing the label remounts the input and dismisses the keyboard.
+  // Group key MUST be stable across edits — do NOT include user-editable
+  // gameLabel text, otherwise editing the label remounts the input and
+  // dismisses the keyboard. Prefer grouping by the original gameLabel set at
+  // pick time so a same-game parlay across both teams collapses into ONE
+  // matchup card instead of one per team.
   const groups = entry.picks.reduce<Record<string, ParlayPick[]>>((acc, p) => {
-    const key = `${p.league ?? "—"}::${p.team ?? "—"}`;
+    const key = p.gameLabel
+      ? `${p.league ?? "—"}::g::${p.gameLabel}`
+      : `${p.league ?? "—"}::t::${p.team ?? "—"}`;
     (acc[key] ||= []).push(p);
     return acc;
   }, {});
