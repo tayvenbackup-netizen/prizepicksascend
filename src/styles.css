@@ -78,11 +78,12 @@
   --radius: 1rem;
 
   /* PrizePicks-like dark palette */
-  --background: oklch(0.13 0.02 270);            /* near-black with cool tint */
+  --background: #0A0B10;                          /* deep midnight black */
   --foreground: oklch(0.98 0 0);
 
-  --surface:    oklch(0.18 0.02 270);            /* card bg */
-  --surface-2:  oklch(0.23 0.02 270);            /* elevated chips/buttons */
+  --surface:    #12131A;                          /* card fill */
+  --surface-2:  #1D1E26;                          /* inner header / elevated */
+  --surface-3:  #282A36;                          /* inner badge fill */
 
   --card: var(--surface);
   --card-foreground: oklch(0.98 0 0);
