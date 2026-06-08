@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, X, Check, Landmark, DollarSign } from "lucide-react";
+import { ArrowLeft, X, Check, Landmark, DollarSign, AlertCircle } from "lucide-react";
 import { useProfile, PaymentMethod } from "./ProfileContext";
 import { PLogo } from "./Icons";
 import { CardLogo, BRAND_LABEL } from "./CardLogo";
