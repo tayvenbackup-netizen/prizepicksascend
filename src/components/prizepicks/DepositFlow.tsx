@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Trash2, Info, DollarSign, Check, X, Landmark, Loader2 } from "lucide-react";
 import { useProfile } from "./ProfileContext";
-import { PLogo } from "./Icons";
+import coinPlayers from "@/assets/menu/coin-players.gif";
+import coinTeams from "@/assets/menu/coin-teams.gif";
+import venmoAsset from "@/assets/payments/venmo.png.asset.json";
+import paypalAsset from "@/assets/payments/paypal.png.asset.json";
 
 type Step = "methods" | "card";
 
