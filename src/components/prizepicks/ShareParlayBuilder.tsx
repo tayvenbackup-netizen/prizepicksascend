@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, X, Search, Sparkles, Link2, Loader2, ChevronRight, Plus, Check, Trash2 } from "lucide-react";
+import { ArrowLeft, X, Search, Sparkles, Link2, Loader2, ChevronRight, Plus, Check, Trash2, Upload, Image as ImageIcon, Wand2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   maxPayoutWithBadges as maxPayout,
   POWER_MULTIPLIERS,
@@ -13,6 +14,7 @@ import { SUPPORTED_SPORTS, marketsFor, type Market, type SportKey } from "@/lib/
 import { fmtMoney } from "@/lib/fmt";
 import { Jersey } from "./Jersey";
 import { BadgePicker } from "./Badges";
+import { parsePpScreenshot, type ParsedPick } from "@/lib/parsePpScreenshot.functions";
 
 type Game = {
   id: string;
