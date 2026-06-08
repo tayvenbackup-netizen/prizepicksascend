@@ -162,9 +162,9 @@ export function WithdrawFlow({
                   <div className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-4">
                     <div className="flex items-center gap-2.5">
                       <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
-                      <span className="text-[14px] font-semibold text-white">Available to withdraw</span>
-                    </div>
-                    <span className="text-[14px] font-semibold text-white">${balance}</span>
+                    <span className="text-[14px] font-semibold text-white">Available to withdraw</span>
+                  </div>
+                  <span className="text-[14px] font-semibold text-white">${autoComma(balance)}</span>
                   </div>
 
                   {belowMin ? (
