@@ -247,9 +247,7 @@ export function DepositFlow({
                         className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-[#15172180] py-8"
                       >
                         <CardLogo brand={pm.brand} size={26} />
-                        <p className="text-[15px] font-bold text-white">
-                          {pm.brand === "credit" ? "Credit Card" : "Debit Card"}
-                        </p>
+                        <p className="text-[15px] font-bold text-white">Debit Card</p>
                         <p className="-mt-1 text-[11.5px] text-white/55">****{pm.last4}, exp. {pm.exp}</p>
                       </button>
                     ))}
