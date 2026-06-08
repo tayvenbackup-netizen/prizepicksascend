@@ -246,7 +246,9 @@ export function DepositFlow({
                     <button onClick={back} aria-label="Back" className="text-white">
                       <ArrowLeft className="h-6 w-6" strokeWidth={2} />
                     </button>
-                    <h1 className="text-[20px] font-extrabold text-white">Mastercard</h1>
+                    <h1 className="text-[20px] font-extrabold text-white">
+                      {selected ? BRAND_LABEL[selected.brand] : "Card"}
+                    </h1>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[14px] text-white">${balance}</span>
@@ -286,10 +288,10 @@ export function DepositFlow({
                   <div className="mt-5 rounded-xl border border-white/10 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <MastercardLogo size={22} />
-                        <span className="text-[14px] text-white/80">Mastercard</span>
+                        {selected && <CardLogo brand={selected.brand} size={22} />}
+                        <span className="text-[14px] text-white/80">{selected ? BRAND_LABEL[selected.brand] : ""}</span>
                       </div>
-                      <span className="text-[14px] text-white/60">Ending 6427</span>
+                      <span className="text-[14px] text-white/60">Ending {selected?.last4 ?? ""}</span>
                     </div>
 
                     <input
