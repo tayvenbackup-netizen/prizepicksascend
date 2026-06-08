@@ -210,7 +210,7 @@ function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () =
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left rounded-2xl border border-white/5 bg-surface active:scale-[0.99] transition-transform ${isPast ? "p-3" : "p-3.5"}`}
+      className={`w-full text-left rounded-2xl border border-white/5 bg-surface active:scale-[0.99] transition-transform p-3`}
     >
       <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0">
