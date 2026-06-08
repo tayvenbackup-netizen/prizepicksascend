@@ -45,6 +45,38 @@ function PaypalLogo({ size = 30 }: { size?: number }) {
 
 const QUICK = [25, 100, 250, 500];
 
+function onApplePayButtonClicked() {
+  const AP = (window as any).ApplePaySession;
+  if (!AP || typeof AP.canMakePayments !== "function" || !AP.canMakePayments()) {
+    alert("Apple Pay is not available on this device or browser. Please use Safari on an Apple device with Apple Pay set up.");
+    return;
+  }
+  const request = {
+    countryCode: "US",
+    currencyCode: "USD",
+    merchantCapabilities: ["supports3DS"],
+    supportedNetworks: ["visa", "masterCard", "amex", "discover"],
+    total: { label: "Demo (Card is not charged)", type: "final", amount: "1.99" },
+  };
+  try {
+    const session = new AP(3, request);
+    session.onvalidatemerchant = (_event: any) => {
+      // No backend merchant validation in demo — abort gracefully
+      try { session.abort(); } catch {}
+    };
+    session.onpaymentmethodselected = () => {
+      session.completePaymentMethodSelection({});
+    };
+    session.onpaymentauthorized = () => {
+      session.completePayment({ status: AP.STATUS_SUCCESS });
+    };
+    session.oncancel = () => {};
+    session.begin();
+  } catch (e) {
+    alert("Unable to start Apple Pay session.");
+  }
+}
+
 function detectBrand(num: string): CardBrand | null {
   const n = num.replace(/\D/g, "");
   if (!n) return null;
@@ -230,6 +262,7 @@ export function DepositFlow({
                   <h3 className="text-[15px] font-bold text-white">Saved Methods</h3>
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <button
+                      onClick={onApplePayButtonClicked}
                       className="relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-[#15172180] py-8"
                     >
                       <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-0.5 rounded-md bg-[#0a0d18] px-2 py-0.5 text-[11px] font-bold text-[#79e54a]">
