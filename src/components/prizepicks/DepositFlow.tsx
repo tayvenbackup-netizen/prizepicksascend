@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Info, DollarSign, Check, X, Landmark, Loader2, CreditCard, HelpCircle, Headphones } from "lucide-react";
 import { useProfile } from "./ProfileContext";
