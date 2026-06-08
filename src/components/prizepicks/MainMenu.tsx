@@ -44,10 +44,17 @@ function Row({ label, badge }: { label: string; badge?: string }) {
 }
 
 export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { data } = useProfile();
+  const { data, setData } = useProfile();
   const balance = `$${autoComma(data.balance)}`;
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
+
+  const handleSubmitted = (amount: number) => {
+    const current = parseFloat(String(data.balance).replace(/,/g, "")) || 0;
+    const next = Math.max(0, current - amount);
+    setData({ ...data, balance: next.toFixed(2) });
+    setNotifyOpen(true);
+  };
 
   useEffect(() => {
     if (!open) return;
