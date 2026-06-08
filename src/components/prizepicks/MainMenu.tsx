@@ -123,7 +123,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
               </div>
 
               <div className="mt-3.5 grid grid-cols-2 gap-2.5">
-                <button className="h-[38px] rounded-full bg-[#1f202d] text-[13px] font-bold text-white">Withdraw</button>
+                <button onClick={() => setWithdrawOpen(true)} className="h-[38px] rounded-full bg-[#1f202d] text-[13px] font-bold text-white">Withdraw</button>
                 <button className="h-[38px] rounded-full bg-[#7c3aed] text-[13px] font-bold text-white">Deposit</button>
               </div>
 
