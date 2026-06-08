@@ -10,6 +10,7 @@ import { MostPickedPlayers, TopWinningPlayers } from "@/components/prizepicks/Pl
 import { MostPickedTeams, TopWinningLeagues } from "@/components/prizepicks/LeaguesTeams";
 import { BottomNav, type NavTab } from "@/components/prizepicks/BottomNav";
 import { EntriesView } from "@/components/prizepicks/EntriesView";
+import { PromosView } from "@/components/prizepicks/PromosView";
 import { ProfileProvider } from "@/components/prizepicks/ProfileContext";
 import { EntriesProvider } from "@/components/prizepicks/EntriesContext";
 import { GateRoot } from "@/components/gate/GateRoot";
@@ -59,7 +60,13 @@ function Index() {
             </div>
           )}
 
-          {nav !== "profile" && nav !== "entries" && (
+          {nav === "promos" && (
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <PromosView />
+            </div>
+          )}
+
+          {nav !== "profile" && nav !== "entries" && nav !== "promos" && (
             <div className="flex-1 min-h-0 flex items-center justify-center text-muted-foreground text-sm pb-28">
               Ascend2k LarpPickz
             </div>
