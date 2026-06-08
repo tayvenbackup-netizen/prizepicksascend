@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Trash2, Info, DollarSign, Check, X, Landmark, Loader2 } from "lucide-react";
+import { ArrowLeft, Info, DollarSign, Check, X, Landmark, Loader2 } from "lucide-react";
 import { useProfile } from "./ProfileContext";
 import coinPlayers from "@/assets/menu/coin-players.gif";
 import coinTeams from "@/assets/menu/coin-teams.gif";
@@ -274,9 +274,6 @@ export function DepositFlow({
                       <ArrowLeft className="h-6 w-6" strokeWidth={2} />
                     </button>
                     <h1 className="text-[20px] font-extrabold text-white">Mastercard</h1>
-                    <button aria-label="Remove" className="text-white/80">
-                      <Trash2 className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                    </button>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[14px] text-white">${balance}</span>
