@@ -1578,12 +1578,18 @@ function ScreenshotImportScreen({
     }
   };
 
-  const addAll = () => {
+  const [adding, setAdding] = useState(false);
+  const addAll = async () => {
     if (picks.length === 0) return;
-    const drafts = picks.map((p, i) => parsedToDraft(p, i));
-    if (meta.entryAmount && meta.entryAmount > 0) onEntryAmount(meta.entryAmount);
-    if (meta.parlayType) onParlayType(meta.parlayType);
-    onAddPicks(drafts);
+    setAdding(true);
+    try {
+      const drafts = await Promise.all(picks.map((p, i) => parsedToDraft(p, i)));
+      if (meta.entryAmount && meta.entryAmount > 0) onEntryAmount(meta.entryAmount);
+      if (meta.parlayType) onParlayType(meta.parlayType);
+      onAddPicks(drafts);
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
