@@ -241,6 +241,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     sport: step.sport,
                     team: t,
                     gameLabel: `${step.game.away.abbr} vs ${step.game.home.abbr} · ${step.game.shortLabel}`,
+                    startsAt: step.game.date,
                   })
                 }
               />
@@ -261,7 +262,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                 sport={step.sport}
                 team={step.team}
                 gameLabel={step.gameLabel}
-                onPick={(p) => setStep({ kind: "markets", sport: step.sport, player: p, gameLabel: step.gameLabel })}
+                onPick={(p) => setStep({ kind: "markets", sport: step.sport, player: p, gameLabel: step.gameLabel, startsAt: step.startsAt })}
               />
             )}
             {step.kind === "markets" && (
@@ -277,6 +278,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     pick,
                     line,
                     gameLabel: step.gameLabel,
+                    startsAt: step.startsAt,
                   })
                 }
               />
