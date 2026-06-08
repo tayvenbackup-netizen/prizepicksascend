@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, X, Search, Sparkles, Link2, Loader2, ChevronRight, Plus, Check, Trash2 } from "lucide-react";
+import { ArrowLeft, X, Search, Sparkles, Link2, Loader2, ChevronRight, Plus, Check, Trash2, Upload, Wand2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   maxPayoutWithBadges as maxPayout,
   POWER_MULTIPLIERS,
@@ -13,6 +14,7 @@ import { SUPPORTED_SPORTS, marketsFor, type Market, type SportKey } from "@/lib/
 import { fmtMoney } from "@/lib/fmt";
 import { Jersey } from "./Jersey";
 import { BadgePicker } from "./Badges";
+import { parsePpScreenshot, type ParsedPick } from "@/lib/parsePpScreenshot.functions";
 
 type Game = {
   id: string;
@@ -79,6 +81,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
   const [ppLoading, setPpLoading] = useState(false);
   // Past-pick mode lets the user log a parlay that already happened.
   const [pastMode, setPastMode] = useState(false);
+  const [screenshotMode, setScreenshotMode] = useState(false);
   const [pastDate, setPastDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [results, setResults] = useState<Record<string, "pending" | "win" | "loss">>({});
 
@@ -89,6 +92,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       setPpMsg(null);
       setPpLink("");
       setPastMode(false);
+      setScreenshotMode(false);
       setResults({});
     }
   }, [open]);
@@ -215,13 +219,38 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
           />
 
           <div className="flex-1 min-h-0 overflow-hidden">
-            {step.kind === "sports" && (
+            {step.kind === "sports" && !screenshotMode && (
               <SportsScreen
                 pastMode={pastMode}
-                onTogglePast={setPastMode}
+                screenshotMode={screenshotMode}
+                onSetMode={(m) => {
+                  if (m === "screenshot") { setScreenshotMode(true); setPastMode(true); }
+                  else if (m === "past") { setScreenshotMode(false); setPastMode(true); }
+                  else { setScreenshotMode(false); setPastMode(false); }
+                }}
                 onPick={(s) =>
                   setStep(pastMode ? { kind: "pastTeams", sport: s } : { kind: "games", sport: s })
                 }
+              />
+            )}
+            {step.kind === "sports" && screenshotMode && (
+              <ScreenshotImportScreen
+                onAddPicks={(drafts) => {
+                  setPicks((prev) => {
+                    const seen = new Set(prev.map((p) => p.key));
+                    const merged = [...prev];
+                    for (const d of drafts) {
+                      if (merged.length >= 6) break;
+                      if (seen.has(d.key)) continue;
+                      seen.add(d.key);
+                      merged.push(d);
+                    }
+                    return merged;
+                  });
+                  setShowSlip(true);
+                }}
+                onEntryAmount={(n) => { if (n > 0) setEntryAmount(String(n)); }}
+                onParlayType={(t) => { if (t) setType(t); }}
               />
             )}
             {step.kind === "games" && (
@@ -653,24 +682,32 @@ function Header({
 function SportsScreen({
   onPick,
   pastMode,
-  onTogglePast,
+  screenshotMode,
+  onSetMode,
 }: {
   onPick: (s: SportKey) => void;
   pastMode: boolean;
-  onTogglePast: (v: boolean) => void;
+  screenshotMode: boolean;
+  onSetMode: (m: "live" | "past" | "screenshot") => void;
 }) {
+  const current: "live" | "past" | "screenshot" = screenshotMode
+    ? "screenshot"
+    : pastMode
+      ? "past"
+      : "live";
   return (
     <div className="h-full overflow-y-auto px-4 py-2">
-      <div className="mb-3 grid grid-cols-2 rounded-full bg-white/[0.05] p-0.5">
+      <div className="mb-3 grid grid-cols-3 rounded-full bg-white/[0.05] p-0.5">
         {([
-          { k: false, label: "Live" },
-          { k: true, label: "Past Plays" },
+          { k: "live", label: "Live" },
+          { k: "past", label: "Past" },
+          { k: "screenshot", label: "Screenshot" },
         ] as const).map((opt) => {
-          const active = pastMode === opt.k;
+          const active = current === opt.k;
           return (
             <button
               key={opt.label}
-              onClick={() => onTogglePast(opt.k)}
+              onClick={() => onSetMode(opt.k)}
               className={`rounded-full py-1.5 text-[11px] font-bold transition-colors ${
                 active ? "bg-[#7c3aed] text-white" : "text-white/60"
               }`}
@@ -1380,6 +1417,246 @@ function SameGamePicker({
       )}
       {enabled && status === "err" && (
         <p className="mt-1 text-[9px] text-red-300">{err}</p>
+      )}
+    </div>
+  );
+}
+
+/* -------------------- Screenshot importer -------------------- */
+
+const VALID_SPORTS: SportKey[] = [
+  "NBA", "NFL", "MLB", "NHL", "WNBA", "NCAAM", "NCAAF",
+  "EPL", "MLS", "UCL", "ATP", "WTA", "UFC", "PGA",
+];
+
+function normalizeSport(s?: string | null): SportKey {
+  const up = (s || "").toUpperCase().trim();
+  return (VALID_SPORTS as string[]).includes(up) ? (up as SportKey) : "NBA";
+}
+
+function parsedToDraft(p: ParsedPick, i: number): Draft {
+  const sport = normalizeSport(p.sport);
+  const team = (p.team || "—").toUpperCase();
+  const id = `ss-${i}-${p.player.replace(/\s+/g, "_")}`;
+  const market: Market = {
+    id: p.stat.toLowerCase().replace(/[^a-z0-9]+/g, "-") || `stat-${i}`,
+    label: p.stat,
+    line: Number(p.line) || 0,
+  };
+  const pick: "over" | "under" =
+    p.pick === "under" || p.pick === "less" ? "under" : "over";
+  return {
+    key: id,
+    player: { id, name: p.player, team, photo: null },
+    sport,
+    market,
+    pick,
+    line: String(p.line ?? market.line),
+    badge: (p.badge ?? null) as PickBadge,
+    gameLabel: `Screenshot import`,
+  };
+}
+
+function ScreenshotImportScreen({
+  onAddPicks,
+  onEntryAmount,
+  onParlayType,
+}: {
+  onAddPicks: (drafts: Draft[]) => void;
+  onEntryAmount: (n: number) => void;
+  onParlayType: (t: ParlayType | null) => void;
+}) {
+  const parse = useServerFn(parsePpScreenshot);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [picks, setPicks] = useState<ParsedPick[]>([]);
+  const [meta, setMeta] = useState<{ parlayType: ParlayType | null; entryAmount: number | null }>({
+    parlayType: null,
+    entryAmount: null,
+  });
+
+  const pickFile = () => fileRef.current?.click();
+
+  const onFile = async (file: File) => {
+    setErr(null);
+    setPicks([]);
+    if (!file.type.startsWith("image/")) {
+      setErr("Please choose an image file.");
+      return;
+    }
+    if (file.size > 6 * 1024 * 1024) {
+      setErr("Image must be under 6 MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setDataUrl(String(reader.result || ""));
+    reader.readAsDataURL(file);
+  };
+
+  const runParse = async () => {
+    if (!dataUrl) return;
+    setLoading(true);
+    setErr(null);
+    try {
+      const res = await parse({ data: { imageDataUrl: dataUrl } });
+      const list = Array.isArray(res?.picks) ? res.picks.slice(0, 6) : [];
+      if (list.length === 0) setErr("No picks detected. Try a clearer screenshot.");
+      setPicks(list);
+      setMeta({
+        parlayType: (res?.parlayType as ParlayType | null) ?? null,
+        entryAmount: typeof res?.entryAmount === "number" ? res.entryAmount : null,
+      });
+    } catch (e: any) {
+      setErr(e?.message || "Failed to parse screenshot.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addAll = () => {
+    if (picks.length === 0) return;
+    const drafts = picks.map((p, i) => parsedToDraft(p, i));
+    if (meta.entryAmount && meta.entryAmount > 0) onEntryAmount(meta.entryAmount);
+    if (meta.parlayType) onParlayType(meta.parlayType);
+    onAddPicks(drafts);
+  };
+
+  return (
+    <div className="h-full overflow-y-auto px-4 py-2">
+      <div className="mb-3 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-[#7c3aed]/15 to-[#7c3aed]/[0.02] p-3">
+        <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#c4b5fd]">
+          <Wand2 className="h-3.5 w-3.5" /> AI Screenshot Import
+        </div>
+        <p className="mt-1 text-[11px] leading-snug text-white/70">
+          Upload a screenshot of your PrizePicks slip and we'll auto-detect every player, stat, line, more/less, and demon / goblin badges.
+        </p>
+      </div>
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onFile(f);
+          e.currentTarget.value = "";
+        }}
+      />
+
+      {!dataUrl && (
+        <button
+          onClick={pickFile}
+          className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/15 bg-white/[0.02] px-4 py-10 text-white/70 transition-colors hover:bg-white/[0.05]"
+        >
+          <Upload className="h-7 w-7 text-white/55" />
+          <span className="text-[13px] font-bold text-white">Tap to choose screenshot</span>
+          <span className="text-[10px] text-white/45">PNG or JPG · up to 6 MB</span>
+        </button>
+      )}
+
+      {dataUrl && (
+        <div className="space-y-2">
+          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-black">
+            <img src={dataUrl} alt="slip" className="max-h-[260px] w-full object-contain" />
+            <button
+              onClick={() => { setDataUrl(null); setPicks([]); setErr(null); }}
+              className="absolute right-1.5 top-1.5 rounded-full bg-black/60 p-1 text-white/90"
+              aria-label="Remove"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={pickFile}
+              className="h-9 flex-1 rounded-lg border border-white/10 bg-white/[0.04] text-[12px] font-bold text-white/80"
+            >
+              Replace
+            </button>
+            <button
+              onClick={runParse}
+              disabled={loading}
+              className="flex h-9 flex-[2] items-center justify-center gap-1.5 rounded-lg bg-[#7c3aed] text-[12px] font-bold text-white disabled:opacity-40"
+            >
+              {loading ? (
+                <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Reading slip…</>
+              ) : (
+                <><Wand2 className="h-3.5 w-3.5" /> Auto-detect picks</>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {err && (
+        <div className="mt-3 rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-[11px] text-red-200">
+          {err}
+        </div>
+      )}
+
+      {picks.length > 0 && (
+        <div className="mt-3">
+          <div className="mb-1.5 flex items-center justify-between">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/55">
+              Detected · {picks.length}
+            </p>
+            {(meta.parlayType || meta.entryAmount) && (
+              <p className="text-[10px] text-white/55">
+                {meta.parlayType ? `${meta.parlayType} play` : ""}
+                {meta.entryAmount ? ` · $${meta.entryAmount}` : ""}
+              </p>
+            )}
+          </div>
+          <ul className="space-y-1.5">
+            {picks.map((p, i) => (
+              <li
+                key={`${p.player}-${i}`}
+                className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-2.5 py-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate text-[12px] font-bold text-white">{p.player}</span>
+                    {p.badge === "demon" && (
+                      <span className="rounded bg-red-500/25 px-1 text-[8px] font-bold uppercase text-red-300">Demon</span>
+                    )}
+                    {p.badge === "goblin" && (
+                      <span className="rounded bg-green-500/25 px-1 text-[8px] font-bold uppercase text-green-300">Goblin</span>
+                    )}
+                  </div>
+                  <div className="truncate text-[10px] text-white/55">
+                    {(p.team || "—")} · {p.sport || "?"} · {p.stat}
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-[12px] font-bold text-white">{p.line}</div>
+                  <div
+                    className={`text-[9px] font-bold uppercase ${
+                      p.pick === "under" || p.pick === "less" ? "text-red-300" : "text-green-300"
+                    }`}
+                  >
+                    {p.pick === "under" || p.pick === "less" ? "Less" : "More"}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setPicks((arr) => arr.filter((_, j) => j !== i))}
+                  className="ml-1 text-white/35 hover:text-red-400"
+                  aria-label="Remove"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={addAll}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-[#7c3aed] py-2.5 text-[12px] font-bold text-white shadow-lg shadow-[#7c3aed]/30"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add {picks.length} pick{picks.length === 1 ? "" : "s"} to slip
+          </button>
+        </div>
       )}
     </div>
   );
