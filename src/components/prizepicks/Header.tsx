@@ -7,10 +7,12 @@ import arrowDown from "@/assets/major/arrow-down.png";
 import { useProfile } from "./ProfileContext";
 import { autoComma } from "@/lib/fmt";
 import { MainMenu } from "./MainMenu";
+import { NotificationGenerator } from "./NotificationGenerator";
 
 export function TopHeader() {
   const { data } = useProfile();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   return (
     <>
       <header
@@ -29,7 +31,12 @@ export function TopHeader() {
         </div>
 
         <div className="flex flex-1 min-w-0 justify-center">
-          <div className="flex items-center justify-center gap-1.5 rounded-full border-[1.5px] border-white/95 px-2.5 py-[7px] min-w-0 max-w-full overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setNotifOpen(true)}
+            aria-label="Notification generator"
+            className="flex items-center justify-center gap-1.5 rounded-full border-[1.5px] border-white/95 px-2.5 py-[7px] min-w-0 max-w-full overflow-hidden"
+          >
             <img
               src={playersPill}
               alt="Players"
@@ -41,7 +48,7 @@ export function TopHeader() {
               alt=""
               className="h-[20px] w-[20px] shrink-0 object-contain"
             />
-          </div>
+          </button>
         </div>
 
         <div className="flex shrink-0 items-center justify-end gap-1">
@@ -51,6 +58,7 @@ export function TopHeader() {
         </div>
       </header>
       <MainMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <NotificationGenerator open={notifOpen} onClose={() => setNotifOpen(false)} />
     </>
   );
 }
