@@ -49,12 +49,21 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
   const balance = `$${autoComma(data.balance)}`;
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [depositNotifyOpen, setDepositNotifyOpen] = useState(false);
 
   const handleSubmitted = (amount: number) => {
     const current = parseFloat(String(data.balance).replace(/,/g, "")) || 0;
     const next = Math.max(0, current - amount);
     setData({ ...data, balance: next.toFixed(2) });
     setNotifyOpen(true);
+  };
+
+  const handleDeposited = (amount: number) => {
+    const current = parseFloat(String(data.balance).replace(/,/g, "")) || 0;
+    const next = current + amount;
+    setData({ ...data, balance: next.toFixed(2) });
+    setDepositNotifyOpen(true);
   };
 
   useEffect(() => {
