@@ -1434,7 +1434,64 @@ function normalizeSport(s?: string | null): SportKey {
   return (VALID_SPORTS as string[]).includes(up) ? (up as SportKey) : "NBA";
 }
 
-function parsedToDraft(p: ParsedPick, i: number): Draft {
+async function fetchPlayerPhoto(name: string): Promise<string | null> {
+  try {
+    const r = await fetch(
+      `https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=${encodeURIComponent(name)}`,
+    );
+    const j = await r.json();
+    const p = j?.player?.[0];
+    return p?.strCutout || p?.strThumb || p?.strRender || null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchGameInfo(
+  sport: SportKey,
+  teamAbbr: string,
+): Promise<{ label: string; date: string } | null> {
+  const up = (teamAbbr || "").toUpperCase();
+  if (!up || up === "—") return null;
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  const today = new Date();
+  const past = new Date(Date.now() - 30 * 86400000);
+  const future = new Date(Date.now() + 14 * 86400000);
+  try {
+    const r = await fetch(
+      `/api/public/espn-scoreboard?league=${sport}&from=${fmt(past)}&to=${fmt(future)}`,
+    );
+    const j = await r.json();
+    const events: any[] = j?.events || [];
+    const matches = events.filter((ev) =>
+      (ev?.competitions?.[0]?.competitors || []).some(
+        (c: any) =>
+          (c?.team?.abbreviation || "").toUpperCase() === up ||
+          (c?.team?.shortDisplayName || "").toUpperCase() === up,
+      ),
+    );
+    if (matches.length === 0) return null;
+    // Prefer the game closest to "now" (most recent past or next upcoming)
+    matches.sort(
+      (a, b) =>
+        Math.abs(Date.parse(a.date) - today.getTime()) -
+        Math.abs(Date.parse(b.date) - today.getTime()),
+    );
+    const match = matches[0];
+    const cs: any[] = match?.competitions?.[0]?.competitors || [];
+    const home = cs.find((c) => c.homeAway === "home") || cs[0];
+    const away = cs.find((c) => c.homeAway === "away") || cs[1];
+    const aAbbr = away?.team?.abbreviation || "AWY";
+    const hAbbr = home?.team?.abbreviation || "HOM";
+    const dt = new Date(match.date);
+    const short = `${dt.getMonth() + 1}/${dt.getDate()}`;
+    return { label: `${aAbbr} vs ${hAbbr} · ${short}`, date: fmt(dt) };
+  } catch {
+    return null;
+  }
+}
+
+async function parsedToDraft(p: ParsedPick, i: number): Promise<Draft> {
   const sport = normalizeSport(p.sport);
   const team = (p.team || "—").toUpperCase();
   const id = `ss-${i}-${p.player.replace(/\s+/g, "_")}`;
@@ -1445,17 +1502,23 @@ function parsedToDraft(p: ParsedPick, i: number): Draft {
   };
   const pick: "over" | "under" =
     p.pick === "under" || p.pick === "less" ? "under" : "over";
+  const [photo, game] = await Promise.all([
+    fetchPlayerPhoto(p.player),
+    fetchGameInfo(sport, team),
+  ]);
   return {
     key: id,
-    player: { id, name: p.player, team, photo: null },
+    player: { id, name: p.player, team, photo },
     sport,
     market,
     pick,
     line: String(p.line ?? market.line),
     badge: (p.badge ?? null) as PickBadge,
-    gameLabel: `Screenshot import`,
+    gameLabel: game?.label,
+    sameGameDate: game?.date,
   };
 }
+
 
 function ScreenshotImportScreen({
   onAddPicks,
