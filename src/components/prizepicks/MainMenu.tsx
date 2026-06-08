@@ -10,6 +10,7 @@ import coinTeams from "@/assets/menu/coin-teams.gif";
 import { useProfile } from "./ProfileContext";
 import { autoComma } from "@/lib/fmt";
 import { WithdrawFlow, WithdrawalNotification } from "./WithdrawFlow";
+import { DepositFlow, DepositNotification } from "./DepositFlow";
 
 
 const usefulLinks = [
@@ -48,12 +49,21 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
   const balance = `$${autoComma(data.balance)}`;
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [depositNotifyOpen, setDepositNotifyOpen] = useState(false);
 
   const handleSubmitted = (amount: number) => {
     const current = parseFloat(String(data.balance).replace(/,/g, "")) || 0;
     const next = Math.max(0, current - amount);
     setData({ ...data, balance: next.toFixed(2) });
     setNotifyOpen(true);
+  };
+
+  const handleDeposited = (amount: number) => {
+    const current = parseFloat(String(data.balance).replace(/,/g, "")) || 0;
+    const next = current + amount;
+    setData({ ...data, balance: next.toFixed(2) });
+    setDepositNotifyOpen(true);
   };
 
   useEffect(() => {
@@ -131,7 +141,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
 
               <div className="mt-3.5 grid grid-cols-2 gap-2.5">
                 <button onClick={() => setWithdrawOpen(true)} className="h-[38px] rounded-full bg-[#1f202d] text-[13px] font-bold text-white">Withdraw</button>
-                <button className="h-[38px] rounded-full bg-[#7c3aed] text-[13px] font-bold text-white">Deposit</button>
+                <button onClick={() => setDepositOpen(true)} className="h-[38px] rounded-full bg-[#7c3aed] text-[13px] font-bold text-white">Deposit</button>
               </div>
 
               <div className="mt-3.5 border-t border-white/[0.08] pt-3">
@@ -196,6 +206,12 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
         onSubmitted={handleSubmitted}
       />
       <WithdrawalNotification show={notifyOpen} onClose={() => setNotifyOpen(false)} />
+      <DepositFlow
+        open={depositOpen}
+        onClose={() => setDepositOpen(false)}
+        onSubmitted={handleDeposited}
+      />
+      <DepositNotification show={depositNotifyOpen} onClose={() => setDepositNotifyOpen(false)} />
     </AnimatePresence>
   );
 }
