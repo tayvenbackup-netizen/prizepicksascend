@@ -210,7 +210,7 @@ export function WithdrawFlow({
               paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
             }}
           >
-            <Header title="Mastercard" onBack={back} />
+            <Header title={selected ? BRAND_LABEL[selected.brand] : "Card"} onBack={back} />
 
             <div className="px-4 pt-4">
               <p className="text-[13px] text-white/65">Withdrawable balance: ${balance}</p>
@@ -229,10 +229,10 @@ export function WithdrawFlow({
               <div className="mt-6 rounded-xl border border-white/10 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <MastercardLogo size={22} />
-                    <span className="text-[14px] text-white/80">Mastercard</span>
+                    {selected && <CardLogo brand={selected.brand} size={22} />}
+                    <span className="text-[14px] text-white/80">{selected ? BRAND_LABEL[selected.brand] : ""}</span>
                   </div>
-                  <span className="text-[14px] text-white/60">Ending 6427</span>
+                  <span className="text-[14px] text-white/60">Ending {selected?.last4 ?? ""}</span>
                 </div>
 
                 <div className="mt-6 flex flex-col items-center">
