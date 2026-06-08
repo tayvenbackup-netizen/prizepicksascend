@@ -130,7 +130,7 @@ export function DepositFlow({
     exit: (d: number) => ({ x: d > 0 ? "-100%" : "100%" }),
   };
 
-  const cardType: CardKind | null = typeof step === "object" ? step.type : null;
+  const cardType: CardKind | null = typeof step === "object" && step.kind === "card" ? step.type : null;
   const detected = detectBrand(cardNumber);
   const brandOk = !!detected && !!cardType && ALLOWED[cardType].includes(detected);
   const amt = parseFloat(amount) || 0;
