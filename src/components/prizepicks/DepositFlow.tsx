@@ -40,19 +40,24 @@ function ApplePayLogo() {
   );
 }
 
-function VenmoLogo() {
+function VenmoLogo({ size = 28 }: { size?: number }) {
   return (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] bg-white">
-      <span className="text-[13px] font-extrabold italic text-[#3D95CE]">v</span>
+    <span
+      className="inline-flex items-center justify-center overflow-hidden rounded-[6px] bg-white"
+      style={{ width: size, height: size }}
+    >
+      <img src={venmoAsset.url} alt="Venmo" className="h-full w-full object-contain" />
     </span>
   );
 }
 
-function PaypalLogo() {
+function PaypalLogo({ size = 28 }: { size?: number }) {
   return (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] bg-white">
-      <span className="text-[11px] font-extrabold italic text-[#003087]">P</span>
-      <span className="-ml-0.5 text-[11px] font-extrabold italic text-[#009cde]">P</span>
+    <span
+      className="inline-flex items-center justify-center overflow-hidden rounded-[6px] bg-white"
+      style={{ width: size, height: size }}
+    >
+      <img src={paypalAsset.url} alt="PayPal" className="h-[78%] w-[78%] object-contain" />
     </span>
   );
 }
