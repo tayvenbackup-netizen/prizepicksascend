@@ -5,6 +5,7 @@ import { useProfile, PaymentMethod } from "./ProfileContext";
 import { PLogo } from "./Icons";
 import { CardLogo, BRAND_LABEL } from "./CardLogo";
 import { CardManager } from "./CardManager";
+import { autoComma, fmtAmountInput, parseAmountInput } from "@/lib/fmt";
 
 type Step = "methods" | "card" | "otp";
 
@@ -130,7 +131,7 @@ export function WithdrawFlow({
               </div>
               <div className="flex items-center gap-1">
                 <span className="text-[#22c55e] text-[15px] font-semibold">$</span>
-                <span className="text-[#22c55e] text-[15px] font-semibold">{balance}</span>
+                <span className="text-[#22c55e] text-[15px] font-semibold">{autoComma(balance)}</span>
               </div>
             </div>
 
@@ -161,9 +162,9 @@ export function WithdrawFlow({
                   <div className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-4">
                     <div className="flex items-center gap-2.5">
                       <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
-                      <span className="text-[14px] font-semibold text-white">Available to withdraw</span>
-                    </div>
-                    <span className="text-[14px] font-semibold text-white">${balance}</span>
+                    <span className="text-[14px] font-semibold text-white">Available to withdraw</span>
+                  </div>
+                  <span className="text-[14px] font-semibold text-white">${autoComma(balance)}</span>
                   </div>
 
                   {belowMin ? (
@@ -253,11 +254,11 @@ export function WithdrawFlow({
             <Header title={selected ? BRAND_LABEL[selected.brand] : "Card"} onBack={back} />
 
             <div className="px-4 pt-4">
-              <p className="text-[13px] text-white/65">Withdrawable balance: ${balance}</p>
+              <p className="text-[13px] text-white/65">Withdrawable balance: ${autoComma(balance)}</p>
 
               <h3 className="mt-6 text-[15px] font-bold text-white">Withdrawal Amount</h3>
               {(() => {
-                const amt = parseFloat(amount) || 0;
+                const amt = parseAmountInput(amount);
                 const exceeds = amt > (parseFloat(balance) || 0);
 
                 const invalid = amt <= 0 || exceeds;
@@ -267,7 +268,7 @@ export function WithdrawFlow({
                       <DollarSign className={`h-[18px] w-[18px] ${exceeds ? "text-[#ef4444]" : "text-white/65"}`} strokeWidth={2} />
                       <input
                         value={amount}
-                        onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                        onChange={(e) => setAmount(fmtAmountInput(e.target.value))}
                         inputMode="decimal"
                         className={`flex-1 bg-transparent text-[15px] font-semibold outline-none placeholder:text-white/40 ${exceeds ? "text-[#ef4444]" : "text-white"}`}
                       />
