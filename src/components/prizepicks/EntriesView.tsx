@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
 import {
