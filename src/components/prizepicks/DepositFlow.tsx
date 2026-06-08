@@ -230,6 +230,7 @@ export function DepositFlow({
                   <h3 className="text-[15px] font-bold text-white">Saved Methods</h3>
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <button
+                      onClick={onApplePayButtonClicked}
                       className="relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-[#15172180] py-8"
                     >
                       <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-0.5 rounded-md bg-[#0a0d18] px-2 py-0.5 text-[11px] font-bold text-[#79e54a]">
