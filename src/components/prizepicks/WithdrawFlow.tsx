@@ -156,19 +156,16 @@ export function WithdrawFlow({
               <h3 className="mt-6 text-[15px] font-bold text-white">Saved Methods</h3>
 
               <div className="mt-3 grid grid-cols-2 gap-3">
-                {[
-                  { last: "6427", exp: "08/28" },
-                  { last: "6976", exp: "06/29" },
-                ].map((c) => (
+                {paymentMethods.map((m) => (
                   <button
-                    key={c.last}
-                    onClick={() => go("card")}
+                    key={m.id}
+                    onClick={() => { setSelected(m); go("card"); }}
                     className="flex flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5"
                   >
-                    <MastercardLogo size={26} />
+                    <CardLogo brand={m.brand} size={26} />
                     <div className="text-center">
-                      <p className="text-[13px] font-bold text-white">Debit Card</p>
-                      <p className="mt-1 text-[11px] text-white/55">****{c.last}, exp. {c.exp}</p>
+                      <p className="text-[13px] font-bold text-white">{BRAND_LABEL[m.brand]}</p>
+                      <p className="mt-1 text-[11px] text-white/55">****{m.last4}, exp. {m.exp}</p>
                     </div>
                   </button>
                 ))}
@@ -180,7 +177,10 @@ export function WithdrawFlow({
               </p>
 
               <div className="mt-3 w-[calc(50%-6px)]">
-                <button className="flex w-full flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5">
+                <button
+                  onClick={() => setManagerOpen(true)}
+                  className="flex w-full flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5"
+                >
                   <Landmark className="h-6 w-6 text-white" strokeWidth={1.75} />
                   <p className="text-[13px] font-bold text-white">Online Banking</p>
                   <div className="flex items-center gap-1.5 opacity-80">
