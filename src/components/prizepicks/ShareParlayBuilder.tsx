@@ -1243,3 +1243,115 @@ function PlayerRow({ player, onPick }: { player: Player; onPick: () => void }) {
     </li>
   );
 }
+
+/* -------------------- Same-Game date picker (past mode) -------------------- */
+
+function SameGamePicker({
+  pick,
+  defaultDate,
+  onGameLabel,
+}: {
+  pick: Draft;
+  defaultDate: string;
+  onGameLabel: (label: string | undefined) => void;
+}) {
+  const [enabled, setEnabled] = useState(!!pick.gameLabel);
+  const [date, setDate] = useState(defaultDate);
+  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">(
+    pick.gameLabel ? "ok" : "idle",
+  );
+  const [err, setErr] = useState<string | null>(null);
+
+  const lookup = async (d: string) => {
+    setStatus("loading");
+    setErr(null);
+    try {
+      const r = await fetch(
+        `/api/public/espn-scoreboard?league=${pick.sport}&date=${d}`,
+      );
+      const j = await r.json();
+      const events: any[] = j?.events || [];
+      const teamAbbr = (pick.player.team || "").toUpperCase();
+      const match = events.find((ev) => {
+        const cs: any[] = ev?.competitions?.[0]?.competitors || [];
+        return cs.some(
+          (c) =>
+            (c?.team?.abbreviation || "").toUpperCase() === teamAbbr ||
+            (c?.team?.shortDisplayName || "").toUpperCase() === teamAbbr,
+        );
+      });
+      if (!match) {
+        setStatus("err");
+        setErr("No game found for that team on that date.");
+        onGameLabel(undefined);
+        return;
+      }
+      const cs: any[] = match?.competitions?.[0]?.competitors || [];
+      const home = cs.find((c) => c.homeAway === "home") || cs[0];
+      const away = cs.find((c) => c.homeAway === "away") || cs[1];
+      const aAbbr =
+        away?.team?.abbreviation || away?.team?.shortDisplayName || "AWY";
+      const hAbbr =
+        home?.team?.abbreviation || home?.team?.shortDisplayName || "HOM";
+      const dt = new Date(match.date);
+      const short = `${dt.getMonth() + 1}/${dt.getDate()}`;
+      const label = `${aAbbr} vs ${hAbbr} · ${short}`;
+      onGameLabel(label);
+      setStatus("ok");
+    } catch (e) {
+      setStatus("err");
+      setErr(String(e));
+      onGameLabel(undefined);
+    }
+  };
+
+  const toggle = () => {
+    const next = !enabled;
+    setEnabled(next);
+    if (next) {
+      lookup(date);
+    } else {
+      onGameLabel(undefined);
+      setStatus("idle");
+      setErr(null);
+    }
+  };
+
+  return (
+    <div className="mt-2 rounded-md border border-white/10 bg-black/20 px-2 py-1.5">
+      <label className="flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-white/70">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={toggle}
+          className="h-3 w-3 accent-[#7c3aed]"
+        />
+        Same game?
+      </label>
+      {enabled && (
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+              lookup(e.target.value);
+            }}
+            className="h-7 flex-1 rounded-md bg-black/40 px-1.5 text-[10px] text-white outline-none ring-1 ring-white/10 focus:ring-[#7c3aed]"
+          />
+          {status === "loading" && (
+            <Loader2 className="h-3 w-3 animate-spin text-white/55" />
+          )}
+          {status === "ok" && pick.gameLabel && (
+            <span className="truncate text-[10px] font-semibold text-green-300">
+              {pick.gameLabel}
+            </span>
+          )}
+        </div>
+      )}
+      {enabled && status === "err" && (
+        <p className="mt-1 text-[9px] text-red-300">{err}</p>
+      )}
+    </div>
+  );
+}
