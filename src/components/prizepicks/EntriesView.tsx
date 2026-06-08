@@ -210,11 +210,11 @@ function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () =
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left rounded-2xl border border-white/5 bg-surface active:scale-[0.99] transition-transform ${isPast ? "p-3" : "p-3.5"}`}
+      className={`w-full text-left rounded-2xl border border-white/5 bg-surface active:scale-[0.99] transition-transform p-3`}
     >
       <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0">
-          <div className={`${isPast ? "text-[14px]" : "text-[15px]"} font-bold leading-tight ${isPast && !isWin ? "text-foreground" : ""}`}>
+          <div className={`text-[14px] font-bold leading-tight ${isPast && !isWin ? "text-foreground" : ""}`}>
             <span className="text-foreground">
               {fmtMoney(entry.entryAmount)}
             </span>{" "}
@@ -223,19 +223,21 @@ function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () =
               {fmtMoney(isWin ? actualPayout : isPast ? potentialMax : entry.potential)}
             </span>
           </div>
-          <div className={`mt-0.5 ${isPast ? "text-[11px]" : "text-[12px]"} ${isPast && !isWin ? "text-foreground" : "text-muted-foreground"}`}>
+          <div className={`mt-0.5 text-[11px] ${isPast && !isWin ? "text-foreground" : "text-muted-foreground"}`}>
             {planLabel(entry)}
           </div>
+
         </div>
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/40 shrink-0">
           <img src={flagIcon} alt="" className="h-4 w-4 object-contain" draggable={false} />
         </div>
       </div>
 
-      <div className={`${isPast ? "mt-2" : "mt-2.5"} h-px bg-white/5`} />
+      <div className={`mt-2 h-px bg-white/5`} />
 
 
-      <div className={`${isPast ? "mt-2" : "mt-2.5"} flex items-center gap-2.5`}>
+      <div className={`mt-2 flex items-center gap-2.5`}>
+
         <div className="flex -space-x-2">
           {visible.map((p) => (
             <PickAvatar key={p.id} pick={p} />
@@ -265,7 +267,7 @@ function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () =
         </div>
       </div>
 
-      <div className={`${isPast ? "mt-1.5" : "mt-2"} text-[11px] ${isPast && !isWin ? "text-foreground" : "text-muted-foreground"} truncate`}>
+      <div className={`mt-1.5 text-[11px] ${isPast && !isWin ? "text-foreground" : "text-muted-foreground"} truncate`}>
         {namesList}
         {namesSuffix}
       </div>
