@@ -131,7 +131,7 @@ export function WithdrawFlow({
               </div>
               <div className="flex items-center gap-1">
                 <span className="text-[#22c55e] text-[15px] font-semibold">$</span>
-                <span className="text-[#22c55e] text-[15px] font-semibold">{balance}</span>
+                <span className="text-[#22c55e] text-[15px] font-semibold">{autoComma(balance)}</span>
               </div>
             </div>
 
