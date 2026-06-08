@@ -128,7 +128,7 @@ export function EntriesView() {
         ) : (
           <div className="flex flex-col px-4 pt-5 pb-6">
             {tab === "open" ? (
-              <>
+              <div className="px-2">
                 {live.length > 0 && (
                   <Section title="Live">
                     {live.map((e) => (
@@ -143,7 +143,7 @@ export function EntriesView() {
                     ))}
                   </Section>
                 )}
-              </>
+              </div>
             ) : (
               <PastList past={past} onOpen={(id) => setOpenEntryId(id)} />
             )}
