@@ -218,7 +218,8 @@ export function WithdrawFlow({
               <h3 className="mt-6 text-[15px] font-bold text-white">Withdrawal Amount</h3>
               {(() => {
                 const amt = parseFloat(amount) || 0;
-                const exceeds = amt > balance;
+                const exceeds = amt > (parseFloat(balance) || 0);
+
                 const invalid = amt <= 0 || exceeds;
                 return (
                   <>
