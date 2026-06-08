@@ -52,7 +52,7 @@ export function WithdrawFlow({
 }: {
   open: boolean;
   onClose: () => void;
-  onSubmitted: () => void;
+  onSubmitted: (amount: number) => void;
 }) {
   const { data } = useProfile();
   const balance = data.balance;
@@ -104,16 +104,22 @@ export function WithdrawFlow({
 
   const otpFilled = code.every((c) => c !== "");
 
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-[70] overflow-hidden bg-[#050614]"
-      style={{
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
-      }}
-    >
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="withdraw-shell"
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.32 }}
+          className="fixed inset-0 z-[70] overflow-hidden bg-[#050614]"
+          style={{
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
+          }}
+        >
+
       <AnimatePresence custom={dir} mode="popLayout" initial={false}>
         {step === "methods" && (
           <motion.div
@@ -311,8 +317,9 @@ export function WithdrawFlow({
               <button
                 disabled={!otpFilled}
                 onClick={() => {
+                  const amt = parseFloat(amount) || 0;
                   onClose();
-                  onSubmitted();
+                  onSubmitted(amt);
                 }}
                 className="mt-7 w-full rounded-full bg-[#1f202d] py-4 text-[15px] font-bold text-white/70 disabled:opacity-70 enabled:bg-[#7c3aed] enabled:text-white"
               >
@@ -322,9 +329,12 @@ export function WithdrawFlow({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
+
 
 export function WithdrawalNotification({
   show,
@@ -351,21 +361,21 @@ export function WithdrawalNotification({
           style={{ top: "calc(env(safe-area-inset-top, 0px) + 8px)" }}
         >
           <div className="relative overflow-hidden rounded-2xl border-[1.5px] border-[#79e54a] bg-[#0a0d18] shadow-lg">
-            <div className="flex items-start gap-3 px-3.5 pt-2.5 pb-3">
-              <div className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border-[1.5px] border-[#79e54a]">
-                <Check className="h-3.5 w-3.5 text-[#79e54a]" strokeWidth={3} />
+            <div className="flex items-center gap-3 px-3.5 pt-2 pb-2.5">
+              <div className="grid h-5 w-5 shrink-0 place-items-center self-center rounded-full border-[1.5px] border-[#79e54a]">
+                <Check className="h-3 w-3 text-[#79e54a]" strokeWidth={3} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[14px] font-bold leading-tight text-white">Withdrawal submitted!</p>
-                <p className="mt-0.5 text-[12px] leading-snug text-white/80">
+                <p className="text-[12px] font-semibold leading-tight text-white">Withdrawal submitted!</p>
+                <p className="mt-0.5 text-[10.5px] font-normal leading-snug text-white/75">
                   Most withdrawals hit instantly, but some can take 1-3 business days.
                 </p>
               </div>
-              <button onClick={onClose} aria-label="Dismiss" className="text-white/80">
-                <X className="h-4 w-4" />
+              <button onClick={onClose} aria-label="Dismiss" className="self-center text-white/70">
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
-            <div className="h-[6px] w-full bg-white/5">
+            <div className="h-[4px] w-full bg-white/5">
               <motion.div
                 key={String(show)}
                 initial={{ width: "100%" }}
