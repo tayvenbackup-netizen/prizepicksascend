@@ -10,6 +10,7 @@ import coinTeams from "@/assets/menu/coin-teams.gif";
 import { useProfile } from "./ProfileContext";
 import { autoComma } from "@/lib/fmt";
 import { WithdrawFlow, WithdrawalNotification } from "./WithdrawFlow";
+import { DepositFlow, DepositNotification } from "./DepositFlow";
 
 
 const usefulLinks = [
