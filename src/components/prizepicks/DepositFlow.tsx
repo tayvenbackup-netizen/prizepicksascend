@@ -223,9 +223,9 @@ export function DepositFlow({
                 </div>
 
                 <div className="px-4">
-                  <div className="grid grid-cols-2 gap-3">
+                  <h3 className="text-[15px] font-bold text-white">Saved Methods</h3>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
                     <button
-                      onClick={() => openCard("debit")}
                       className="relative flex flex-col items-center justify-center gap-3 rounded-2xl bg-[#15172180] py-8"
                     >
                       <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-0.5 rounded-md bg-[#0a0d18] px-2 py-0.5 text-[11px] font-bold text-[#79e54a]">
@@ -235,9 +235,28 @@ export function DepositFlow({
                       <ApplePayLogo />
                       <p className="text-[15px] font-bold text-white">Apple Pay</p>
                     </button>
+
+                    {paymentMethods.map((pm) => (
+                      <button
+                        key={pm.id}
+                        onClick={() => {
+                          setDir(1);
+                          setAmount("100");
+                          setStep({ kind: "saved", id: pm.id });
+                        }}
+                        className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-[#15172180] py-8"
+                      >
+                        <CardLogo brand={pm.brand} size={26} />
+                        <p className="text-[15px] font-bold text-white">
+                          {pm.brand === "credit" ? "Credit Card" : "Debit Card"}
+                        </p>
+                        <p className="-mt-1 text-[11.5px] text-white/55">****{pm.last4}, exp. {pm.exp}</p>
+                      </button>
+                    ))}
                   </div>
 
                   <h3 className="mt-7 text-[15px] font-bold text-white">Other Methods</h3>
+
 
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     <button
