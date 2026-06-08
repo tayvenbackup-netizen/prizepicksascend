@@ -317,8 +317,9 @@ export function WithdrawFlow({
               <button
                 disabled={!otpFilled}
                 onClick={() => {
+                  const amt = parseFloat(amount) || 0;
                   onClose();
-                  onSubmitted();
+                  onSubmitted(amt);
                 }}
                 className="mt-7 w-full rounded-full bg-[#1f202d] py-4 text-[15px] font-bold text-white/70 disabled:opacity-70 enabled:bg-[#7c3aed] enabled:text-white"
               >
@@ -328,9 +329,12 @@ export function WithdrawFlow({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
+
 
 export function WithdrawalNotification({
   show,
