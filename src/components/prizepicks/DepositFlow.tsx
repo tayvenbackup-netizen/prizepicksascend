@@ -711,6 +711,15 @@ export function DepositFlow({
           </AnimatePresence>
         </motion.div>
       )}
+      <ApplePaySheet
+        open={applePayOpen}
+        onClose={() => setApplePayOpen(false)}
+        onPaid={() => {
+          setApplePayOpen(false);
+          onClose();
+          onSubmitted(parseFloat(APPLE_PAY_REQUEST.total.amount));
+        }}
+      />
     </AnimatePresence>
   );
 }
