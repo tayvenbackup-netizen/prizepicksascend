@@ -183,7 +183,7 @@ function planLabel(entry: Entry) {
   return `${entry.picks.length}-Pick ${entry.type === "power" ? "Power" : "Flex"} Play`;
 }
 
-function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
+function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () => void; forceLive?: boolean }) {
   const visible = entry.picks.slice(0, 5);
   const extra = entry.picks.length - visible.length;
   const namesList = entry.picks
@@ -199,6 +199,12 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
 
   const isWin = isPast && settled && actualPayout > 0;
   const hits = entry.picks.filter((p) => p.result === "win").length;
+
+  const startsAtMs = entry.startsAt ? Date.parse(entry.startsAt) : NaN;
+  const showLive =
+    forceLive ||
+    entry.status === "live" ||
+    (entry.status === "upcoming" && Number.isFinite(startsAtMs) && startsAtMs <= Date.now());
 
   return (
     <button
@@ -241,8 +247,8 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
           </span>
         )}
         <div className="ml-auto text-right">
-          {entry.status === "live" ? (
-            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
+          {showLive ? (
+            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-destructive">
               <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
               Live
             </div>
@@ -251,7 +257,9 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
           ) : (
             <>
               <div className="text-[10px] text-muted-foreground">Next game</div>
-              <div className="text-[12px] font-semibold">{entry.startTime ?? "—"}</div>
+              <div className="text-[12px] font-semibold">
+                {Number.isFinite(startsAtMs) ? fmtGameTime(startsAtMs) : entry.startTime ?? "—"}
+              </div>
             </>
           )}
         </div>
@@ -264,6 +272,13 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
 
     </button>
   );
+}
+
+function fmtGameTime(ms: number): string {
+  return new Date(ms).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function PastStatusBadge({ entry }: { entry: Entry }) {
