@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, X, Check, Landmark, DollarSign } from "lucide-react";
-import { useProfile } from "./ProfileContext";
+import { useProfile, PaymentMethod } from "./ProfileContext";
 import { PLogo } from "./Icons";
+import { CardLogo, BRAND_LABEL } from "./CardLogo";
+import { CardManager } from "./CardManager";
 
 type Step = "methods" | "card" | "otp";
 
