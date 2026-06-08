@@ -161,6 +161,8 @@ type Ctx = {
   setPickTeams: (l: PickTeamEntry[]) => void;
   topWins: TopWinEntry[];
   setTopWins: (l: TopWinEntry[]) => void;
+  paymentMethods: PaymentMethod[];
+  setPaymentMethods: (l: PaymentMethod[]) => void;
 };
 
 const ProfileContext = createContext<Ctx | null>(null);
