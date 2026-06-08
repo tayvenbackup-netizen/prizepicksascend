@@ -193,7 +193,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
       <WithdrawFlow
         open={withdrawOpen}
         onClose={() => setWithdrawOpen(false)}
-        onSubmitted={() => setNotifyOpen(true)}
+        onSubmitted={handleSubmitted}
       />
       <WithdrawalNotification show={notifyOpen} onClose={() => setNotifyOpen(false)} />
     </AnimatePresence>
