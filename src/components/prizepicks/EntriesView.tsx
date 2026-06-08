@@ -16,12 +16,23 @@ export function EntriesView() {
   const [openEntryId, setOpenEntryId] = useState<string | null>(null);
   const { entries } = useEntries();
 
+  // Tick every 30s so upcoming entries flip to "Live" once start time passes.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const isLiveNow = (e: Entry) =>
+    e.status === "live" ||
+    (e.status === "upcoming" && !!e.startsAt && Date.parse(e.startsAt) <= now);
+
   const open = entries.filter((e) => e.status === "live" || e.status === "upcoming");
   const past = entries.filter(
     (e) => e.status !== "live" && e.status !== "upcoming",
   );
-  const live = open.filter((e) => e.status === "live");
-  const upcoming = open.filter((e) => e.status === "upcoming");
+  const live = open.filter(isLiveNow);
+  const upcoming = open.filter((e) => !isLiveNow(e));
 
   const totalOpen = open.length;
   const totalPotential = open.reduce((s, e) => s + e.potential, 0);
