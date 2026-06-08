@@ -43,10 +43,13 @@ export const Route = createFileRoute("/api/public/espn-scoreboard")({
             headers: { "Content-Type": "application/json" },
           });
         }
+        const fromParam = url.searchParams.get("from");
+        const toParam = url.searchParams.get("to");
         let dates: string;
         if (dateParam) {
-          const cleaned = dateParam.replace(/-/g, "");
-          dates = cleaned;
+          dates = dateParam.replace(/-/g, "");
+        } else if (fromParam && toParam) {
+          dates = `${fromParam.replace(/-/g, "")}-${toParam.replace(/-/g, "")}`;
         } else {
           const start = new Date();
           const end = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
