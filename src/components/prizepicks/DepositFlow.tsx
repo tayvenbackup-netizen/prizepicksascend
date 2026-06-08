@@ -10,25 +10,6 @@ import paypalAsset from "@/assets/payments/paypal.png.asset.json";
 
 type Step = "methods" | "card";
 
-function MastercardLogo({ size = 28 }: { size?: number }) {
-  return (
-    <span
-      className="inline-flex items-center justify-center rounded-[6px] bg-white"
-      style={{ width: size + 10, height: size }}
-    >
-      <span className="relative" style={{ width: size, height: size * 0.62 }}>
-        <span
-          className="absolute left-0 top-0 rounded-full bg-[#eb001b]"
-          style={{ width: size * 0.62, height: size * 0.62 }}
-        />
-        <span
-          className="absolute right-0 top-0 rounded-full bg-[#f79e1b] mix-blend-multiply"
-          style={{ width: size * 0.62, height: size * 0.62 }}
-        />
-      </span>
-    </span>
-  );
-}
 
 function ApplePayLogo() {
   return (
