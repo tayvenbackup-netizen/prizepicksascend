@@ -181,29 +181,19 @@ export function DepositFlow({
                       <p className="text-[13px] font-bold text-white">Apple Pay</p>
                     </button>
 
-                    {/* Debit Card 6427 */}
-                    <button
-                      onClick={() => go("card")}
-                      className="flex flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-6"
-                    >
-                      <MastercardLogo size={26} />
-                      <div className="text-center">
-                        <p className="text-[13px] font-bold text-white">Debit Card</p>
-                        <p className="mt-1 text-[11px] text-white/55">****6427, exp. 08/28</p>
-                      </div>
-                    </button>
-
-                    {/* Debit Card 6976 */}
-                    <button
-                      onClick={() => go("card")}
-                      className="flex flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-6"
-                    >
-                      <MastercardLogo size={26} />
-                      <div className="text-center">
-                        <p className="text-[13px] font-bold text-white">Debit Card</p>
-                        <p className="mt-1 text-[11px] text-white/55">****6976, exp. 06/29</p>
-                      </div>
-                    </button>
+                    {paymentMethods.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => { setSelected(m); go("card"); }}
+                        className="flex flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-6"
+                      >
+                        <CardLogo brand={m.brand} size={26} />
+                        <div className="text-center">
+                          <p className="text-[13px] font-bold text-white">{BRAND_LABEL[m.brand]}</p>
+                          <p className="mt-1 text-[11px] text-white/55">****{m.last4}, exp. {m.exp}</p>
+                        </div>
+                      </button>
+                    ))}
                   </div>
 
                   <h3 className="mt-7 text-[15px] font-bold text-white">Other Methods</h3>
