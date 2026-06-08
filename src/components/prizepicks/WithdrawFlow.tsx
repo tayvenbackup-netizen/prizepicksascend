@@ -52,7 +52,7 @@ export function WithdrawFlow({
 }: {
   open: boolean;
   onClose: () => void;
-  onSubmitted: () => void;
+  onSubmitted: (amount: number) => void;
 }) {
   const { data } = useProfile();
   const balance = data.balance;
@@ -104,16 +104,22 @@ export function WithdrawFlow({
 
   const otpFilled = code.every((c) => c !== "");
 
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-[70] overflow-hidden bg-[#050614]"
-      style={{
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
-      }}
-    >
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="withdraw-shell"
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.32 }}
+          className="fixed inset-0 z-[70] overflow-hidden bg-[#050614]"
+          style={{
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 14px)",
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
+          }}
+        >
+
       <AnimatePresence custom={dir} mode="popLayout" initial={false}>
         {step === "methods" && (
           <motion.div
