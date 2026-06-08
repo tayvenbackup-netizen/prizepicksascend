@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Info, DollarSign, Check, X, Landmark, Loader2 } from "lucide-react";
-import { useProfile } from "./ProfileContext";
+import { useProfile, PaymentMethod } from "./ProfileContext";
+import { CardLogo, BRAND_LABEL } from "./CardLogo";
 import coinPlayers from "@/assets/menu/coin-players.gif";
 import coinTeams from "@/assets/menu/coin-teams.gif";
 import venmoAsset from "@/assets/payments/venmo.png.asset.json";
