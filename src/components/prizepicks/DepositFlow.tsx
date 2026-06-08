@@ -169,15 +169,13 @@ export function DepositFlow({
 
                 {/* Tabs */}
                 <div className="grid grid-cols-2 px-4 mt-1">
-                  <button className="flex items-center justify-center gap-2 pb-2 text-center text-[14px] font-semibold text-white border-b-[3px] border-[#7c3aed]">
-                    <PLogo size={18} />
+                  <button className="flex items-center justify-center gap-1.5 pb-1.5 text-center text-[12px] font-bold text-white border-b-[2.5px] border-[#7c3aed]">
+                    <img src={coinPlayers} alt="" className="h-[14px] w-[14px] rounded-full object-contain" />
                     <span>Players</span>
-                    <span className="text-white/65 font-normal">${balance}</span>
+                    <span className="text-white/55 font-normal">${balance}</span>
                   </button>
-                  <button className="flex items-center justify-center gap-2 pb-2 text-center text-[14px] font-normal text-white/60 border-b border-white/15">
-                    <span className="grid h-[18px] w-[18px] place-items-center rounded-full bg-[#0f5132]">
-                      <span className="text-[10px] font-bold text-[#22c55e]">P</span>
-                    </span>
+                  <button className="flex items-center justify-center gap-1.5 pb-1.5 text-center text-[12px] font-normal text-white/55 border-b border-white/15">
+                    <img src={coinTeams} alt="" className="h-[14px] w-[14px] rounded-full object-contain" />
                     <span>Teams &amp; Culture</span>
                     <span>$0.00</span>
                   </button>
