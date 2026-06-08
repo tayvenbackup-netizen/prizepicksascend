@@ -258,7 +258,7 @@ export function WithdrawFlow({
 
               <h3 className="mt-6 text-[15px] font-bold text-white">Withdrawal Amount</h3>
               {(() => {
-                const amt = parseFloat(amount) || 0;
+                const amt = parseAmountInput(amount);
                 const exceeds = amt > (parseFloat(balance) || 0);
 
                 const invalid = amt <= 0 || exceeds;
@@ -268,7 +268,7 @@ export function WithdrawFlow({
                       <DollarSign className={`h-[18px] w-[18px] ${exceeds ? "text-[#ef4444]" : "text-white/65"}`} strokeWidth={2} />
                       <input
                         value={amount}
-                        onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                        onChange={(e) => setAmount(fmtAmountInput(e.target.value))}
                         inputMode="decimal"
                         className={`flex-1 bg-transparent text-[15px] font-semibold outline-none placeholder:text-white/40 ${exceeds ? "text-[#ef4444]" : "text-white"}`}
                       />
