@@ -31,6 +31,7 @@ export const Route = createFileRoute("/api/public/espn-scoreboard")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const league = (url.searchParams.get("league") || "").toUpperCase();
+        const dateParam = url.searchParams.get("date"); // YYYY-MM-DD or YYYYMMDD
         const days = Math.min(
           30,
           Math.max(1, Number(url.searchParams.get("days") || "10")),
@@ -42,9 +43,15 @@ export const Route = createFileRoute("/api/public/espn-scoreboard")({
             headers: { "Content-Type": "application/json" },
           });
         }
-        const start = new Date();
-        const end = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-        const dates = `${ymd(start)}-${ymd(end)}`;
+        let dates: string;
+        if (dateParam) {
+          const cleaned = dateParam.replace(/-/g, "");
+          dates = cleaned;
+        } else {
+          const start = new Date();
+          const end = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+          dates = `${ymd(start)}-${ymd(end)}`;
+        }
         const target = `https://site.api.espn.com/apis/site/v2/sports/${path}/scoreboard?dates=${dates}&limit=200`;
         try {
           const r = await fetch(target);
