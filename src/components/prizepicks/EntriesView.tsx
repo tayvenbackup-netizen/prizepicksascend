@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import emptyEntries from "@/assets/empty-entries.png";
 import flagIcon from "@/assets/flag-icon.png";
 import {
@@ -16,12 +16,23 @@ export function EntriesView() {
   const [openEntryId, setOpenEntryId] = useState<string | null>(null);
   const { entries } = useEntries();
 
+  // Tick every 30s so upcoming entries flip to "Live" once start time passes.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const isLiveNow = (e: Entry) =>
+    e.status === "live" ||
+    (e.status === "upcoming" && !!e.startsAt && Date.parse(e.startsAt) <= now);
+
   const open = entries.filter((e) => e.status === "live" || e.status === "upcoming");
   const past = entries.filter(
     (e) => e.status !== "live" && e.status !== "upcoming",
   );
-  const live = open.filter((e) => e.status === "live");
-  const upcoming = open.filter((e) => e.status === "upcoming");
+  const live = open.filter(isLiveNow);
+  const upcoming = open.filter((e) => !isLiveNow(e));
 
   const totalOpen = open.length;
   const totalPotential = open.reduce((s, e) => s + e.potential, 0);
@@ -121,7 +132,7 @@ export function EntriesView() {
                 {live.length > 0 && (
                   <Section title="Live">
                     {live.map((e) => (
-                      <EntryCard key={e.id} entry={e} onClick={() => setOpenEntryId(e.id)} />
+                      <EntryCard key={e.id} entry={e} forceLive onClick={() => setOpenEntryId(e.id)} />
                     ))}
                   </Section>
                 )}
@@ -172,7 +183,7 @@ function planLabel(entry: Entry) {
   return `${entry.picks.length}-Pick ${entry.type === "power" ? "Power" : "Flex"} Play`;
 }
 
-function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
+function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () => void; forceLive?: boolean }) {
   const visible = entry.picks.slice(0, 5);
   const extra = entry.picks.length - visible.length;
   const namesList = entry.picks
@@ -188,6 +199,12 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
 
   const isWin = isPast && settled && actualPayout > 0;
   const hits = entry.picks.filter((p) => p.result === "win").length;
+
+  const startsAtMs = entry.startsAt ? Date.parse(entry.startsAt) : NaN;
+  const showLive =
+    forceLive ||
+    entry.status === "live" ||
+    (entry.status === "upcoming" && Number.isFinite(startsAtMs) && startsAtMs <= Date.now());
 
   return (
     <button
@@ -230,8 +247,8 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
           </span>
         )}
         <div className="ml-auto text-right">
-          {entry.status === "live" ? (
-            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
+          {showLive ? (
+            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-destructive">
               <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
               Live
             </div>
@@ -240,7 +257,9 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
           ) : (
             <>
               <div className="text-[10px] text-muted-foreground">Next game</div>
-              <div className="text-[12px] font-semibold">{entry.startTime ?? "—"}</div>
+              <div className="text-[12px] font-semibold">
+                {Number.isFinite(startsAtMs) ? fmtGameTime(startsAtMs) : entry.startTime ?? "—"}
+              </div>
             </>
           )}
         </div>
@@ -253,6 +272,13 @@ function EntryCard({ entry, onClick }: { entry: Entry; onClick?: () => void }) {
 
     </button>
   );
+}
+
+function fmtGameTime(ms: number): string {
+  return new Date(ms).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function PastStatusBadge({ entry }: { entry: Entry }) {

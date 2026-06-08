@@ -41,9 +41,9 @@ type Step =
   | { kind: "sports" }
   | { kind: "games"; sport: SportKey }
   | { kind: "teams"; sport: SportKey; game: Game }
-  | { kind: "roster"; sport: SportKey; team: TeamLite; gameLabel: string }
+  | { kind: "roster"; sport: SportKey; team: TeamLite; gameLabel: string; startsAt?: string }
   | { kind: "pastTeams"; sport: SportKey }
-  | { kind: "markets"; sport: SportKey; player: Player; gameLabel?: string };
+  | { kind: "markets"; sport: SportKey; player: Player; gameLabel?: string; startsAt?: string };
 
 type Draft = {
   key: string;
@@ -54,6 +54,7 @@ type Draft = {
   line: string;
   badge?: PickBadge;
   gameLabel?: string;
+  startsAt?: string;
 };
 
 function fmtShort(iso: string) {
@@ -140,6 +141,11 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       badge: d.badge ?? null,
       gameLabel: d.gameLabel,
     }));
+    // Earliest startsAt across picks becomes the entry's game time.
+    const startTimes = picks
+      .map((d) => (d.startsAt ? Date.parse(d.startsAt) : NaN))
+      .filter((n) => Number.isFinite(n));
+    const earliest = startTimes.length ? new Date(Math.min(...startTimes)).toISOString() : undefined;
     addEntry({
       type: effectiveType,
       status: pastMode ? "past" : "upcoming",
@@ -149,6 +155,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       startTime: pastMode
         ? new Date(pastDate).toLocaleDateString()
         : "Next game",
+      startsAt: pastMode ? undefined : earliest,
       playedAt: pastMode ? new Date(pastDate).toISOString() : undefined,
     });
     setPicks([]);
@@ -234,6 +241,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     sport: step.sport,
                     team: t,
                     gameLabel: `${step.game.away.abbr} vs ${step.game.home.abbr} · ${step.game.shortLabel}`,
+                    startsAt: step.game.date,
                   })
                 }
               />
@@ -254,7 +262,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                 sport={step.sport}
                 team={step.team}
                 gameLabel={step.gameLabel}
-                onPick={(p) => setStep({ kind: "markets", sport: step.sport, player: p, gameLabel: step.gameLabel })}
+                onPick={(p) => setStep({ kind: "markets", sport: step.sport, player: p, gameLabel: step.gameLabel, startsAt: step.startsAt })}
               />
             )}
             {step.kind === "markets" && (
@@ -270,6 +278,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
                     pick,
                     line,
                     gameLabel: step.gameLabel,
+                    startsAt: step.startsAt,
                   })
                 }
               />

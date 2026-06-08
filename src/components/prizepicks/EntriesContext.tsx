@@ -31,6 +31,8 @@ export type Entry = {
   potential: number;
   picks: ParlayPick[];
   startTime?: string;
+  /** ISO timestamp of the earliest pick's game start. */
+  startsAt?: string;
   /** ISO date (for past entries) */
   playedAt?: string;
   createdAt: number;
