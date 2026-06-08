@@ -141,6 +141,11 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       badge: d.badge ?? null,
       gameLabel: d.gameLabel,
     }));
+    // Earliest startsAt across picks becomes the entry's game time.
+    const startTimes = picks
+      .map((d) => (d.startsAt ? Date.parse(d.startsAt) : NaN))
+      .filter((n) => Number.isFinite(n));
+    const earliest = startTimes.length ? new Date(Math.min(...startTimes)).toISOString() : undefined;
     addEntry({
       type: effectiveType,
       status: pastMode ? "past" : "upcoming",
@@ -150,6 +155,7 @@ export function ShareParlayBuilder({ open, onClose }: { open: boolean; onClose: 
       startTime: pastMode
         ? new Date(pastDate).toLocaleDateString()
         : "Next game",
+      startsAt: pastMode ? undefined : earliest,
       playedAt: pastMode ? new Date(pastDate).toISOString() : undefined,
     });
     setPicks([]);
