@@ -46,6 +46,8 @@ function Row({ label, badge }: { label: string; badge?: string }) {
 export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { data } = useProfile();
   const balance = `$${autoComma(data.balance)}`;
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -53,6 +55,7 @@ export function MainMenu({ open, onClose }: { open: boolean; onClose: () => void
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
   }, [open]);
+
 
   return (
     <AnimatePresence>
