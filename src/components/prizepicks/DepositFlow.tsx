@@ -136,19 +136,22 @@ export function DepositFlow({
   const amt = parseFloat(amount) || 0;
   const digits = cardNumber.replace(/\D/g, "");
   const cvvLen = detected === "amex" ? 4 : 3;
+  const maxCardLen = detected === "amex" ? 15 : 16;
   const canDeposit =
     brandOk &&
-    digits.length >= 15 &&
+    digits.length === maxCardLen &&
     /^\d{2}\/\d{2}$/.test(exp) &&
-    cvv.length >= cvvLen &&
-    zip.length >= 5 &&
+    cvv.length === cvvLen &&
+    zip.length === 5 &&
     amt > 0 &&
     !processing;
 
   const formatCardNumber = (raw: string) => {
-    const d = raw.replace(/\D/g, "").slice(0, 19);
+    const limit = /^3[47]/.test(raw.replace(/\D/g, "")) ? 15 : 16;
+    const d = raw.replace(/\D/g, "").slice(0, limit);
     return d.replace(/(.{4})/g, "$1 ").trim();
   };
+
   const formatExp = (raw: string) => {
     const d = raw.replace(/\D/g, "").slice(0, 4);
     if (d.length < 3) return d;
