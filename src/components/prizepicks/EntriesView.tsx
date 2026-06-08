@@ -233,10 +233,11 @@ function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () =
         </div>
       </div>
 
-      <div className={`${isPast ? "mt-2" : "mt-2.5"} h-px bg-white/5`} />
+      <div className={`mt-2 h-px bg-white/5`} />
 
 
-      <div className={`${isPast ? "mt-2" : "mt-2.5"} flex items-center gap-2.5`}>
+      <div className={`mt-2 flex items-center gap-2.5`}>
+
         <div className="flex -space-x-2">
           {visible.map((p) => (
             <PickAvatar key={p.id} pick={p} />
