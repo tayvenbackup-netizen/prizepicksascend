@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, X, Check, Landmark, DollarSign } from "lucide-react";
+import { ArrowLeft, X, Check, Landmark, DollarSign, AlertCircle } from "lucide-react";
 import { useProfile, PaymentMethod } from "./ProfileContext";
 import { PLogo } from "./Icons";
 import { CardLogo, BRAND_LABEL } from "./CardLogo";
@@ -144,54 +144,94 @@ export function WithdrawFlow({
               </button>
             </div>
 
-            <div className="px-4 pt-5">
-              <div className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-4">
-                <div className="flex items-center gap-2.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
-                  <span className="text-[14px] font-semibold text-white">Available to withdraw</span>
-                </div>
-                <span className="text-[14px] font-semibold text-white">${balance}</span>
-              </div>
-
-              <h3 className="mt-6 text-[15px] font-bold text-white">Saved Methods</h3>
-
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                {paymentMethods.map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => { setSelected(m); go("card"); }}
-                    className="flex flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5"
-                  >
-                    <CardLogo brand={m.brand} size={26} />
-                    <div className="text-center">
-                      <p className="text-[13px] font-bold text-white">{BRAND_LABEL[m.brand]}</p>
-                      <p className="mt-1 text-[11px] text-white/55">****{m.last4}, exp. {m.exp}</p>
+            {(() => {
+              const bal = parseFloat(balance) || 0;
+              const belowMin = bal < 10;
+              return (
+                <div className="px-4 pt-5">
+                  {belowMin && (
+                    <div className="mb-5 flex items-center gap-3 rounded-xl bg-[#facc15] px-4 py-3.5">
+                      <AlertCircle className="h-6 w-6 shrink-0 text-black" strokeWidth={2} />
+                      <p className="text-[14px] font-semibold text-black">
+                        The minimum balance for withdrawal is $10
+                      </p>
                     </div>
-                  </button>
-                ))}
-              </div>
+                  )}
 
-              <h3 className="mt-7 text-[15px] font-bold text-white">Connect your bank account</h3>
-              <p className="mt-1 text-[12px] text-white/55">
-                This method will be saved for both deposit and withdrawal.
-              </p>
-
-              <div className="mt-3 w-[calc(50%-6px)]">
-                <button
-                  onClick={() => setManagerOpen(true)}
-                  className="flex w-full flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5"
-                >
-                  <Landmark className="h-6 w-6 text-white" strokeWidth={1.75} />
-                  <p className="text-[13px] font-bold text-white">Online Banking</p>
-                  <div className="flex items-center gap-1.5 opacity-80">
-                    <span className="rounded-[3px] bg-[#d52b1e] px-1 py-0.5 text-[8px] font-extrabold text-white">us</span>
-                    <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#d52b1e]">◆</span>
-                    <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#004080]">citi</span>
-                    <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#0066b3]">●</span>
+                  <div className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-4">
+                    <div className="flex items-center gap-2.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
+                      <span className="text-[14px] font-semibold text-white">Available to withdraw</span>
+                    </div>
+                    <span className="text-[14px] font-semibold text-white">${balance}</span>
                   </div>
-                </button>
-              </div>
-            </div>
+
+                  {belowMin ? (
+                    <>
+                      <h3 className="mt-7 text-[17px] font-bold text-white">Withdrawal not available</h3>
+                      <p className="mt-1 text-[13px] text-white/70 leading-snug">
+                        Once you have winnings available, you can connect your bank account for withdraws.
+                      </p>
+
+                      <div className="mt-4 w-[calc(50%-6px)]">
+                        <div className="flex w-full flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5 opacity-50">
+                          <Landmark className="h-6 w-6 text-white" strokeWidth={1.75} />
+                          <p className="text-[13px] font-bold text-white">Online Banking</p>
+                          <div className="flex items-center gap-1.5 opacity-80">
+                            <span className="rounded-[3px] bg-[#d52b1e] px-1 py-0.5 text-[8px] font-extrabold text-white">us</span>
+                            <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#d52b1e]">◆</span>
+                            <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#004080]">citi</span>
+                            <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#0066b3]">●</span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="mt-6 text-[15px] font-bold text-white">Saved Methods</h3>
+
+                      <div className="mt-3 grid grid-cols-2 gap-3">
+                        {paymentMethods.map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => { setSelected(m); go("card"); }}
+                            className="flex flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5"
+                          >
+                            <CardLogo brand={m.brand} size={26} />
+                            <div className="text-center">
+                              <p className="text-[13px] font-bold text-white">{BRAND_LABEL[m.brand]}</p>
+                              <p className="mt-1 text-[11px] text-white/55">****{m.last4}, exp. {m.exp}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+
+                      <h3 className="mt-7 text-[15px] font-bold text-white">Connect your bank account</h3>
+                      <p className="mt-1 text-[12px] text-white/55">
+                        This method will be saved for both deposit and withdrawal.
+                      </p>
+
+                      <div className="mt-3 w-[calc(50%-6px)]">
+                        <button
+                          onClick={() => setManagerOpen(true)}
+                          className="flex w-full flex-col items-center justify-center gap-2 rounded-xl bg-[#1a1c28] py-5"
+                        >
+                          <Landmark className="h-6 w-6 text-white" strokeWidth={1.75} />
+                          <p className="text-[13px] font-bold text-white">Online Banking</p>
+                          <div className="flex items-center gap-1.5 opacity-80">
+                            <span className="rounded-[3px] bg-[#d52b1e] px-1 py-0.5 text-[8px] font-extrabold text-white">us</span>
+                            <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#d52b1e]">◆</span>
+                            <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#004080]">citi</span>
+                            <span className="rounded-[3px] bg-white px-1 py-0.5 text-[8px] font-extrabold text-[#0066b3]">●</span>
+                          </div>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
+
           </motion.div>
         )}
 
