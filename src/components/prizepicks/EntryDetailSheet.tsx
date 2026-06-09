@@ -565,7 +565,7 @@ function PickRow({
       ? "bg-success"
       : result === "loss"
       ? "bg-destructive/70"
-      : "bg-primary";
+      : "bg-white";
   const valueColor =
     result === "win"
       ? "border-success text-success"
