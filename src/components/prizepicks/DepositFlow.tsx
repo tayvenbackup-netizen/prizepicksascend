@@ -462,7 +462,7 @@ export function DepositFlow({
             {typeof step === "object" && step.kind === "saved" && (() => {
               const pm = paymentMethods.find((m) => m.id === step.id);
               if (!pm) return null;
-              const sAmt = parseFloat(amount) || 0;
+              const sAmt = parseAmountInput(amount);
               const sCan = sAmt > 0 && !processing;
               const sDeposit = () => {
                 if (!sCan) return;
