@@ -360,7 +360,7 @@ export function WithdrawFlow({
               <button
                 disabled={!otpFilled}
                 onClick={() => {
-                  const amt = parseFloat(amount) || 0;
+                  const amt = parseAmountInput(amount);
                   onClose();
                   onSubmitted(amt);
                 }}
