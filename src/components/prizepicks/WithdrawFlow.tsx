@@ -146,7 +146,7 @@ export function WithdrawFlow({
             </div>
 
             {(() => {
-              const bal = parseFloat(balance) || 0;
+              const bal = parseAmountInput(String(balance));
               const belowMin = bal < 10;
               return (
                 <div className="px-4 pt-5">
