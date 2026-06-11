@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { initNative } from "@/lib/native";
 import { TopHeader } from "@/components/prizepicks/Header";
 import { ProfileHeader } from "@/components/prizepicks/ProfileHeader";
 import { ProfileTabs } from "@/components/prizepicks/Tabs";
@@ -21,6 +22,10 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [nav, setNav] = useState<NavTab>("profile");
+
+  useEffect(() => {
+    initNative();
+  }, []);
 
   return (
     <GateRoot>
