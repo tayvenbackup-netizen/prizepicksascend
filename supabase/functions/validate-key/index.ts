@@ -302,6 +302,7 @@ const ADMIN_ACTIONS = new Set([
   'create_sub_admin', 'list_sub_admins', 'revoke_sub_admin',
   'analytics_summary', 'list_audit_log',
   'list_security_alerts', 'mark_alert_reviewed',
+  'list_reseller_groups', 'list_reseller_keys', 'generate_bulk_keys',
 ]);
 
 const CSRF_EXEMPT_ACTIONS = new Set([
