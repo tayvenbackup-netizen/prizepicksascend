@@ -741,6 +741,9 @@ Deno.serve(async (req) => {
           activation_region:  attemptGeo.region,
           activation_city:    attemptGeo.city,
           activation_ip: clientIP,
+          activation_user_agent: userAgent.slice(0, 500),
+          hwid: hwidVal,
+          last_seen_at: now.toISOString(),
         }).eq('id', keyRow.id);
         keyRow.activated_at = now.toISOString();
         keyRow.expires_at = expiresAt;
@@ -748,14 +751,21 @@ Deno.serve(async (req) => {
         const patch: Record<string, unknown> = {
           device_fingerprint: fp,
           device_count: (keyRow.device_count || 0) + 1,
+          last_seen_at: new Date().toISOString(),
         };
+        if (hwidVal && !keyRow.hwid) patch.hwid = hwidVal;
         if (!keyRow.activation_country && (attemptGeo.country || attemptGeo.region || attemptGeo.city)) {
           patch.activation_country = attemptGeo.country;
           patch.activation_region  = attemptGeo.region;
           patch.activation_city    = attemptGeo.city;
           patch.activation_ip      = clientIP;
+          patch.activation_user_agent = userAgent.slice(0, 500);
         }
         await supabase.from('access_keys').update(patch).eq('id', keyRow.id);
+      } else {
+        await supabase.from('access_keys').update({
+          last_seen_at: new Date().toISOString(),
+        }).eq('id', keyRow.id);
       }
 
       const sessionToken = crypto.randomUUID();
