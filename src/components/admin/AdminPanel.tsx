@@ -139,6 +139,25 @@ const AdminPanel = ({ isOpen, onClose, subAdminId }: AdminPanelProps) => {
 
   const [bypassEnabled, setBypassEnabled] = useState(false);
 
+  // Keys search
+  const [keySearch, setKeySearch] = useState('');
+  const [refreshingAll, setRefreshingAll] = useState(false);
+  const [refreshingKeyId, setRefreshingKeyId] = useState<string | null>(null);
+
+  // Reseller tab state
+  const [resellerGroups, setResellerGroups] = useState<Array<{ id: string; name: string; color: string; key_count: number; created_at: string }>>([]);
+  const [resellerLoading, setResellerLoading] = useState(false);
+  const [newResellerName, setNewResellerName] = useState('');
+  const [creatingReseller, setCreatingReseller] = useState(false);
+  const [resellerError, setResellerError] = useState('');
+  const [selectedReseller, setSelectedReseller] = useState<{ id: string; name: string } | null>(null);
+  const [resellerKeys, setResellerKeys] = useState<KeyRecord[]>([]);
+  const [bulkAmount, setBulkAmount] = useState(10);
+  const [bulkType, setBulkType] = useState<KeyType>('weekly');
+  const [bulkGenerating, setBulkGenerating] = useState(false);
+  const [bulkError, setBulkError] = useState('');
+  const [bulkCreated, setBulkCreated] = useState<string[]>([]);
+
   const authenticate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password.trim()) { setAuthError('Enter password'); return; }
