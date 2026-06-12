@@ -764,6 +764,181 @@ const AdminPanel = ({ isOpen, onClose, subAdminId }: AdminPanelProps) => {
                 </div>
               )}
 
+              {/* RESELLER TAB */}
+              {activeTab === 'reseller' && isMaster && (
+                <div className="space-y-3">
+                  {!selectedReseller ? (
+                    <>
+                      <div className="rounded-xl p-3 space-y-2"
+                           style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+                        <div className="flex items-center gap-2">
+                          <Store className="w-4 h-4" style={{ color: C.accent }} />
+                          <span className="text-xs font-bold" style={{ color: C.text }}>Create Reseller Group</span>
+                        </div>
+                        <input value={newResellerName} onChange={e => setNewResellerName(e.target.value)}
+                               placeholder="Reseller name (e.g. Mike, AlphaPicks)"
+                               className="w-full h-9 px-3 rounded-lg text-xs focus:outline-none"
+                               style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }} />
+                        <button onClick={createResellerGroup} disabled={creatingReseller}
+                                className="w-full h-9 rounded-lg text-xs font-black flex items-center justify-center gap-2 disabled:opacity-50"
+                                style={{ background: C.accent, color: C.text }}>
+                          {creatingReseller ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                          Create Reseller
+                        </button>
+                        {resellerError && (<p className="text-[11px]" style={{ color: C.red }}>{resellerError}</p>)}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between px-1">
+                          <h3 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                            Resellers ({resellerGroups.length})
+                          </h3>
+                          <button onClick={loadResellerGroups} className="p-1" style={{ color: C.textDim }}>
+                            <RefreshCw className={`w-3.5 h-3.5 ${resellerLoading ? 'animate-spin' : ''}`} />
+                          </button>
+                        </div>
+                        <div className="space-y-2 max-h-[360px] overflow-y-auto pr-0.5">
+                          {resellerGroups.map(g => (
+                            <button key={g.id} onClick={() => openReseller({ id: g.id, name: g.name })}
+                                    className="w-full rounded-xl px-3.5 py-2.5 flex items-center gap-3 text-left transition-colors hover:opacity-90"
+                                    style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                   style={{ background: `${C.accent}15` }}>
+                                <Store className="w-4 h-4" style={{ color: C.accent }} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>{g.name}</p>
+                                <p className="text-[10px]" style={{ color: C.textDim }}>{g.key_count} key{g.key_count === 1 ? '' : 's'}</p>
+                              </div>
+                              <ChevronDown className="w-3.5 h-3.5 -rotate-90" style={{ color: C.textDim }} />
+                            </button>
+                          ))}
+                          {resellerGroups.length === 0 && !resellerLoading && (
+                            <p className="text-xs text-center py-6" style={{ color: C.textDim }}>No resellers yet</p>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setSelectedReseller(null)}
+                                className="p-1.5 rounded-lg" style={{ background: `${C.textDim}15` }}>
+                          <ArrowLeft className="w-3.5 h-3.5" style={{ color: C.textMuted }} />
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>{selectedReseller.name}</p>
+                          <p className="text-[9px]" style={{ color: C.textDim }}>Reseller · {resellerKeys.length} keys</p>
+                        </div>
+                        <button onClick={reloadResellerKeys} className="p-1" style={{ color: C.textDim }}>
+                          <RefreshCw className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="rounded-xl p-3 space-y-2"
+                           style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+                        <div className="flex items-center gap-2">
+                          <Plus className="w-4 h-4" style={{ color: C.green }} />
+                          <span className="text-xs font-bold" style={{ color: C.text }}>Bulk Generate Keys</span>
+                        </div>
+                        <div className="flex gap-1 flex-wrap">
+                          {(['daily', '3day', 'weekly', 'monthly', 'lifetime'] as const).map(t => (
+                            <button key={t} onClick={() => setBulkType(t)}
+                                    className="flex-1 min-w-[58px] h-8 rounded-lg text-[10px] font-bold"
+                                    style={{
+                                      background: bulkType === t ? C.accent : C.surface,
+                                      color: bulkType === t ? C.text : C.textDim,
+                                      border: `1px solid ${bulkType === t ? C.accent : C.border}`,
+                                    }}>
+                              {t === '3day' ? '3-Day' : t.charAt(0).toUpperCase() + t.slice(1)}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <label className="text-[11px] shrink-0" style={{ color: C.textMuted }}>Amount</label>
+                          <input type="number" min={1} max={200} value={bulkAmount}
+                                 onChange={e => setBulkAmount(Math.max(1, Math.min(200, Number(e.target.value) || 1)))}
+                                 className="flex-1 h-8 px-2 rounded-md text-[12px] focus:outline-none"
+                                 style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }} />
+                          <span className="text-[10px]" style={{ color: C.textDim }}>1–200</span>
+                        </div>
+                        <button onClick={generateBulk} disabled={bulkGenerating}
+                                className="w-full h-9 rounded-lg text-xs font-black flex items-center justify-center gap-2 disabled:opacity-50"
+                                style={{ background: C.green, color: C.bg }}>
+                          {bulkGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
+                          Generate {bulkAmount} key{bulkAmount === 1 ? '' : 's'}
+                        </button>
+                        {bulkError && (<p className="text-[11px]" style={{ color: C.red }}>{bulkError}</p>)}
+                        {bulkCreated.length > 0 && (
+                          <div className="rounded-lg p-2 space-y-1 max-h-32 overflow-y-auto"
+                               style={{ background: C.surface, border: `1px solid ${C.green}40` }}>
+                            <div className="flex items-center justify-between">
+                              <p className="text-[10px] font-bold" style={{ color: C.green }}>✓ {bulkCreated.length} created</p>
+                              <button onClick={() => copyToClipboard(bulkCreated.join('\n'), 'bulk')}
+                                      className="flex items-center gap-1 px-2 py-0.5 rounded-md"
+                                      style={{ background: `${C.green}15` }}>
+                                {copied === 'bulk'
+                                  ? <Check className="w-3 h-3" style={{ color: C.green }} />
+                                  : <Copy className="w-3 h-3" style={{ color: C.green }} />}
+                                <span className="text-[9px] font-bold" style={{ color: C.green }}>
+                                  {copied === 'bulk' ? 'Copied' : 'Copy all'}
+                                </span>
+                              </button>
+                            </div>
+                            {bulkCreated.map(k => (
+                              <code key={k} className="text-[10px] font-mono block break-all" style={{ color: '#4eff4e' }}>{k}</code>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-0.5">
+                        {resellerKeys.map(k => (
+                          <div key={k.id} className="rounded-xl px-3 py-2 flex items-center gap-2"
+                               style={{ background: C.bg, border: `1px solid ${k.is_revoked ? `${C.red}30` : C.border}` }}>
+                            <Key className="w-3.5 h-3.5 shrink-0"
+                                 style={{ color: k.is_revoked ? `${C.red}99` : C.accent }} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-bold truncate" style={{ color: C.text }}>
+                                {k.key_name || `Key …${k.key_preview}`}
+                              </p>
+                              <p className="text-[9px]" style={{ color: C.textDim }}>
+                                {k.key_type} · {k.is_revoked ? 'Revoked' : k.activated_at ? 'Active' : 'Unused'}
+                              </p>
+                            </div>
+                            {k.key_value && (
+                              <button onClick={() => copyToClipboard(k.key_value!, k.id)}
+                                      className="shrink-0 p-1 rounded">
+                                {copied === k.id ? <Check className="w-3 h-3" style={{ color: C.green }} />
+                                                : <Copy className="w-3 h-3" style={{ color: C.textDim }} />}
+                              </button>
+                            )}
+                            <button onClick={() => refreshKey(k.id).then(reloadResellerKeys)}
+                                    disabled={refreshingKeyId === k.id}
+                                    className="shrink-0 p-1.5 rounded-lg disabled:opacity-50"
+                                    style={{ background: `${C.green}15` }}>
+                              <RefreshCw className={`w-3 h-3 ${refreshingKeyId === k.id ? 'animate-spin' : ''}`} style={{ color: C.green }} />
+                            </button>
+                            <button onClick={async () => {
+                                      if (!confirm('Delete this key?')) return;
+                                      await adminApi('delete_key', { key_id: k.id });
+                                      reloadResellerKeys(); loadResellerGroups();
+                                    }}
+                                    className="shrink-0 p-1.5 rounded-lg" style={{ background: `${C.red}15` }}>
+                              <Trash2 className="w-3 h-3" style={{ color: C.red }} />
+                            </button>
+                          </div>
+                        ))}
+                        {resellerKeys.length === 0 && (
+                          <p className="text-xs text-center py-6" style={{ color: C.textDim }}>No keys yet — generate some above</p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+
               {activeTab === 'audit' && isMaster && <AdminAuditLog callApi={adminApi} />}
               {activeTab === 'alerts' && isMaster && (
                 <AdminSecurityAlerts callApi={adminApi} onRevokeKey={async (id) => { await revokeKey(id); }} />
