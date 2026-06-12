@@ -414,6 +414,7 @@ const CSRF_EXEMPT_ACTIONS = new Set([
   'sub_admin_auth',
   'admin_logout',
   'reset_master_password',
+  'reset_master_device',
   ...ADMIN_ACTIONS,
 ]);
 
