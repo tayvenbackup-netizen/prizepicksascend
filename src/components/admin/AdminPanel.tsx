@@ -569,6 +569,12 @@ const AdminPanel = ({ isOpen, onClose, subAdminId }: AdminPanelProps) => {
                                 <Ban className="w-3 h-3" style={{ color: C.yellow }} />
                               </button>
                             )}
+                            <button onClick={() => refreshKey(k.id)} disabled={refreshingKeyId === k.id}
+                                    className="p-1.5 rounded-lg disabled:opacity-50"
+                                    style={{ background: `${C.green}15` }}
+                                    title="Reset device, activation, sessions">
+                              <RefreshCw className={`w-3 h-3 ${refreshingKeyId === k.id ? 'animate-spin' : ''}`} style={{ color: C.green }} />
+                            </button>
                             <button onClick={() => deleteKey(k.id)} className="p-1.5 rounded-lg"
                                     style={{ background: `${C.red}15` }}>
                               <Trash2 className="w-3 h-3" style={{ color: C.red }} />
