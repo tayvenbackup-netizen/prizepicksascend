@@ -911,20 +911,22 @@ Deno.serve(async (req) => {
         });
       };
 
-      const masterOnlyActions = ['toggle_bypass', 'refresh_all_keys', 'extend_key', 'create_sub_admin', 'list_sub_admins', 'revoke_sub_admin', 'analytics_summary', 'list_audit_log', 'list_security_alerts', 'mark_alert_reviewed'];
+      const masterOnlyActions = ['toggle_bypass', 'refresh_all_keys', 'extend_key', 'create_sub_admin', 'list_sub_admins', 'revoke_sub_admin', 'analytics_summary', 'list_audit_log', 'list_security_alerts', 'mark_alert_reviewed', 'list_reseller_groups', 'list_reseller_keys', 'generate_bulk_keys'];
       if (masterOnlyActions.includes(action) && !isMaster) {
         return json({ error: 'Master admin access required' }, 403);
       }
 
       if (action === 'create_group') {
-        const { name, color } = body;
+        const { name, color, is_reseller } = body;
         if (!name || typeof name !== 'string' || name.trim().length < 1 || name.trim().length > 50) {
           return json({ error: 'Group name must be 1-50 characters' }, 400);
         }
+        if (is_reseller && !isMaster) return json({ error: 'Master admin access required' }, 403);
         const { data: group, error } = await supabase.from('key_groups').insert({
           name: name.trim(),
           color: color || '#1475e1',
           created_by: isMaster ? 'master' : adminId,
+          is_reseller: !!is_reseller,
         }).select().single();
         if (error) { console.error('create_group failed:', error); return json({ error: 'Failed to create group' }, 500); }
 
