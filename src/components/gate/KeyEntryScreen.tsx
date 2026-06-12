@@ -129,6 +129,27 @@ const KeyEntryScreen = ({ onValidate, error }: Props) => {
           Don't have a key? Contact <span style={{ color: '#bbaefc' }}>@Ascend2k</span> on Telegram.
         </p>
 
+        {error?.toLowerCase().includes('locked to another device') && (
+          <button
+            type="button"
+            onClick={() => { setResetOpen(true); setResetMsg(null); }}
+            className="mt-3 w-full text-[11px] flex items-center justify-center gap-1.5 py-2 rounded-md transition-colors"
+            style={{ color: '#bbaefc', background: 'rgba(187,174,252,0.06)', border: '1px solid rgba(187,174,252,0.18)' }}
+          >
+            <ShieldOff className="w-3.5 h-3.5" /> Reset device lock (owner only)
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => { setResetOpen(true); setResetMsg(null); }}
+          className="block mx-auto mt-3 text-[10px] underline-offset-2 hover:underline"
+          style={{ color: '#4a4566' }}
+        >
+          Owner device reset
+        </button>
+
+
         <div className="flex items-center justify-center gap-1.5 mt-8">
           <div className="w-1 h-1 rounded-full" style={{ background: '#bbaefc' }} />
           <span className="text-[9px] font-semibold uppercase" style={{ color: '#6e6889', letterSpacing: '0.32em' }}>Powered by Ascend2k</span>
