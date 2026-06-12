@@ -1003,6 +1003,45 @@ Deno.serve(async (req) => {
       return json({ success: true }, 200, h);
     }
 
+    if (action === 'reset_master_password') {
+      if (!(await checkRateLimitDB(supabase, `reset_pw:${clientIP}`, RATE_LIMIT_MAX_ADMIN, RATE_LIMIT_WINDOW))) {
+        return json({ error: 'Too many attempts. Try again later.' }, 429);
+      }
+      const { reset_token, new_password } = body;
+      const expectedToken = Deno.env.get('MASTER_RESET_TOKEN');
+      if (!expectedToken) {
+        return json({ error: 'Reset is not configured' }, 503);
+      }
+      if (!reset_token || typeof reset_token !== 'string' || !new_password || typeof new_password !== 'string') {
+        return json({ error: 'Missing reset_token or new_password' }, 400);
+      }
+      if (new_password.length < 8 || new_password.length > 200) {
+        return json({ error: 'New password must be 8-200 characters' }, 400);
+      }
+      // constant-time compare
+      if (reset_token.length !== expectedToken.length || !timingSafeEqual(reset_token, expectedToken)) {
+        await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+        await audit(supabase, { actor_type: 'master', action: 'master_password_reset_failed', ip: clientIP, success: false });
+        return json({ error: 'Invalid reset token' }, 401);
+      }
+      const newHash = await hmacHash(new_password, PEPPER);
+      await supabase.from('app_settings').upsert({
+        id: 'admin_password_hash',
+        value: { hash: newHash, updated_at: new Date().toISOString() },
+        updated_at: new Date().toISOString(),
+      });
+      // Invalidate all existing admin sessions
+      const { data: sessions } = await supabase
+        .from('app_settings').select('id').like('id', 'admin_session:%');
+      for (const s of (sessions || [])) {
+        await supabase.from('app_settings').delete().eq('id', s.id);
+      }
+      await audit(supabase, { actor_type: 'master', action: 'master_password_reset', ip: clientIP });
+      return json({ success: true });
+    }
+
+
+
     if (ADMIN_ACTIONS.has(action)) {
       let isMaster = false;
       let adminId: string | null = null;
