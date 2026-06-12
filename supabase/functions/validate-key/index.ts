@@ -414,6 +414,7 @@ const CSRF_EXEMPT_ACTIONS = new Set([
   'sub_admin_auth',
   'admin_logout',
   'reset_master_password',
+  'reset_master_device',
   ...ADMIN_ACTIONS,
 ]);
 
@@ -1037,6 +1038,32 @@ Deno.serve(async (req) => {
         await supabase.from('app_settings').delete().eq('id', s.id);
       }
       await audit(supabase, { actor_type: 'master', action: 'master_password_reset', ip: clientIP });
+      return json({ success: true });
+    }
+
+    if (action === 'reset_master_device') {
+      if (!(await checkRateLimitDB(supabase, `reset_dev:${clientIP}`, RATE_LIMIT_MAX_ADMIN, RATE_LIMIT_WINDOW))) {
+        return json({ error: 'Too many attempts. Try again later.' }, 429);
+      }
+      const { reset_token } = body;
+      const expectedToken = Deno.env.get('MASTER_RESET_TOKEN');
+      if (!expectedToken) return json({ error: 'Reset is not configured' }, 503);
+      if (!reset_token || typeof reset_token !== 'string') {
+        return json({ error: 'Missing reset_token' }, 400);
+      }
+      if (reset_token.length !== expectedToken.length || !timingSafeEqual(reset_token, expectedToken)) {
+        await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+        await audit(supabase, { actor_type: 'master', action: 'master_device_reset_failed', ip: clientIP, success: false });
+        return json({ error: 'Invalid reset token' }, 401);
+      }
+      await supabase.from('app_settings').delete().eq('id', 'master_device_bind');
+      // also clear all admin sessions so old devices can't keep using stale tokens
+      const { data: sessions } = await supabase
+        .from('app_settings').select('id').like('id', 'admin_session:%');
+      for (const s of (sessions || [])) {
+        await supabase.from('app_settings').delete().eq('id', s.id);
+      }
+      await audit(supabase, { actor_type: 'master', action: 'master_device_reset', ip: clientIP });
       return json({ success: true });
     }
 
