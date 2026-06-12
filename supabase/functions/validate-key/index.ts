@@ -1085,12 +1085,99 @@ Deno.serve(async (req) => {
         const fields = isMaster
           ? 'id, key_preview, key_type, activated_at, expires_at, is_revoked, created_at, key_name, device_count, device_fingerprint, session_count, total_play_seconds, group_id, created_by, is_sub_admin, activation_country, activation_region, activation_city, activation_ip, key_value'
           : 'id, key_preview, key_type, activated_at, expires_at, is_revoked, created_at, key_name, device_count, device_fingerprint, session_count, total_play_seconds, group_id, created_by, is_sub_admin, activation_country, activation_region, activation_city, activation_ip';
+        // Exclude keys whose group is a reseller group
+        const { data: resellerGroups } = await supabase
+          .from('key_groups').select('id').eq('is_reseller', true);
+        const resellerGroupIds = (resellerGroups || []).map((g: any) => g.id);
         let query = supabase.from('access_keys').select(fields)
           .eq('is_sub_admin', false).order('created_at', { ascending: false });
         if (!isMaster && adminId) query = query.eq('created_by', adminId);
+        if (resellerGroupIds.length > 0) {
+          query = query.or(`group_id.is.null,group_id.not.in.(${resellerGroupIds.join(',')})`);
+        }
         const { data: keys } = await query;
         await auditAction({ action: 'keys_listed', metadata: { count: keys?.length ?? 0 } });
         return json({ keys: keys || [], is_master: isMaster });
+      }
+
+      if (action === 'list_reseller_groups') {
+        const { data: groups } = await supabase
+          .from('key_groups').select('*').eq('is_reseller', true).order('created_at', { ascending: false });
+        // attach key count per group
+        const enriched = [];
+        for (const g of (groups || [])) {
+          const { count } = await supabase
+            .from('access_keys').select('id', { count: 'exact', head: true }).eq('group_id', g.id);
+          enriched.push({ ...g, key_count: count ?? 0 });
+        }
+        return json({ groups: enriched });
+      }
+
+      if (action === 'list_reseller_keys') {
+        const { group_id } = body;
+        if (!group_id) return json({ error: 'Missing group_id' }, 400);
+        const { data: grp } = await supabase
+          .from('key_groups').select('id, name, is_reseller').eq('id', group_id).maybeSingle();
+        if (!grp || !grp.is_reseller) return json({ error: 'Reseller group not found' }, 404);
+        const { data: keys } = await supabase
+          .from('access_keys')
+          .select('id, key_preview, key_type, activated_at, expires_at, is_revoked, created_at, key_name, device_count, device_fingerprint, session_count, total_play_seconds, key_value')
+          .eq('group_id', group_id).eq('is_sub_admin', false)
+          .order('created_at', { ascending: false });
+        return json({ group: grp, keys: keys || [] });
+      }
+
+      if (action === 'generate_bulk_keys') {
+        const { group_id, key_type, amount } = body;
+        if (!group_id) return json({ error: 'Missing group_id' }, 400);
+        if (!['daily', '3day', 'weekly', 'monthly', 'lifetime'].includes(key_type)) {
+          return json({ error: 'Invalid key type' }, 400);
+        }
+        const n = Number(amount);
+        if (!Number.isFinite(n) || n < 1 || n > 200) {
+          return json({ error: 'Amount must be 1-200' }, 400);
+        }
+        const { data: grp } = await supabase
+          .from('key_groups').select('id, name, is_reseller').eq('id', group_id).maybeSingle();
+        if (!grp || !grp.is_reseller) return json({ error: 'Reseller group not found' }, 404);
+
+        // unambiguous chars
+        const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        const randChunk = (len: number) => {
+          const bytes = crypto.getRandomValues(new Uint8Array(len));
+          let s = '';
+          for (let i = 0; i < len; i++) s += ALPHABET[bytes[i] % ALPHABET.length];
+          return s;
+        };
+        const safeName = String(grp.name).replace(/[^A-Za-z0-9]/g, '').slice(0, 20) || 'RES';
+
+        const created: { key: string; name: string }[] = [];
+        const rows: any[] = [];
+        for (let i = 0; i < n; i++) {
+          const keyVal = `${safeName}-${randChunk(4)}-${randChunk(4)}`;
+          const keyHash = await hmacHash(keyVal, PEPPER);
+          rows.push({
+            key_hash: keyHash,
+            key_preview: keyVal.slice(-4),
+            key_type,
+            key_name: keyVal,
+            key_value: keyVal,
+            group_id,
+            created_by: isMaster ? null : adminId,
+          });
+          created.push({ key: keyVal, name: keyVal });
+        }
+        const { error } = await supabase.from('access_keys').insert(rows);
+        if (error) {
+          console.error('generate_bulk_keys failed:', error);
+          return json({ error: 'Failed to generate keys' }, 500);
+        }
+        await auditAction({
+          action: 'bulk_keys_generated', target_type: 'key_group',
+          target_id: group_id, target_label: grp.name,
+          metadata: { count: n, key_type },
+        });
+        return json({ success: true, created });
       }
 
       if (action === 'extend_key') {
