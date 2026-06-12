@@ -237,6 +237,60 @@ const AdminPanel = ({ isOpen, onClose, subAdminId }: AdminPanelProps) => {
   };
   const toggleBypass = async () => { const v = !bypassEnabled; await adminApi('toggle_bypass', { bypass_enabled: v }); setBypassEnabled(v); };
 
+  const refreshKey = async (id: string) => {
+    if (!confirm('Refresh this key? This clears the bound device, activation date, expiry, and all sessions.')) return;
+    setRefreshingKeyId(id);
+    try { await adminApi('refresh_key', { key_id: id }); } catch (e: any) { alert(e?.message || 'Failed'); }
+    setRefreshingKeyId(null);
+    loadKeys();
+  };
+  const refreshAllKeys = async () => {
+    if (!confirm('Refresh ALL keys? This wipes device bindings, activation/expiry, and sessions for every non-revoked key.')) return;
+    setRefreshingAll(true);
+    try { await adminApi('refresh_all_keys'); } catch (e: any) { alert(e?.message || 'Failed'); }
+    setRefreshingAll(false);
+    loadKeys();
+  };
+
+  // Reseller
+  const loadResellerGroups = async () => {
+    setResellerLoading(true);
+    try { const d = await adminApi('list_reseller_groups'); setResellerGroups(d.groups || []); } catch {}
+    setResellerLoading(false);
+  };
+  const createResellerGroup = async () => {
+    const name = newResellerName.trim();
+    if (name.length < 1) { setResellerError('Enter a name'); return; }
+    setCreatingReseller(true); setResellerError('');
+    try {
+      await adminApi('create_group', { name, is_reseller: true });
+      setNewResellerName('');
+      loadResellerGroups();
+    } catch (e: any) { setResellerError(e?.message || 'Failed'); }
+    setCreatingReseller(false);
+  };
+  const openReseller = async (g: { id: string; name: string }) => {
+    setSelectedReseller(g); setResellerKeys([]); setBulkCreated([]); setBulkError('');
+    try { const d = await adminApi('list_reseller_keys', { group_id: g.id }); setResellerKeys(d.keys || []); } catch {}
+  };
+  const reloadResellerKeys = async () => {
+    if (!selectedReseller) return;
+    try { const d = await adminApi('list_reseller_keys', { group_id: selectedReseller.id }); setResellerKeys(d.keys || []); } catch {}
+  };
+  const generateBulk = async () => {
+    if (!selectedReseller) return;
+    setBulkGenerating(true); setBulkError(''); setBulkCreated([]);
+    try {
+      const d = await adminApi('generate_bulk_keys', {
+        group_id: selectedReseller.id, key_type: bulkType, amount: bulkAmount,
+      });
+      setBulkCreated((d.created || []).map((c: any) => c.key));
+      reloadResellerKeys();
+      loadResellerGroups();
+    } catch (e: any) { setBulkError(e?.message || 'Failed'); }
+    setBulkGenerating(false);
+  };
+
   const copyToClipboard = (text: string, tag: string) => {
     navigator.clipboard.writeText(text);
     setCopied(tag);
