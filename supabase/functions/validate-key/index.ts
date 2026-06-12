@@ -526,13 +526,14 @@ Deno.serve(async (req) => {
         return json({ error: 'Too many attempts. Try again later.' }, 429);
       }
 
-      const { key, device_fingerprint } = body;
+      const { key, device_fingerprint, hwid } = body;
       if (!key || typeof key !== 'string' || key.trim().length < 4 || key.trim().length > 200) {
         return json({ error: 'Invalid key format' }, 400);
       }
       if (device_fingerprint && (typeof device_fingerprint !== 'string' || device_fingerprint.length > 200)) {
         return json({ error: 'Invalid device fingerprint' }, 400);
       }
+      const hwidVal: string | null = (typeof hwid === 'string' && hwid.length > 0 && hwid.length <= 200) ? hwid : null;
 
       const trimmedKey = key.trim();
       const fp = device_fingerprint || null;
