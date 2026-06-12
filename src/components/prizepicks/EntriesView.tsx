@@ -228,8 +228,8 @@ function EntryCard({ entry, onClick, forceLive }: { entry: Entry; onClick?: () =
           </div>
 
         </div>
-        <div className="flex h-8 w-8 items-center justify-center shrink-0">
-          <img src={flagIcon} alt="" className="h-8 w-8 object-contain" draggable={false} />
+        <div className="flex h-[26px] w-[26px] items-center justify-center shrink-0">
+          <img src={flagIcon} alt="" className="h-[26px] w-[26px] object-contain" draggable={false} />
         </div>
       </div>
 
