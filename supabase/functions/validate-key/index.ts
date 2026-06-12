@@ -198,65 +198,159 @@ async function getAdminMasterKeyHash(pepper: string): Promise<string> {
   return adminMasterKeyHash;
 }
 
+function normalizeIP(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let ip = raw.trim();
+  if (!ip) return null;
+  // Strip surrounding brackets and any port suffix.
+  // IPv6 in brackets: [::1]:443  -> ::1
+  if (ip.startsWith('[')) {
+    const end = ip.indexOf(']');
+    if (end > 0) ip = ip.slice(1, end);
+  } else if (ip.includes('.') && ip.includes(':') && ip.split(':').length === 2) {
+    // IPv4 with port: 1.2.3.4:5678 -> 1.2.3.4
+    ip = ip.split(':')[0];
+  }
+  // IPv4-mapped IPv6: ::ffff:1.2.3.4 -> 1.2.3.4
+  const mapped = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+  if (mapped) ip = mapped[1];
+  return ip;
+}
+
+function isPrivateIP(ip: string): boolean {
+  if (!ip) return true;
+  if (ip === '::1' || ip === '127.0.0.1' || ip === 'localhost' || ip === 'unknown') return true;
+  if (ip.startsWith('127.') || ip.startsWith('10.') || ip.startsWith('192.168.')) return true;
+  // 172.16.0.0/12
+  const m = ip.match(/^172\.(\d+)\./);
+  if (m) {
+    const n = parseInt(m[1], 10);
+    if (n >= 16 && n <= 31) return true;
+  }
+  // Link-local + ULA IPv6
+  if (/^fe80:/i.test(ip) || /^fc/i.test(ip) || /^fd/i.test(ip)) return true;
+  return false;
+}
+
 function getClientIP(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('cf-connecting-ip') ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
+  // Priority order: most trustworthy edge-set headers first.
+  const candidates = [
+    req.headers.get('cf-connecting-ip'),
+    req.headers.get('true-client-ip'),
+    req.headers.get('fly-client-ip'),
+    req.headers.get('x-real-ip'),
+    // Leftmost in XFF is the originating client (rest are proxies)
+    req.headers.get('x-forwarded-for')?.split(',')[0],
+    req.headers.get('forwarded')?.match(/for=("?)([^;,"]+)\1/i)?.[2],
+  ];
+  for (const c of candidates) {
+    const ip = normalizeIP(c ?? null);
+    if (ip && !isPrivateIP(ip)) return ip;
+  }
+  // Fall back to anything we can normalize, even if private (dev only).
+  for (const c of candidates) {
+    const ip = normalizeIP(c ?? null);
+    if (ip) return ip;
+  }
+  return 'unknown';
 }
 
 type GeoInfo = { country: string | null; region: string | null; city: string | null };
 const geoCache = new Map<string, { at: number; data: GeoInfo }>();
-const GEO_TTL_MS = 10 * 60_000;
+const GEO_TTL_MS = 60 * 60_000; // 1h
+
+const norm = (s: string | null | undefined) => (s || '').trim().toLowerCase();
+
+function pickConsensus(values: (string | null | undefined)[]): string | null {
+  const counts = new Map<string, { count: number; original: string }>();
+  for (const v of values) {
+    const key = norm(v);
+    if (!key) continue;
+    const cur = counts.get(key);
+    if (cur) cur.count++;
+    else counts.set(key, { count: 1, original: v as string });
+  }
+  if (!counts.size) return null;
+  let best: { count: number; original: string } | null = null;
+  for (const v of counts.values()) {
+    if (!best || v.count > best.count) best = v;
+  }
+  return best?.original ?? null;
+}
+
+async function fetchJson(url: string, timeoutMs = 2500): Promise<any | null> {
+  try {
+    const r = await fetch(url, {
+      signal: AbortSignal.timeout(timeoutMs),
+      headers: { 'accept': 'application/json', 'user-agent': 'PrizePicks-KeyGuard/1.0' },
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; }
+}
 
 async function lookupGeo(ip: string): Promise<GeoInfo> {
   const empty: GeoInfo = { country: null, region: null, city: null };
-  if (!ip || ip === 'unknown' || ip.startsWith('127.') || ip.startsWith('::1')) return empty;
+  if (!ip || ip === 'unknown' || isPrivateIP(ip)) return empty;
   const cached = geoCache.get(ip);
   if (cached && Date.now() - cached.at < GEO_TTL_MS) return cached.data;
 
-  try {
-    const r = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`, { signal: AbortSignal.timeout(2500) });
-    if (r.ok) {
-      const j = await r.json();
-      if (!j?.error) {
-        const data: GeoInfo = {
-          country: j.country_name || j.country || null,
-          region: j.region || j.region_code || null,
-          city: j.city || null,
-        };
-        geoCache.set(ip, { at: Date.now(), data });
-        return data;
-      }
-    }
-  } catch {}
+  // Query several providers in parallel and reconcile by majority vote.
+  // No single provider is 100% accurate; consensus across 3+ sources is.
+  const enc = encodeURIComponent(ip);
+  const [a, b, c, d] = await Promise.all([
+    fetchJson(`https://ipapi.co/${enc}/json/`),
+    fetchJson(`https://ipwho.is/${enc}`),
+    fetchJson(`https://get.geojs.io/v1/ip/geo/${enc}.json`),
+    fetchJson(`http://ip-api.com/json/${enc}?fields=status,country,countryCode,regionName,city`),
+  ]);
 
-  try {
-    const r = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,country,regionName,city`, { signal: AbortSignal.timeout(2500) });
-    if (r.ok) {
-      const j = await r.json();
-      if (j?.status === 'success') {
-        const data: GeoInfo = {
-          country: j.country || null,
-          region: j.regionName || null,
-          city: j.city || null,
-        };
-        geoCache.set(ip, { at: Date.now(), data });
-        return data;
-      }
-    }
-  } catch {}
+  const results: GeoInfo[] = [];
+  if (a && !a.error) results.push({
+    country: a.country_name || a.country || null,
+    region: a.region || a.region_code || null,
+    city: a.city || null,
+  });
+  if (b && b.success !== false) results.push({
+    country: b.country || null,
+    region: b.region || null,
+    city: b.city || null,
+  });
+  if (c) results.push({
+    country: c.country || c.country_code || null,
+    region: c.region || null,
+    city: c.city || null,
+  });
+  if (d && d.status === 'success') results.push({
+    country: d.country || null,
+    region: d.regionName || null,
+    city: d.city || null,
+  });
 
-  return empty;
+  if (!results.length) return empty;
+  const data: GeoInfo = {
+    country: pickConsensus(results.map(r => r.country)),
+    region:  pickConsensus(results.map(r => r.region)),
+    city:    pickConsensus(results.map(r => r.city)),
+  };
+  geoCache.set(ip, { at: Date.now(), data });
+  return data;
 }
 
 function isForeignLocation(activation: GeoInfo, attempt: GeoInfo): boolean {
+  // Require both sides to have at least a country before deciding "foreign".
   if (!attempt.country && !attempt.region && !attempt.city) return false;
   if (!activation.country && !activation.region && !activation.city) return false;
-  const norm = (s: string | null) => (s || '').trim().toLowerCase();
-  if (activation.country && attempt.country && norm(activation.country) !== norm(attempt.country)) return true;
-  if (activation.region  && attempt.region  && norm(activation.region)  !== norm(attempt.region))  return true;
-  if (activation.city    && attempt.city    && norm(activation.city)    !== norm(attempt.city))    return true;
+
+  // Country mismatch is the strongest signal — geo-IP is most reliable at
+  // country level. If countries differ, it's foreign. If both countries are
+  // known and match, do not flag on region/city alone (those are noisier).
+  if (activation.country && attempt.country) {
+    return norm(activation.country) !== norm(attempt.country);
+  }
+  // Fallback only when country is missing on one side.
+  if (activation.region && attempt.region && norm(activation.region) !== norm(attempt.region)) return true;
+  if (activation.city   && attempt.city   && norm(activation.city)   !== norm(attempt.city))   return true;
   return false;
 }
 
