@@ -1,0 +1,1 @@
+ALTER TABLE public.key_groups ADD COLUMN IF NOT EXISTS is_reseller boolean NOT NULL DEFAULT false;
