@@ -402,6 +402,7 @@ const ADMIN_ACTIONS = new Set([
   'analytics_summary', 'list_audit_log',
   'list_security_alerts', 'mark_alert_reviewed',
   'list_reseller_groups', 'list_reseller_keys', 'generate_bulk_keys',
+  'list_device_requests', 'approve_device_request', 'deny_device_request',
 ]);
 
 const CSRF_EXEMPT_ACTIONS = new Set([
@@ -412,6 +413,7 @@ const CSRF_EXEMPT_ACTIONS = new Set([
   'admin_auth',
   'sub_admin_auth',
   'admin_logout',
+  'reset_master_password',
   ...ADMIN_ACTIONS,
 ]);
 
