@@ -1012,7 +1012,7 @@ Deno.serve(async (req) => {
         });
       };
 
-      const masterOnlyActions = ['toggle_bypass', 'refresh_all_keys', 'extend_key', 'create_sub_admin', 'list_sub_admins', 'revoke_sub_admin', 'analytics_summary', 'list_audit_log', 'list_security_alerts', 'mark_alert_reviewed', 'list_reseller_groups', 'list_reseller_keys', 'generate_bulk_keys'];
+      const masterOnlyActions = ['toggle_bypass', 'refresh_all_keys', 'extend_key', 'create_sub_admin', 'list_sub_admins', 'revoke_sub_admin', 'analytics_summary', 'list_audit_log', 'list_security_alerts', 'mark_alert_reviewed', 'list_reseller_groups', 'list_reseller_keys', 'generate_bulk_keys', 'list_device_requests', 'approve_device_request', 'deny_device_request'];
       if (masterOnlyActions.includes(action) && !isMaster) {
         return json({ error: 'Master admin access required' }, 403);
       }
