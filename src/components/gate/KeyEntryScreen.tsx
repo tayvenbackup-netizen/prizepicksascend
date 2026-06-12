@@ -156,6 +156,71 @@ const KeyEntryScreen = ({ onValidate, error }: Props) => {
           <div className="w-1 h-1 rounded-full" style={{ background: '#bbaefc' }} />
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {resetOpen && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10000] flex items-center justify-center px-4"
+            style={{ background: 'rgba(0,0,0,0.7)' }}
+            onClick={() => !resetLoading && setResetOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-sm rounded-xl p-5"
+              style={{ background: '#15101f', border: '1px solid rgba(187,174,252,0.2)' }}
+            >
+              <button
+                type="button"
+                onClick={() => !resetLoading && setResetOpen(false)}
+                className="absolute right-3 top-3"
+                style={{ color: '#6e6889' }}
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldOff className="w-4 h-4" style={{ color: '#bbaefc' }} />
+                <h2 className="text-sm font-semibold text-white">Reset master device lock</h2>
+              </div>
+              <p className="text-[11px] mb-4 leading-relaxed" style={{ color: '#8d87a8' }}>
+                Enter the master reset token to unbind the master key from its current device. This also signs out all admin sessions.
+              </p>
+              <input
+                type="password"
+                value={resetToken}
+                onChange={(e) => setResetToken(e.target.value)}
+                placeholder="MASTER_RESET_TOKEN"
+                disabled={resetLoading}
+                autoComplete="off"
+                spellCheck={false}
+                className="w-full h-10 px-3 rounded-md text-sm focus:outline-none disabled:opacity-50"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(187,174,252,0.25)', color: '#fff' }}
+              />
+              {resetMsg && (
+                <div
+                  className="mt-3 flex items-start gap-1.5 text-[11px]"
+                  style={{ color: resetMsg.type === 'ok' ? '#86efac' : '#ff7a7a' }}
+                >
+                  {resetMsg.type === 'ok'
+                    ? <CheckCircle2 className="w-3.5 h-3.5 mt-px shrink-0" />
+                    : <AlertCircle className="w-3.5 h-3.5 mt-px shrink-0" />}
+                  <span>{resetMsg.text}</span>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleResetDevice}
+                disabled={!resetToken.trim() || resetLoading}
+                className="mt-4 w-full h-10 rounded-md font-semibold text-sm flex items-center justify-center gap-2 text-white disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg, #6c5ce7, #8b6cf3)' }}
+              >
+                {resetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Reset device lock</>}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
