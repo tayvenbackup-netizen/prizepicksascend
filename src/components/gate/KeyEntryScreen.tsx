@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { KeyRound, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff, Trophy } from 'lucide-react';
+import { KeyRound, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff, Trophy, ShieldOff, X } from 'lucide-react';
 
 interface Props { onValidate: (key: string) => Promise<boolean>; error: string; }
+
+const API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-key`;
 
 const KeyEntryScreen = ({ onValidate, error }: Props) => {
   const [key, setKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showKey, setShowKey] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMsg, setResetMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +23,34 @@ const KeyEntryScreen = ({ onValidate, error }: Props) => {
     const ok = await onValidate(key);
     if (ok) { setSuccess(true); await new Promise(r => setTimeout(r, 600)); }
     setLoading(false);
+  };
+
+  const handleResetDevice = async () => {
+    if (!resetToken.trim() || resetLoading) return;
+    setResetLoading(true);
+    setResetMsg(null);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ action: 'reset_master_device', reset_token: resetToken.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data?.success) {
+        setResetMsg({ type: 'ok', text: 'Device lock cleared. You can now sign in on this device.' });
+        setResetToken('');
+        setTimeout(() => setResetOpen(false), 1500);
+      } else {
+        setResetMsg({ type: 'err', text: data?.error || 'Reset failed' });
+      }
+    } catch {
+      setResetMsg({ type: 'err', text: 'Connection error' });
+    }
+    setResetLoading(false);
   };
 
   const blockKeys = (e: React.KeyboardEvent) => {
