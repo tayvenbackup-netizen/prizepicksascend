@@ -18,18 +18,68 @@ interface SessionInfo {
 const API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-key`;
 const SESSION_STORAGE_KEY = 'tl_ac_session_v2';
 
-function getDeviceFingerprint(): string {
-  if (typeof navigator === 'undefined' || typeof screen === 'undefined') {
-    return 'server';
-  }
+function getCanvasFingerprint(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 280; canvas.height = 60;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+    ctx.textBaseline = 'top';
+    ctx.font = "16px 'Arial'";
+    ctx.fillStyle = '#f60';
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = '#069';
+    ctx.fillText('PrizePicks-KeyGuard \u2728', 2, 15);
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+    ctx.fillText('PrizePicks-KeyGuard \u2728', 4, 17);
+    return canvas.toDataURL();
+  } catch { return ''; }
+}
 
+function getWebGLFingerprint(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+    if (!gl) return '';
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    const vendor = dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
+    const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+    return `${vendor}|${renderer}|${gl.getParameter(gl.VERSION)}|${gl.getParameter(gl.SHADING_LANGUAGE_VERSION)}`;
+  } catch { return ''; }
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const enc = new TextEncoder().encode(input);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function getDeviceFingerprintSync(): string {
+  // Fast synchronous fallback (also used as the storage-encryption key so it
+  // must be stable and available at module load).
+  if (typeof navigator === 'undefined' || typeof screen === 'undefined') return 'server';
+  let installId = '';
+  try {
+    installId = localStorage.getItem('tl_install_id') || '';
+    if (!installId) {
+      installId = (crypto as any).randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2);
+      localStorage.setItem('tl_install_id', installId);
+    }
+  } catch {}
   const signals = [
+    installId,
     navigator.userAgent, navigator.language,
-    screen.width + 'x' + screen.height, screen.colorDepth?.toString() ?? '',
+    (navigator.languages || []).join(','),
+    `${screen.width}x${screen.height}x${screen.colorDepth ?? ''}`,
+    `${screen.availWidth}x${screen.availHeight}`,
+    String(window.devicePixelRatio || 1),
     new Date().getTimezoneOffset().toString(),
+    Intl.DateTimeFormat().resolvedOptions().timeZone || '',
     navigator.hardwareConcurrency?.toString() ?? '',
     (navigator as any).deviceMemory?.toString() ?? '',
-    navigator.platform ?? '', navigator.maxTouchPoints?.toString() ?? '',
+    navigator.platform ?? '',
+    navigator.maxTouchPoints?.toString() ?? '',
+    (navigator as any).vendor ?? '',
   ].join('|');
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
   for (let i = 0; i < signals.length; i++) {
@@ -42,7 +92,22 @@ function getDeviceFingerprint(): string {
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 
-const DEVICE_FP = typeof window !== 'undefined' ? getDeviceFingerprint() : 'server';
+let DEVICE_FP = typeof window !== 'undefined' ? getDeviceFingerprintSync() : 'server';
+
+// Upgrade asynchronously to a high-entropy SHA-256 fingerprint that includes
+// canvas + WebGL signals. Used for server-side device binding.
+if (typeof window !== 'undefined') {
+  (async () => {
+    try {
+      const signals = [
+        DEVICE_FP,
+        getCanvasFingerprint(),
+        getWebGLFingerprint(),
+      ].join('||');
+      DEVICE_FP = await sha256Hex(signals);
+    } catch {}
+  })();
+}
 
 async function loadPersistedSession(): Promise<SessionInfo | null> {
   try {
