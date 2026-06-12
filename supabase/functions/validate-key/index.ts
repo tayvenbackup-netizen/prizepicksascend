@@ -642,33 +642,82 @@ Deno.serve(async (req) => {
         };
         const foreign = isForeignLocation(activationGeo, attemptGeo);
 
-        await supabase.from('device_attempts').insert({
-          key_id: keyRow.id,
-          device_fingerprint: fp,
-          device_info: userAgent.slice(0, 300),
-          ip_address: clientIP,
-          blocked: true,
-        });
+        // Check if this device was already approved via a device_request
+        const { data: approvedReq } = await supabase
+          .from('device_requests')
+          .select('id')
+          .eq('key_id', keyRow.id)
+          .eq('device_fingerprint', fp)
+          .eq('status', 'approved')
+          .maybeSingle();
 
-        if (foreign) {
-          await supabase.from('security_alerts').insert({
+        if (approvedReq) {
+          // Pre-approved 2nd device — accept and update tracking
+          await supabase.from('access_keys').update({
+            device_fingerprint: fp,
+            device_count: (keyRow.device_count || 1) + 1,
+            hwid: hwidVal || keyRow.hwid || null,
+          }).eq('id', keyRow.id);
+          keyRow.device_fingerprint = fp;
+        } else {
+          await supabase.from('device_attempts').insert({
             key_id: keyRow.id,
-            attempt_country: attemptGeo.country,
-            attempt_region:  attemptGeo.region,
-            attempt_city:    attemptGeo.city,
-            attempt_ip: clientIP,
             device_fingerprint: fp,
             device_info: userAgent.slice(0, 300),
-            reason: 'foreign_location_and_device',
+            ip_address: clientIP,
             blocked: true,
           });
-          return json({
-            error: 'Sign-in blocked: this key was activated in a different location. Contact admin.',
-          }, 403);
-        }
 
-        return json({ error: 'Key is locked to another device. Contact admin to refresh.' }, 401);
+          if (foreign) {
+            await supabase.from('security_alerts').insert({
+              key_id: keyRow.id,
+              attempt_country: attemptGeo.country,
+              attempt_region:  attemptGeo.region,
+              attempt_city:    attemptGeo.city,
+              attempt_ip: clientIP,
+              device_fingerprint: fp,
+              device_info: userAgent.slice(0, 300),
+              reason: 'foreign_location_and_device',
+              blocked: true,
+            });
+          }
+
+          // Check for existing pending/denied requests to avoid duplicates
+          const { data: existingReq } = await supabase
+            .from('device_requests')
+            .select('id, status')
+            .eq('key_id', keyRow.id)
+            .eq('device_fingerprint', fp)
+            .order('requested_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (existingReq?.status === 'denied') {
+            return json({ error: 'This device was denied by admin.', denied: true }, 403);
+          }
+
+          if (!existingReq) {
+            await supabase.from('device_requests').insert({
+              key_id: keyRow.id,
+              status: 'pending',
+              device_fingerprint: fp,
+              hwid: hwidVal,
+              ip: clientIP,
+              user_agent: userAgent.slice(0, 500),
+              country: attemptGeo.country,
+              region: attemptGeo.region,
+              city: attemptGeo.city,
+              reason: foreign ? 'foreign_location_and_device' : 'new_device',
+            });
+          }
+
+          return json({
+            pending_approval: true,
+            message: 'New device detected. Awaiting admin approval.',
+          }, 200);
+        }
       }
+
 
       if (!keyRow.activated_at) {
         const now = new Date();
