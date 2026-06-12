@@ -1496,6 +1496,72 @@ Deno.serve(async (req) => {
         return json({ attempts: attempts || [] });
       }
 
+      if (action === 'list_device_requests') {
+        const { data: requests } = await supabase
+          .from('device_requests')
+          .select('id, key_id, status, device_fingerprint, hwid, ip, user_agent, country, region, city, reason, requested_at, decided_at')
+          .order('requested_at', { ascending: false })
+          .limit(200);
+        const keyIds = Array.from(new Set((requests || []).map((r: any) => r.key_id)));
+        const keyMap: Record<string, { key_name: string | null; key_preview: string | null }> = {};
+        if (keyIds.length > 0) {
+          const { data: keys } = await supabase
+            .from('access_keys').select('id, key_name, key_preview').in('id', keyIds);
+          for (const k of (keys || [])) keyMap[k.id] = { key_name: k.key_name, key_preview: k.key_preview };
+        }
+        const enriched = (requests || []).map((r: any) => ({
+          ...r,
+          key_name: keyMap[r.key_id]?.key_name ?? null,
+          key_preview: keyMap[r.key_id]?.key_preview ?? null,
+        }));
+        await auditAction({ action: 'device_requests_listed', metadata: { count: enriched.length } });
+        return json({ requests: enriched });
+      }
+
+      if (action === 'approve_device_request') {
+        const { request_id } = body;
+        if (!request_id) return json({ error: 'Missing request_id' }, 400);
+        const { data: reqRow } = await supabase
+          .from('device_requests').select('id, key_id, device_fingerprint, hwid, status').eq('id', request_id).maybeSingle();
+        if (!reqRow) return json({ error: 'Request not found' }, 404);
+        await supabase.from('device_requests').update({
+          status: 'approved',
+          decided_at: new Date().toISOString(),
+        }).eq('id', request_id);
+        // Bump allowed device slots: bind this device as approved on the key
+        const { data: keyRow } = await supabase
+          .from('access_keys').select('device_count, hwid').eq('id', reqRow.key_id).maybeSingle();
+        await supabase.from('access_keys').update({
+          device_fingerprint: reqRow.device_fingerprint,
+          device_count: Math.max(2, (keyRow?.device_count || 1) + 1),
+          hwid: reqRow.hwid || keyRow?.hwid || null,
+        }).eq('id', reqRow.key_id);
+        await auditAction({
+          action: 'device_request_approved', target_type: 'access_key',
+          target_id: reqRow.key_id, metadata: { request_id, device_fingerprint: reqRow.device_fingerprint },
+        });
+        return json({ success: true });
+      }
+
+      if (action === 'deny_device_request') {
+        const { request_id } = body;
+        if (!request_id) return json({ error: 'Missing request_id' }, 400);
+        const { data: reqRow } = await supabase
+          .from('device_requests').select('id, key_id').eq('id', request_id).maybeSingle();
+        if (!reqRow) return json({ error: 'Request not found' }, 404);
+        await supabase.from('device_requests').update({
+          status: 'denied',
+          decided_at: new Date().toISOString(),
+        }).eq('id', request_id);
+        await auditAction({
+          action: 'device_request_denied', target_type: 'access_key',
+          target_id: reqRow.key_id, metadata: { request_id },
+        });
+        return json({ success: true });
+      }
+
+
+
       if (action === 'toggle_bypass') {
         const { bypass_enabled } = body;
         await supabase.from('app_settings')
