@@ -92,15 +92,22 @@ function getDeviceFingerprintSync(): string {
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 
-let DEVICE_FP = typeof window !== 'undefined' ? getDeviceFingerprintSync() : 'server';
+// Stable storage-encryption key. Must NOT change after first run, otherwise
+// the persisted session can't be decrypted on hard refresh and the user has
+// to re-enter their key every time.
+const STORAGE_FP = typeof window !== 'undefined' ? getDeviceFingerprintSync() : 'server';
 
-// Upgrade asynchronously to a high-entropy SHA-256 fingerprint that includes
-// canvas + WebGL signals. Used for server-side device binding.
+// DEVICE_FP is what we send to the server for device binding. It starts as
+// the sync fingerprint and is asynchronously upgraded to a high-entropy
+// SHA-256 hash (canvas + WebGL). Keeping it separate from STORAGE_FP means
+// upgrading it never invalidates locally-persisted sessions.
+let DEVICE_FP = STORAGE_FP;
+
 if (typeof window !== 'undefined') {
   (async () => {
     try {
       const signals = [
-        DEVICE_FP,
+        STORAGE_FP,
         getCanvasFingerprint(),
         getWebGLFingerprint(),
       ].join('||');
@@ -113,7 +120,7 @@ async function loadPersistedSession(): Promise<SessionInfo | null> {
   try {
     const raw = localStorage.getItem(SESSION_STORAGE_KEY);
     if (!raw) return null;
-    const decrypted = await decryptFromStorage(raw, DEVICE_FP);
+    const decrypted = await decryptFromStorage(raw, STORAGE_FP);
     if (!decrypted) { localStorage.removeItem(SESSION_STORAGE_KEY); return null; }
     const parsed = JSON.parse(decrypted);
     if (!parsed?.csrf_token) { localStorage.removeItem(SESSION_STORAGE_KEY); return null; }
@@ -123,7 +130,7 @@ async function loadPersistedSession(): Promise<SessionInfo | null> {
 async function persistSession(session: SessionInfo | null) {
   try {
     if (session) {
-      const encrypted = await encryptToStorage(JSON.stringify(session), DEVICE_FP);
+      const encrypted = await encryptToStorage(JSON.stringify(session), STORAGE_FP);
       localStorage.setItem(SESSION_STORAGE_KEY, encrypted);
     } else {
       localStorage.removeItem(SESSION_STORAGE_KEY);
