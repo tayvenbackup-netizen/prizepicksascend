@@ -32,7 +32,7 @@ function Index() {
     <ProfileProvider>
       <EntriesProvider>
       <div className="fixed inset-0 overflow-hidden bg-background">
-        <div className="mx-auto flex h-[100dvh] w-full flex-col overflow-hidden bg-background">
+        <div className="mx-auto flex h-full w-full flex-col overflow-hidden bg-background">
           <div className="shrink-0">
             <TopHeader />
           </div>
