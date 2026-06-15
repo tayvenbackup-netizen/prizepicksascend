@@ -36,8 +36,41 @@ type Player = {
   name: string;
   team: string;
   position?: string;
+  jersey?: string;
+  sport?: SportKey;
   photo: string | null;
 };
+
+const ESPN_HEADSHOT_PATH: Partial<Record<SportKey, string>> = {
+  NBA: "nba",
+  NFL: "nfl",
+  MLB: "mlb",
+  NHL: "nhl",
+  WNBA: "wnba",
+  NCAAM: "mens-college-basketball",
+  NCAAW: "womens-college-basketball",
+  NCAAF: "college-football",
+  EPL: "soccer",
+  MLS: "soccer",
+  UCL: "soccer",
+};
+
+function espnHeadshotUrl(sport: SportKey | undefined, id: string): string | null {
+  if (!sport || !id) return null;
+  const path = ESPN_HEADSHOT_PATH[sport];
+  if (!path) return null;
+  return `https://a.espncdn.com/i/headshots/${path}/players/full/${id}.png`;
+}
+
+function formatPlayerMeta(p: Player, extra?: string): string {
+  const parts: string[] = [];
+  const teamLine = [p.team, p.position && p.position].filter(Boolean).join(" · ");
+  const jersey = p.jersey ? `#${String(p.jersey).replace(/^#/, "")}` : "";
+  const lead = [teamLine, jersey].filter(Boolean).join(" ");
+  if (lead) parts.push(lead);
+  if (extra) parts.push(extra);
+  return parts.join(" · ");
+}
 
 type Step =
   | { kind: "sports" }
