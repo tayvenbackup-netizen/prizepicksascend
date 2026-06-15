@@ -48,7 +48,6 @@ const ESPN_HEADSHOT_PATH: Partial<Record<SportKey, string>> = {
   NHL: "nhl",
   WNBA: "wnba",
   NCAAM: "mens-college-basketball",
-  NCAAW: "womens-college-basketball",
   NCAAF: "college-football",
   EPL: "soccer",
   MLS: "soccer",
