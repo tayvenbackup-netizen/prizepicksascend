@@ -36,8 +36,40 @@ type Player = {
   name: string;
   team: string;
   position?: string;
+  jersey?: string;
+  sport?: SportKey;
   photo: string | null;
 };
+
+const ESPN_HEADSHOT_PATH: Partial<Record<SportKey, string>> = {
+  NBA: "nba",
+  NFL: "nfl",
+  MLB: "mlb",
+  NHL: "nhl",
+  WNBA: "wnba",
+  NCAAM: "mens-college-basketball",
+  NCAAF: "college-football",
+  EPL: "soccer",
+  MLS: "soccer",
+  UCL: "soccer",
+};
+
+function espnHeadshotUrl(sport: SportKey | undefined, id: string): string | null {
+  if (!sport || !id) return null;
+  const path = ESPN_HEADSHOT_PATH[sport];
+  if (!path) return null;
+  return `https://a.espncdn.com/i/headshots/${path}/players/full/${id}.png`;
+}
+
+function formatPlayerMeta(p: Player, extra?: string): string {
+  const parts: string[] = [];
+  const teamLine = [p.team, p.position && p.position].filter(Boolean).join(" · ");
+  const jersey = p.jersey ? `#${String(p.jersey).replace(/^#/, "")}` : "";
+  const lead = [teamLine, jersey].filter(Boolean).join(" ");
+  if (lead) parts.push(lead);
+  if (extra) parts.push(extra);
+  return parts.join(" · ");
+}
 
 type Step =
   | { kind: "sports" }
@@ -810,6 +842,7 @@ function PastTeamsScreen({
             name: p.strPlayer,
             team: p.strTeam || "—",
             position: p.strPosition || undefined,
+            jersey: p.strNumber ? String(p.strNumber) : undefined,
             photo: p.strCutout || p.strThumb || p.strRender || null,
           }));
           setHits(list);
@@ -1086,12 +1119,15 @@ function RosterScreen({
           const items = Array.isArray(g?.items) ? g.items : Array.isArray(g) ? g : [g];
           for (const a of items) {
             if (!a || typeof a !== "object" || !a.displayName) continue;
+            const id = String(a.id || a.uid || "");
             list.push({
-              id: String(a.id || a.uid),
+              id,
               name: a.displayName,
               team: team.abbr,
               position: a.position?.abbreviation || a.position?.name,
-              photo: a.headshot?.href || null,
+              jersey: a.jersey ? String(a.jersey) : undefined,
+              sport,
+              photo: a.headshot?.href || espnHeadshotUrl(sport, id),
             });
           }
         }
@@ -1153,8 +1189,7 @@ function MarketsScreen({
         <div className="min-w-0">
           <div className="truncate text-[14px] font-bold text-white">{player.name}</div>
           <div className="truncate text-[11px] text-white/55">
-            {player.team}
-            {player.position ? ` · ${player.position}` : ""} · {sport}
+            {formatPlayerMeta(player, sport)}
           </div>
         </div>
       </div>
@@ -1242,8 +1277,12 @@ function TeamBadge({ t, size = 28 }: { t: TeamLite; size?: number }) {
 }
 
 function Avatar({ player, size = 32 }: { player: Player; size?: number }) {
-  const [failed, setFailed] = useState(!player.photo);
-  if (failed || !player.photo) {
+  const primary = player.photo;
+  const fallback = espnHeadshotUrl(player.sport, player.id);
+  const [src, setSrc] = useState<string | null>(primary || fallback);
+  const [triedFallback, setTriedFallback] = useState<boolean>(!primary);
+
+  if (!src) {
     return (
       <div
         className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#1a1530]"
@@ -1259,12 +1298,19 @@ function Avatar({ player, size = 32 }: { player: Player; size?: number }) {
       style={{ width: size, height: size }}
     >
       <img
-        src={player.photo}
+        src={src}
         alt={player.name}
         loading="lazy"
         draggable={false}
         className="h-full w-full object-cover object-top"
-        onError={() => setFailed(true)}
+        onError={() => {
+          if (!triedFallback && fallback && src !== fallback) {
+            setTriedFallback(true);
+            setSrc(fallback);
+          } else {
+            setSrc(null);
+          }
+        }}
       />
     </div>
   );
@@ -1281,8 +1327,7 @@ function PlayerRow({ player, onPick }: { player: Player; onPick: () => void }) {
         <div className="min-w-0 flex-1">
           <div className="truncate text-[12px] font-bold text-white">{player.name}</div>
           <div className="truncate text-[10px] text-white/55">
-            {player.team}
-            {player.position ? ` · ${player.position}` : ""}
+            {formatPlayerMeta(player)}
           </div>
         </div>
         <ChevronRight className="h-4 w-4 text-white/40" />
