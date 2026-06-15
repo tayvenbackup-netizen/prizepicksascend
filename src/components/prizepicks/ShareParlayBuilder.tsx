@@ -1328,8 +1328,7 @@ function PlayerRow({ player, onPick }: { player: Player; onPick: () => void }) {
         <div className="min-w-0 flex-1">
           <div className="truncate text-[12px] font-bold text-white">{player.name}</div>
           <div className="truncate text-[10px] text-white/55">
-            {player.team}
-            {player.position ? ` · ${player.position}` : ""}
+            {formatPlayerMeta(player)}
           </div>
         </div>
         <ChevronRight className="h-4 w-4 text-white/40" />
