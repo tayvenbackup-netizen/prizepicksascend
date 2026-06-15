@@ -842,6 +842,7 @@ function PastTeamsScreen({
             name: p.strPlayer,
             team: p.strTeam || "—",
             position: p.strPosition || undefined,
+            jersey: p.strNumber ? String(p.strNumber) : undefined,
             photo: p.strCutout || p.strThumb || p.strRender || null,
           }));
           setHits(list);
