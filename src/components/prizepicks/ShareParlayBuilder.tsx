@@ -1278,8 +1278,12 @@ function TeamBadge({ t, size = 28 }: { t: TeamLite; size?: number }) {
 }
 
 function Avatar({ player, size = 32 }: { player: Player; size?: number }) {
-  const [failed, setFailed] = useState(!player.photo);
-  if (failed || !player.photo) {
+  const primary = player.photo;
+  const fallback = espnHeadshotUrl(player.sport, player.id);
+  const [src, setSrc] = useState<string | null>(primary || fallback);
+  const [triedFallback, setTriedFallback] = useState<boolean>(!primary);
+
+  if (!src) {
     return (
       <div
         className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#1a1530]"
@@ -1295,12 +1299,19 @@ function Avatar({ player, size = 32 }: { player: Player; size?: number }) {
       style={{ width: size, height: size }}
     >
       <img
-        src={player.photo}
+        src={src}
         alt={player.name}
         loading="lazy"
         draggable={false}
         className="h-full w-full object-cover object-top"
-        onError={() => setFailed(true)}
+        onError={() => {
+          if (!triedFallback && fallback && src !== fallback) {
+            setTriedFallback(true);
+            setSrc(fallback);
+          } else {
+            setSrc(null);
+          }
+        }}
       />
     </div>
   );
