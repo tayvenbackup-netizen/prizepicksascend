@@ -1118,12 +1118,15 @@ function RosterScreen({
           const items = Array.isArray(g?.items) ? g.items : Array.isArray(g) ? g : [g];
           for (const a of items) {
             if (!a || typeof a !== "object" || !a.displayName) continue;
+            const id = String(a.id || a.uid || "");
             list.push({
-              id: String(a.id || a.uid),
+              id,
               name: a.displayName,
               team: team.abbr,
               position: a.position?.abbreviation || a.position?.name,
-              photo: a.headshot?.href || null,
+              jersey: a.jersey ? String(a.jersey) : undefined,
+              sport,
+              photo: a.headshot?.href || espnHeadshotUrl(sport, id),
             });
           }
         }
