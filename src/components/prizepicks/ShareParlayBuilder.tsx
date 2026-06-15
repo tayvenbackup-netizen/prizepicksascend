@@ -1189,8 +1189,7 @@ function MarketsScreen({
         <div className="min-w-0">
           <div className="truncate text-[14px] font-bold text-white">{player.name}</div>
           <div className="truncate text-[11px] text-white/55">
-            {player.team}
-            {player.position ? ` · ${player.position}` : ""} · {sport}
+            {formatPlayerMeta(player, sport)}
           </div>
         </div>
       </div>
