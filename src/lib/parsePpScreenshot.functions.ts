@@ -31,14 +31,28 @@ Also detect parlayType ("power" or "flex") and entryAmount (number) if shown on 
 
 export const parsePpScreenshot = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => {
-    const o = input as { imageDataUrl?: string };
+    const o = input as { imageDataUrl?: string; sessionToken?: string };
     if (!o?.imageDataUrl || typeof o.imageDataUrl !== "string") {
       throw new Error("imageDataUrl required");
     }
     if (o.imageDataUrl.length > 8_000_000) throw new Error("Image too large");
-    return { imageDataUrl: o.imageDataUrl };
+    if (!o.sessionToken || typeof o.sessionToken !== "string" || o.sessionToken.length < 16 || o.sessionToken.length > 256) {
+      throw new Error("sessionToken required");
+    }
+    return { imageDataUrl: o.imageDataUrl, sessionToken: o.sessionToken };
   })
   .handler(async ({ data }) => {
+    // Verify caller holds a valid app session before burning AI credits.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: sess, error: sessErr } = await supabaseAdmin
+      .from("key_sessions")
+      .select("id, last_heartbeat")
+      .eq("session_token", data.sessionToken)
+      .maybeSingle();
+    if (sessErr || !sess) throw new Error("Unauthorized");
+    const last = sess.last_heartbeat ? new Date(sess.last_heartbeat).getTime() : 0;
+    if (!last || Date.now() - last > 1000 * 60 * 60 * 24) throw new Error("Unauthorized");
+
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
