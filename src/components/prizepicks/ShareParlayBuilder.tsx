@@ -1608,7 +1608,9 @@ function ScreenshotImportScreen({
     setLoading(true);
     setErr(null);
     try {
-      const res = await parse({ data: { imageDataUrl: dataUrl } });
+      const { getAuthState } = await import("@/lib/authState");
+      const sessionToken = getAuthState().sessionToken || "";
+      const res = await parse({ data: { imageDataUrl: dataUrl, sessionToken } });
       const list = Array.isArray(res?.picks) ? res.picks.slice(0, 6) : [];
       if (list.length === 0) setErr("No picks detected. Try a clearer screenshot.");
       setPicks(list);
