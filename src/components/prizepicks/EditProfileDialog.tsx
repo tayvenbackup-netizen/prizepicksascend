@@ -10,7 +10,7 @@ import { ListsEditor } from "./ListsEditor";
 import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, ListChecks, Award, Activity, KeyRound, Infinity as InfinityIcon } from "lucide-react";
 
 const defaultData: ProfileData = {
-  name: "ascend2k",
+  name: "@richlater",
   joinDate: "Joined September 2025",
   balance: "0.00",
   followers: "0",
@@ -34,7 +34,7 @@ const sections: { title: string; fields: FieldDef[] }[] = [
   {
     title: "Identity",
     fields: [
-      { key: "name", label: "Display name", icon: User, placeholder: "ascend2k" },
+      { key: "name", label: "Display name", icon: User, placeholder: "@richlater" },
       { key: "joinDate", label: "Joined date", icon: Calendar, placeholder: "Joined September 2025" },
     ],
   },
@@ -128,12 +128,12 @@ export function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpe
                 </h2>
               </div>
               <a
-                href="https://t.me/Ascend2k"
+                href="https://t.me/richlater"
                 target="_blank"
                 rel="noreferrer"
                 className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
               >
-                @Ascend2k on Telegram
+                @richlater on Telegram
               </a>
             </div>
             <span

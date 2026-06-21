@@ -73,7 +73,7 @@ function Index() {
 
           {nav !== "profile" && nav !== "entries" && nav !== "promos" && (
             <div className="flex-1 min-h-0 flex items-center justify-center text-muted-foreground text-sm pb-28">
-              Ascend2k LarpPickz
+              @richlater LarpPickz
             </div>
           )}
 
