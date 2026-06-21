@@ -68,7 +68,7 @@ export type TopWinEntry = {
 };
 
 const defaultData: ProfileData = {
-  name: "ascend2k",
+  name: "@richlater",
   joinDate: "Joined September 2025",
   balance: "0.00",
   followers: "0",

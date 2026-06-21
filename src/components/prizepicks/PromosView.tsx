@@ -38,25 +38,13 @@ export function PromosView() {
 
       <div className="mt-3 space-y-2.5">
         <a
-          href="https://t.me/Ascend2k"
+          href="https://t.me/richlater"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-[#1D1E26] px-4 py-3.5 active:opacity-80"
         >
           <TelegramIcon size={26} />
-          <span className="text-[15px] font-semibold text-white">Ascend2k</span>
-        </a>
-
-        <a
-          href="https://t.me/gamblnaddicts"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-[#1D1E26] px-4 py-3.5 active:opacity-80"
-        >
-          <TelegramIcon size={26} />
-          <span className="text-[15px] font-semibold text-white">
-            t.me/gamblnaddicts
-          </span>
+          <span className="text-[15px] font-semibold text-white">@richlater</span>
         </a>
       </div>
     </div>

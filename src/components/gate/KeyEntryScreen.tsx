@@ -71,7 +71,7 @@ const KeyEntryScreen = ({ onValidate, error }: Props) => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="relative w-full max-w-sm">
         <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }} className="flex items-center justify-center gap-2 mb-5">
           <span className="h-px w-8" style={{ background: 'linear-gradient(to right, transparent, #4a4566)' }} />
-          <span className="text-[10px] font-bold uppercase" style={{ color: '#bbaefc', letterSpacing: '0.36em' }}>Ascend2k LarpPickz</span>
+          <span className="text-[10px] font-bold uppercase" style={{ color: '#bbaefc', letterSpacing: '0.36em' }}>@richlater LarpPickz</span>
           <span className="h-px w-8" style={{ background: 'linear-gradient(to left, transparent, #4a4566)' }} />
         </motion.div>
 
@@ -85,7 +85,7 @@ const KeyEntryScreen = ({ onValidate, error }: Props) => {
               <Trophy className="w-10 h-10" style={{ color: '#bbaefc' }} />
             </div>
           </motion.div>
-          <h1 className="text-2xl font-bold mb-1 tracking-tight">Ascend2k LarpPickz</h1>
+          <h1 className="text-2xl font-bold mb-1 tracking-tight">@richlater LarpPickz</h1>
           <p className="text-sm" style={{ color: '#8d87a8' }}>Enter your access key to continue</p>
         </div>
 
@@ -126,7 +126,7 @@ const KeyEntryScreen = ({ onValidate, error }: Props) => {
         </form>
 
         <p className="text-center text-[11px] mt-6 leading-relaxed" style={{ color: '#6e6889' }}>
-          Don't have a key? Contact <span style={{ color: '#bbaefc' }}>@Ascend2k</span> on Telegram.
+          Don't have a key? Contact <span style={{ color: '#bbaefc' }}>@richlater</span> on Telegram.
         </p>
 
         {error?.toLowerCase().includes('locked to another device') && (
@@ -152,7 +152,7 @@ const KeyEntryScreen = ({ onValidate, error }: Props) => {
 
         <div className="flex items-center justify-center gap-1.5 mt-8">
           <div className="w-1 h-1 rounded-full" style={{ background: '#bbaefc' }} />
-          <span className="text-[9px] font-semibold uppercase" style={{ color: '#6e6889', letterSpacing: '0.32em' }}>Powered by Ascend2k</span>
+          <span className="text-[9px] font-semibold uppercase" style={{ color: '#6e6889', letterSpacing: '0.32em' }}>Powered by @richlater</span>
           <div className="w-1 h-1 rounded-full" style={{ background: '#bbaefc' }} />
         </div>
       </motion.div>
