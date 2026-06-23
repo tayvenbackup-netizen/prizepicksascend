@@ -17,6 +17,9 @@ export async function initNative() {
   // Status bar (iOS) — dark content over black background
   try {
     const { StatusBar, Style } = await import('@capacitor/status-bar');
+    // Keep the status bar (clock/battery) visually separate from the WebView
+    // so buttons positioned at the top of the WebView never sit on the clock.
+    await StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
     await StatusBar.setStyle({ style: Style.Dark });
     await StatusBar.setBackgroundColor({ color: '#000000' }).catch(() => {});
   } catch {}

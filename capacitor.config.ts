@@ -12,9 +12,12 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
   },
   ios: {
+    // 'always' keeps the WebView inset under the status bar so the clock/notch
+    // never sits on top of in-app buttons (matched by StatusBar.setOverlaysWebView(false)).
     contentInset: 'always',
     limitsNavigationsToAppBoundDomains: false,
     backgroundColor: '#000000',
+    scrollEnabled: true,
   },
   plugins: {
     SplashScreen: {
