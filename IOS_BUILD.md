@@ -1,9 +1,9 @@
-# PrizePicks → iOS (.ipa) Build Guide
+# PrizePicks → iOS (.ipa) Build Guide — Fully Editable in Xcode
 
-Your Lovable web app is wrapped with **Capacitor** as a remote-shell iOS app.
-The native app loads your published site at
-`https://prizepicksascend.lovable.app`, so every Lovable publish is instantly
-live in the app — no Xcode resubmission needed for content changes.
+This project is wrapped with **Capacitor** in **local-bundle mode**. The iOS
+app ships the built web assets (`dist/`) inside the `.ipa`, so **every file is
+100% editable in Xcode** — HTML, JS, CSS, images, native code, Info.plist,
+entitlements, capabilities, app icon, splash, everything.
 
 > ⚠️ The Lovable sandbox is Linux. You can only produce a real `.ipa` on a
 > **Mac with Xcode 15+**.
@@ -16,8 +16,9 @@ live in the app — no Xcode resubmission needed for content changes.
 # clone / pull the project to your Mac, then:
 cd <project-folder>
 npm install               # or: bun install
+npm run build             # produces dist/ (the web bundle that ships in the app)
 npx cap add ios           # creates the ios/ folder (only once)
-npx cap sync ios
+npx cap sync ios          # copies dist/ → ios/App/App/public/
 ```
 
 That creates `ios/App/App.xcworkspace`.
@@ -27,6 +28,16 @@ That creates `ios/App/App.xcworkspace`.
 ```bash
 npx cap open ios
 ```
+
+Everything you can edit:
+
+- **Web layer** — `ios/App/App/public/` (copied from `dist/` on every `cap sync`)
+- **Native Swift/Obj-C** — `ios/App/App/AppDelegate.swift`, etc.
+- **Info.plist** — permissions strings, URL schemes, ATS, etc.
+- **Capabilities** — Push Notifications, Background Modes, Sign in with Apple, ...
+- **App icon & launch screen** — `ios/App/App/Assets.xcassets/`
+- **Signing & bundle ID** — App target → Signing & Capabilities
+- **Build settings** — minimum iOS version, architectures, etc.
 
 In Xcode:
 
@@ -43,75 +54,63 @@ In Xcode:
    **Development** → follow prompts.
 4. Xcode produces the signed `.ipa`.
 
-Without a paid Developer Account you can still **Run** on the Simulator and
-on your own iPhone (7-day signing), but you cannot export a distributable
-`.ipa`.
+---
+
+## 4 — After any web/UI change
+
+Because the app ships the bundled `dist/`, **every web change requires a
+rebuild** (this is the trade-off for full local editability):
+
+```bash
+npm run build
+npx cap sync ios
+# then re-archive in Xcode
+```
+
+If you instead want web changes to ship instantly without re-archiving,
+re-add a remote-shell `server.url` in `capacitor.config.ts`.
 
 ---
 
-## 4 — Push notifications (OneSignal)
-
-The app is wired for **OneSignal** native push (not web push). To enable:
+## 5 — Push notifications (OneSignal)
 
 ### a) Create OneSignal app
 
 1. Create a free account at <https://onesignal.com>.
 2. **New App/Website** → name it PrizePicks → choose **Apple iOS (APNs)**.
 3. Upload your APNs Auth Key (`.p8`) from
-   <https://developer.apple.com/account/resources/authkeys/list> (requires
-   paid Developer Account). Or use a `.p12` certificate.
+   <https://developer.apple.com/account/resources/authkeys/list>.
 4. Copy your **OneSignal App ID**.
 
-### b) Add the App ID to the project
-
-Add this to `.env` (project root) and re-publish on Lovable:
+### b) Add the App ID to `.env` and rebuild
 
 ```
 VITE_ONESIGNAL_APP_ID=your-onesignal-app-id-here
 ```
 
+Then `npm run build && npx cap sync ios`.
+
 ### c) Xcode capabilities
 
-In Xcode (App target → Signing & Capabilities → **+ Capability**), add:
+App target → Signing & Capabilities → **+ Capability**:
 
 - **Push Notifications**
 - **Background Modes** → check **Remote notifications**
 
-Then follow the OneSignal iOS SDK setup for the **Notification Service
-Extension** (one-line add in Xcode):
+Follow OneSignal's **Notification Service Extension** setup:
 <https://documentation.onesignal.com/docs/ios-sdk-setup>
-
-### d) Send notifications
-
-From the OneSignal dashboard → **Messages → New Push**, or via their REST API
-from any backend. Notifications arrive as real native iOS notifications even
-when the app is closed.
 
 ---
 
-## 5 — App icon & splash
+## 6 — App icon & splash
 
-Replace `public/icon.png` (1024×1024) in the repo, then run:
+Replace `public/icon.png` (1024×1024), then:
 
 ```bash
+npm i -D @capacitor/assets   # once
 npx @capacitor/assets generate --ios
 npx cap sync ios
 ```
-
-(Install the helper once: `npm i -D @capacitor/assets`.)
-
----
-
-## 6 — After any web change
-
-You only need to repeat this when **Capacitor config / plugins change**:
-
-```bash
-npx cap sync ios
-```
-
-Pure web/UI changes ship instantly via Lovable Publish — no re-sync, no
-re-archive.
 
 ---
 
@@ -119,7 +118,7 @@ re-archive.
 
 | Problem | Fix |
 |---|---|
-| White screen in app | The site isn't published yet. Run Publish in Lovable. |
-| Notifications not arriving | Check OneSignal dashboard → Subscriptions tab; verify APNs key is uploaded; confirm Push Notifications capability is enabled in Xcode. |
+| White screen in app | Run `npm run build && npx cap sync ios` — `dist/` was empty. |
+| Web changes not showing | Rebuild and re-sync (see step 4). |
+| Notifications not arriving | Check OneSignal Subscriptions tab; verify APNs key and Push Notifications capability. |
 | "App ID is already taken" | Change `appId` in `capacitor.config.ts`, then `npx cap sync ios`. |
-| Deposits/withdrawals not working in app | They run against the published Lovable Cloud backend — make sure you've published the latest changes. |
