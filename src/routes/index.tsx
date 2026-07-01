@@ -40,7 +40,6 @@ function Index() {
             <>
               <div className="shrink-0">
                 <ProfileHeader />
-                <ProfileTabs />
               </div>
               <div className="stats-scroll flex-1 min-h-0 overflow-y-auto pb-24 space-y-1">
                 <StatsCards />
