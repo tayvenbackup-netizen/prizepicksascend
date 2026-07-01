@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { initNative } from "@/lib/native";
 import { TopHeader } from "@/components/prizepicks/Header";
 import { ProfileHeader } from "@/components/prizepicks/ProfileHeader";
-import { ProfileTabs } from "@/components/prizepicks/Tabs";
 import { StatsCards } from "@/components/prizepicks/StatsCards";
 import { SectionTitle } from "@/components/prizepicks/SectionTitle";
 import { TopWins } from "@/components/prizepicks/TopWins";
