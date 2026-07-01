@@ -22,7 +22,6 @@ export type ProfileData = {
   wins: string;
   totalWon: string;
   topWin: string;
-  level: string;
   progress: number;
 };
 
@@ -76,7 +75,6 @@ const defaultData: ProfileData = {
   wins: "5",
   totalWon: "$325",
   topWin: "$200",
-  level: "0",
   progress: 75,
 };
 
