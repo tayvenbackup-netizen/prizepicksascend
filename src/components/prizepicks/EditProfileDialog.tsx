@@ -7,7 +7,7 @@ import { useAccessControl } from "@/hooks/useAccessControl";
 import { PLogo } from "./Icons";
 // ParlayGen has moved into the Share button (see ShareParlayBuilder).
 import { ListsEditor } from "./ListsEditor";
-import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, ListChecks, Award, Activity, KeyRound, Infinity as InfinityIcon } from "lucide-react";
+import { User, Calendar, Wallet, Users, UserPlus, Trophy, DollarSign, Crown, RotateCcw, Check, Sparkles, ListChecks, Activity, KeyRound, Infinity as InfinityIcon } from "lucide-react";
 
 const defaultData: ProfileData = {
   name: "@richlater",
@@ -18,7 +18,6 @@ const defaultData: ProfileData = {
   wins: "5",
   totalWon: "$325",
   topWin: "$200",
-  level: "0",
   progress: 75,
 };
 
@@ -40,9 +39,7 @@ const sections: { title: string; fields: FieldDef[] }[] = [
   },
   {
     title: "Avatar",
-    fields: [
-      { key: "level", label: "Level badge", icon: Award, placeholder: "0" },
-    ],
+    fields: [],
   },
   {
     title: "Wallet",
