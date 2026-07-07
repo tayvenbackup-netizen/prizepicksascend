@@ -6,10 +6,13 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-// @cloudflare/vite-plugin builds from this — wrangler.jsonc main alone is insufficient.
+// Set NITRO_PRESET=vercel (or vercel-edge, node-server, etc.) to build for a
+// different deploy target. Defaults to Cloudflare for Lovable-hosted preview.
+const preset = process.env.NITRO_PRESET;
+
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  ...(preset ? { nitro: { preset } } : {}),
 });
