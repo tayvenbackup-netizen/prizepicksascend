@@ -150,8 +150,13 @@ async function callApi(action: string, body: Record<string, unknown> = {}) {
   let res: Response;
   try {
     res = await fetch(API_URL, { method: 'POST', credentials: 'include', headers, body: JSON.stringify({ action, ...body }) });
-  } catch {
-    throw new Error('Connection blocked. Refresh and try again.');
+  } catch (e: any) {
+    // Retry once without credentials in case the preview fetch proxy blocks credentialed CORS
+    try {
+      res = await fetch(API_URL, { method: 'POST', headers, body: JSON.stringify({ action, ...body }) });
+    } catch (e2: any) {
+      throw new Error(`Network error: ${e2?.message || e?.message || 'unknown'}. Try the published URL.`);
+    }
   }
 
   let data: any = null;
